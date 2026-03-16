@@ -47,6 +47,17 @@ PCA + silhouette analysis on 28 Bullfinch recordings from xeno-canto across all 
 
 ![Individual silhouette](individuals_silhouette.png)
 
+### 6. CKA layer similarity (`explore_cka.py`)
+
+Computed linear CKA (Centered Kernel Alignment) between all pairs of transformer layers, plus CKA against mel spectrogram input.
+
+**Findings:**
+- **Two processing regimes:** Layers 0-6 form one block (high mutual CKA), layers 7-11 form another. Confirms the phase transition seen in all prior analyses.
+- **Late layers do the heavy lifting:** Adjacent CKA drops most sharply at layers 9→10→11, meaning the final layers make the largest single-step transformations.
+- **All transformer layers have diverged from raw acoustics:** CKA with mel spectrogram is ~0.01 across all layers — the CNN feature extractor (pre-transformer) has already transformed the signal dramatically. The acoustic→abstract transition begins before layer 0.
+
+![CKA analysis](cka_analysis.png)
+
 ## Setup
 
 ```bash
