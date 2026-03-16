@@ -69,6 +69,14 @@ Hooked into all 7 CNN convolutional layers to trace the full pipeline from raw a
 
 ![CNN pipeline](cnn_pipeline.png)
 
+### 8. Temporal context probing (`explore_temporal.py`)
+
+Tests whether later layers encode more temporal context (can predict future frames) than early layers. For each layer, trains a linear probe to predict the cluster identity of frame t+k from the embedding at frame t, across offsets of 20ms to 1000ms.
+
+**Finding:** All layers predict the future **equally well** — layer 0 and layer 11 are nearly identical (83% at t+1, ~47% at t+50). The temporal context advantage over shuffled controls is +40pp at short offsets, fading to +8pp at 1 second. This means temporal prediction comes from the **CNN feature extractor's receptive field**, not the transformer. The transformer refines *what kind* of sound it is, not *what comes next*.
+
+![Temporal context](temporal_context.png)
+
 ## Setup
 
 ```bash
