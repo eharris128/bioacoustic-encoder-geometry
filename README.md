@@ -25,6 +25,20 @@ Hooked into Q/K projections across all 144 attention heads (12 layers x 12 heads
 ![Attention across layers](attention_across_layers.png)
 ![Attention specialization](attention_specialization.png)
 
+### 3. Cluster analysis (`explore_clusters.py`)
+
+Clustered late-layer (layer 11) frame embeddings with k-means and mapped cluster labels back onto spectrograms. Exported audio clips per cluster for listening.
+
+**Finding:** Clusters align with spectrogram structure — distinct vocalization types, silence, and call sub-phases. Comparing similar clusters (e.g., Guineafowl C1 vs C2, cosine similarity 0.86) revealed the model splits on subtle spectral differences below human perceptual thresholds.
+
+### 4. Species linear probe (`probe_species.py`)
+
+Trained logistic regression probes per layer to classify Bullfinch vs Hawfinch using 9 recordings from [xeno-canto](https://xeno-canto.org). Leave-one-recording-out cross-validation.
+
+**Finding:** Species is linearly separable from layer 0 (90%), peaks at layer 1 (94%), then **dips** in mid-layers (5-6, ~84%) before recovering at layer 11 (91% with lowest variance). The mid-layer dip suggests a representational bottleneck where the model discards raw spectral cues and reorganizes toward abstract features.
+
+![Species probe](probe_species.png)
+
 ## Setup
 
 ```bash
@@ -55,6 +69,12 @@ python explore_layers.py
 
 # Attention head analysis (hooks into Q/K projections)
 python explore_attention.py
+
+# Cluster analysis (spectrogram overlay + audio export)
+python explore_clusters.py
+
+# Species linear probe (Bullfinch vs Hawfinch, leave-one-recording-out CV)
+python probe_species.py
 ```
 
 ## Model details

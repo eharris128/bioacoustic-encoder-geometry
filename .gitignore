@@ -3,4 +3,7 @@ models/
 __pycache__/
 *.pyc
 aves/
+audio/
+cluster_output/bullfinch/
+cluster_output/guineafowl/
 download_model.sh
