@@ -39,6 +39,14 @@ Trained logistic regression probes per layer to classify Bullfinch vs Hawfinch u
 
 ![Species probe](probe_species.png)
 
+### 5. Within-species structure (`explore_individuals.py`)
+
+PCA + silhouette analysis on 28 Bullfinch recordings from xeno-canto across all 12 layers. Tests whether the model preserves or erases recording identity.
+
+**Finding:** The model **progressively erases recording identity** across layers. Silhouette score drops monotonically from 0.020 (layer 0) to negative values (layers 8-10), meaning late-layer representations organize by vocalization type rather than recording source. The model learns what's invariant across recordings (the species' vocal repertoire) rather than what's specific to each (noise, mic, individual).
+
+![Individual silhouette](individuals_silhouette.png)
+
 ## Setup
 
 ```bash
@@ -75,6 +83,9 @@ python explore_clusters.py
 
 # Species linear probe (Bullfinch vs Hawfinch, leave-one-recording-out CV)
 python probe_species.py
+
+# Within-species structure (28 Bullfinch recordings, PCA + silhouette)
+python explore_individuals.py
 ```
 
 ## Model details
