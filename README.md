@@ -58,6 +58,17 @@ Computed linear CKA (Centered Kernel Alignment) between all pairs of transformer
 
 ![CKA analysis](cka_analysis.png)
 
+### 7. Full pipeline: CNN feature extractor (`explore_cnn_layers.py`)
+
+Hooked into all 7 CNN convolutional layers to trace the full pipeline from raw audio through to the transformer.
+
+**Findings:**
+- **CNN layers do the heavy lifting:** Adjacent CKA between CNN layers is 0.10-0.23 (massive transformation per step), vs 0.97-0.99 for transformer layers. Each CNN layer transforms the signal more than all 12 transformer layers combined.
+- **CNN builds toward spectrogram-like features:** CKA with mel spectrogram peaks at CNN layer 6 (0.017), not layer 0. The CNN is constructing spectral representations, not destroying them.
+- **The real processing divide is CNN vs transformer**, not early vs late transformer layers.
+
+![CNN pipeline](cnn_pipeline.png)
+
 ## Setup
 
 ```bash
