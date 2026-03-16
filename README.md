@@ -91,6 +91,18 @@ Same architecture (HuBERT-base, 12 layers, 768-dim), same Bullfinch audio input,
 
 ![AVES vs HuBERT](compare_hubert.png)
 
+### 10. Acoustic feature probing (`explore_acoustic_probes.py`)
+
+Probes each layer for measurable acoustic properties (energy, spectral centroid, bandwidth, zero-crossing rate, spectral flatness, HF energy ratio) using ridge regression. Also profiles the layer-11 clusters by their acoustic characteristics.
+
+**Findings:**
+- **Acoustic features are only linearly decodable at layers 0-1**, and only for spectral bandwidth (R²=0.14) and HF energy ratio (R²=0.33). By layer 2, all features drop to R²≈0. The transformer immediately discards raw acoustic information from its linearly-accessible representation.
+- **But late-layer clusters are acoustically meaningful.** Clusters 2 and 3 have high zero-crossing rate, high spectral centroid (~3-4kHz), and high spectral flatness — noisy/broadband sounds. Clusters 0, 5, 7 have low centroid, low ZCR — tonal/low-frequency sounds. Energy is similar across all clusters.
+- **The model encodes sound type nonlinearly.** It organizes vocalizations into acoustically distinct categories, but the encoding is not linearly aligned with any single acoustic feature. It's built an abstract, distributed representation of "what kind of sound this is."
+
+![Acoustic probes](acoustic_probes.png)
+![Cluster profiles](cluster_acoustic_profiles.png)
+
 ## Setup
 
 ```bash
