@@ -77,6 +77,20 @@ Tests whether later layers encode more temporal context (can predict future fram
 
 ![Temporal context](temporal_context.png)
 
+### 9. AVES vs HuBERT comparison (`compare_hubert.py`)
+
+Same architecture (HuBERT-base, 12 layers, 768-dim), same Bullfinch audio input, different training data: AVES trained on animal sounds, HuBERT trained on human speech. Tests whether the layer hierarchy is architecture-driven or data-driven.
+
+**Findings:**
+- **Recording identity erasure:** Both erase across layers (architecture), but AVES retains more recording-specific info early on — animal sounds have more individual variation that matters.
+- **Transformation magnitude:** HuBERT makes bigger jumps at layers 0→1 and 2→3 (CKA drops to 0.955); AVES stays above 0.97 throughout. HuBERT is more aggressive in early transformations.
+- **Acoustic grounding:** AVES maintains higher similarity to mel spectrograms in early layers — it preserves spectral detail longer, consistent with the greater spectral diversity of animal vocalizations.
+- **Attention locality:** The biggest difference. AVES shows a jagged, oscillating local/global pattern; HuBERT is smoother and more structured. The models have learned **fundamentally different attention strategies** from their training data.
+
+**Conclusion:** The broad processing hierarchy is architecture-driven (shared by both models). But attention strategies, transformation profiles, and acoustic grounding are shaped by training data — AVES has genuinely adapted to animal vocalizations.
+
+![AVES vs HuBERT](compare_hubert.png)
+
 ## Setup
 
 ```bash
