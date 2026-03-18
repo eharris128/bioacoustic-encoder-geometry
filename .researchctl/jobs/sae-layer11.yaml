@@ -1,0 +1,24 @@
+schema_version: 1
+job_id: sae-layer11
+display_name: SAE on AVES layer-11 embeddings (Bullfinch)
+entry_command:
+  - python
+  - ops/researchctl_jobs/sae_layer11_job.py
+estimated_runtime_minutes: 20
+runtime_class: gpu
+runner_profile_id: local_python
+supports_resume: false
+expected_outputs:
+  - sae_layer11_training.png
+  - sae_layer11_features.png
+  - sae_layer11_weights.npz
+  - result.json
+result_manifest: result.json
+priority: 70
+enabled: true
+metadata:
+  tags:
+    - aves
+    - sae
+    - interpretability
+    - overnight
