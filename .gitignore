@@ -7,3 +7,7 @@ audio/
 cluster_output/bullfinch/
 cluster_output/guineafowl/
 download_model.sh
+.researchctl/staging/
+.researchctl/archive/
+.researchctl/workspaces/
+artifacts/runs/
