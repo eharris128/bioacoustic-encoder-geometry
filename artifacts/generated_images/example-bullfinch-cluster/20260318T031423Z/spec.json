@@ -1,0 +1,21 @@
+{
+  "name": "example-bullfinch-cluster",
+  "prompt": "A detailed scientific illustration of a Eurasian Bullfinch (Pyrrhula pyrrhula) perched on a branch, in the style of a Victorian natural history plate, precise feather detail, muted colours",
+  "negative_prompt": "blurry, cartoon, photorealistic, low quality",
+  "source_artifact": "artifacts/runs/bullfinch-layer11-structure/RUN-000007/outputs/result.json",
+  "tags": [
+    "bullfinch",
+    "illustration",
+    "layer10-structure"
+  ],
+  "provider": "stub",
+  "model": "",
+  "width": 1024,
+  "height": 1024,
+  "num_images": 1,
+  "seed": 42,
+  "metadata": {
+    "experiment": "bullfinch-layer11-structure",
+    "run_id": "RUN-000007"
+  }
+}
