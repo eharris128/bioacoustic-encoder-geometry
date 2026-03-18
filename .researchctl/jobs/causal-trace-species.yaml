@@ -5,7 +5,7 @@ entry_command:
   - python
   - ops/researchctl_jobs/causal_trace_species_job.py
 estimated_runtime_minutes: 40
-runtime_class: cpu
+runtime_class: gpu
 runner_profile_id: local_python
 supports_resume: false
 expected_outputs:

@@ -398,11 +398,12 @@ def plot_causal_trace(
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    print("Loading AVES model...", flush=True)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Loading AVES model on {device}...", flush=True)
     model = load_feature_extractor(
         config_path=CONFIG_PATH,
         model_path=MODEL_PATH,
-        device="cpu",
+        device=device,
         for_inference=True,
     )
 

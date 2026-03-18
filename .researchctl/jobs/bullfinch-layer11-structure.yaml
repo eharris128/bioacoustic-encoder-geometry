@@ -1,0 +1,26 @@
+schema_version: 1
+job_id: bullfinch-layer11-structure
+display_name: Within-species structure — what does layer 10 encode in Bullfinch? (causal bottleneck)
+entry_command:
+  - python
+  - ops/researchctl_jobs/bullfinch_layer11_structure_job.py
+estimated_runtime_minutes: 30
+runtime_class: gpu
+runner_profile_id: local_python
+supports_resume: false
+expected_outputs:
+  - layer11_cluster_pca.png
+  - layer11_cluster_acoustics.png
+  - layer11_silhouette.png
+  - result.json
+result_manifest: result.json
+priority: 75
+enabled: true
+metadata:
+  tags:
+    - aves
+    - bullfinch
+    - single-species
+    - clustering
+    - interpretability
+    - overnight
