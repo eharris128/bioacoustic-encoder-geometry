@@ -1,84 +1,131 @@
-# [noise_direction.py](noise_direction.py) — Code Notes
+# [noise_direction1.py](noise_direction1.py) — Code Notes
+
+## What This Experiment Does
+
+**This is not an activation-patching experiment.**
+
+The previous version of this script patched random unit vectors into transformer layer
+outputs mid-forward-pass to act as a control for `contrastive_patch_species.py`. That
+design was measuring the model's sensitivity to arbitrary perturbations in activation
+space — not anything about how real recording noise is represented.
+
+This version asks a different question: when you add acoustic background noise to the raw
+audio waveform and run it through AVES, does it move activations along a consistent linear
+direction at each layer? If so, that direction is the noise direction — and we can ask
+whether it overlaps with the species direction from `contrastive_patch_species.py`.
+
+The intervention now happens entirely **before** the model. No hooks. No patching.
+The forward pass is always clean.
+
+---
+
+## Design
+
+```
+for each recording:
+    for each SNR level (40dB → 0dB):
+        noisy_audio = clean_audio + calibrated_white_noise
+        layer_means = mean_frame_activation(AVES(noisy_audio))  # (12, 768)
+
+for each layer:
+    X = stack all (rec, snr) layer_means  # (n_rec × n_snr, 768)
+    noise_direction = PCA(X).components_[0]
+    variance_explained = PCA(X).explained_variance_ratio_[0]
+
+optional:
+    species_direction = normalize(mean_hawfinch - mean_bullfinch) per layer
+    orthogonality = |cos_sim(noise_direction, species_direction)| per layer
+```
+
+---
 
 ## Config
 
-`NUM_NOISE_TRIALS = 20` — number of independent random directions averaged per layer per fold. Higher reduces variance from unlucky draws that happen to partially align with the species direction. 20 is a reasonable tradeoff; drop to 5 for a quick sanity run.
+`SNR_LEVELS_DB = [40, 30, 20, 15, 10, 7, 5, 3, 1, 0]` — 10 levels from nearly clean
+to signal-power-equals-noise-power. The spacing is denser at the noisy end because
+perceptual differences compress at high SNR.
 
-`ALPHA_VALUES` and `MAX_FRAMES_PER_RECORDING` are kept identical to `contrastive_patch_species.py` so outputs are directly comparable.
+`RECORDINGS` — single-species audio files. Needs at least 2–3 recordings so PCA is
+fitting across multiple independent noise trajectories, not just one.
 
----
-
-## `extract_all_layers`
-
-Unchanged from `contrastive_patch_species.py`. Runs one forward pass per recording, stacks all 12 layer outputs into `(n_frames, n_layers, 768)`, and subsamples to `MAX_FRAMES_PER_RECORDING` with a fixed RNG seed.
-
----
-
-## `train_layer11_probe_loro`
-
-Identical to `contrastive_patch_species.py`. Trains a logistic regression probe on layer-11 embeddings using leave-one-recording-out CV, then retrains on all data. The returned `probe` and `scaler` are reused across all patching conditions — keeping the evaluation surface constant means any difference in flip rate is attributable to the patch direction, not probe variation.
+`SPECIES_RECORDINGS` — optional two-species recordings. If empty or any file is missing,
+the orthogonality plot is silently skipped.
 
 ---
 
-## `random_unit_vectors`
+## `add_white_noise`
 
 ```python
-vecs = rng.standard_normal((n, dim)).astype(np.float32)
-norms = np.linalg.norm(vecs, axis=1, keepdims=True)
-return vecs / np.where(norms > 1e-8, norms, 1.0)
+signal_power = np.mean(signal ** 2)
+noise_power = signal_power / (10.0 ** (snr_db / 10.0))
+noise = rng.normal(0.0, np.sqrt(noise_power), signal.shape)
+return audio + noise
 ```
 
-Draws `n` vectors from a standard normal and normalizes each to unit norm. This produces uniformly distributed directions on the unit sphere in R^768. The `1e-8` guard prevents division by zero on the (astronomically unlikely) all-zero draw.
-
-All directions are pre-drawn once in `main` before the sweep loop so the same random directions are used across all recordings and folds — making per-layer averages comparable.
+Noise power is calibrated to the per-recording signal power, so SNR is consistent across
+files recorded at different levels. A field recording at -30dBFS and one at -10dBFS will
+both get the same effective SNR — not the same absolute noise amplitude.
 
 ---
 
-## `noise_patch_run`
+## `extract_layer_means`
 
-Same hook pattern as `contrastive_patch_species.py`:
+Runs one clean forward pass and returns `(NUM_LAYERS, 768)` — the mean frame activation
+at each transformer layer. Frames are randomly subsampled to `MAX_FRAMES_PER_RECORDING`
+before averaging to keep cost bounded on long recordings.
 
-```python
-layer_module = model.model.encoder.transformer.layers[patch_layer]
-hook = layer_module.register_forward_hook(hook_fn)
-```
-
-The hook adds `alpha * direction` to the layer output. If the output is a tuple (which torchaudio transformer layers return), only `output[0]` is modified and the rest of the tuple is passed through unchanged. The hook is always removed in a `finally` block so a failed forward pass doesn't leave a dangling hook.
-
-No `sign` argument here (unlike `contrastive_patch_run`) — random directions have no meaningful sign, so we just add them as-is.
+No hooks are registered. This is a standard `model.extract_features(audio, layers=None)` call.
 
 ---
 
-## `run_noise_alpha_sweep`
+## `run_snr_sweep`
 
-Outer loop: LORO folds (one test recording at a time).
-Middle loop: patch layers 0–11.
-Inner loop: alpha values, then noise trials.
+Loops over recordings and SNR levels. For each pair, adds noise then calls
+`extract_layer_means`. Stores results as `(n_snr, NUM_LAYERS, 768)` per recording.
 
-Alpha = 0 is handled separately — no hook is registered, just a plain forward pass. This is the baseline: mean abs shift should be near 0 if the probe classifies the recording correctly.
-
-For alpha > 0, `NUM_NOISE_TRIALS` forward passes are run per `(fold, layer, alpha)` combination, each with a different pre-drawn random direction. Mean absolute level shifts are averaged across trials before being stored, so `results[layer][alpha]` accumulates one value per fold (not one per trial).
-
-The metric is **mean absolute shift**: `mean(abs(preds - true_label))`. Signed shift is not used here because random directions have no meaningful sign — averaging signed shifts would cancel to ~0 regardless of alpha, making the control useless.
-
-Final return averages across folds:
-```python
-{k: {a: float(np.mean(v)) for a, v in alphas.items()} for k, alphas in results.items()}
-```
+The RNG seed is fixed at 42 and advances sequentially, so every run produces the same
+noise samples. Different SNR levels within the same recording get different noise draws
+(the rng is not reset between levels).
 
 ---
 
-## `compute_alpha1`
+## `compute_noise_directions`
 
-Linear interpolation between the two alpha values that bracket a mean abs shift of 1.0 (one full noise level). Returns `inf` if 1.0 is never reached within the sweep range. Analogous to `compute_alpha50` in `contrastive_patch_species.py` but uses an ordinal threshold appropriate for 5-level labels.
+For each layer, concatenates all `(n_rec × n_snr, 768)` mean activations into one matrix
+and fits `PCA(n_components=1)`. The first principal component is the noise direction at
+that layer.
+
+**Variance explained by PC1** is the key diagnostic. If it's high, noise level moves
+activations along a consistent axis — noise has a linear representation at that layer.
+If it's low, noise scatters activations in multiple directions with no dominant axis,
+suggesting that layer is robust to noise or encodes it nonlinearly.
+
+---
+
+## `compute_species_directions`
+
+Computes `normalize(mean_species1 - mean_species0)` per layer from `SPECIES_RECORDINGS`.
+Returns `None` if the dict is empty or any file path does not exist, skipping the
+orthogonality analysis gracefully.
 
 ---
 
 ## `plot_results`
 
-Produces three figures matching the layout of `contrastive_patch_species.py`:
+Three figures, produced only if their data is available:
 
-1. **`noise_direction_alpha_sweep.png`** — mean abs level shift vs. alpha per layer (left) + alpha_1 bar chart (right). The bar chart title notes "compare to noise-level direction" to prompt the direct comparison.
-2. **`noise_direction_summary.png`** — heatmap of mean abs shift across all `(layer, alpha)` combinations, with per-cell annotations. Colormap is `RdYlGn_r` with `vmax=4` (max possible shift for 5 levels).
+**`noise_snr_curves.png`** — mean L2 distance from the 40dB baseline vs SNR, one curve
+per layer. Steep curves = that layer reacts strongly to noise. Flat curves = that layer
+is insensitive to it. Expect CNN-adjacent layers to show more sensitivity than deep
+transformer layers (consistent with the known pattern that AVES transformer layers are
+invariant to many low-level acoustic features).
 
-The gold bar marks the layer with the lowest alpha_1 under noise — this may differ from the layer identified by noise-level direction patching.
+**`noise_direction_variance.png`** — bar chart of PC1 variance explained per layer.
+High variance at a layer means noise moves that layer's activations along a single
+consistent direction. This is the primary output of the experiment.
+
+**`noise_species_ortho.png`** *(optional)* — `|cosine similarity|` between the noise
+direction and species direction at each layer. Values near 0 mean noise and species
+occupy orthogonal axes — a denoising intervention could be applied without disturbing
+species identity. Values near 1 mean the two directions are aligned, making separability
+harder.

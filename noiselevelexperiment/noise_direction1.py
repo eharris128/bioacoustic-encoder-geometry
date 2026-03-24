@@ -1,28 +1,34 @@
-"""Noise direction patching: control experiment for contrastive direction patching.
+"""Noise-in-audio experiment: where does recording noise live in AVES activation space?
 
 Motivation
 ----------
-Contrastive direction patching (contrastive_patch_species.py) found that patching
-along the unit-norm species direction d_k = normalize(mean_B - mean_A) at layer k
-flips species classification at layer 11. But does this require the *specific* species
-direction, or does any sufficiently large perturbation work?
+Prior experiments (contrastive_patch_species.py) identified the per-layer species direction
+by comparing mean activations across species. This experiment asks an analogous question
+for acoustic background noise: is there a consistent linear direction in activation space
+that encodes recording noise level?
 
-This experiment patches with random unit-norm vectors instead of the species direction:
+Method
+------
+For each recording in RECORDINGS and each SNR level in SNR_LEVELS_DB:
+  1. Add calibrated white noise to the raw audio waveform at that SNR
+  2. Run a clean forward pass through AVES (no activation hooks)
+  3. Extract and subsample frame-level activations at all 12 layers
+  4. Compute per-layer mean activation across frames
 
-  patched_activation = activation + alpha * r_k
+Per layer, fit PCA to the (n_snr × n_recordings, 768) matrix of SNR-indexed mean
+activations. The first PC is the noise direction at that layer — the axis of maximum
+variance explained by noise level.
 
-where r_k is a random unit vector in R^768, drawn fresh for each (layer, trial).
-We average flip rates over NUM_NOISE_TRIALS random directions per layer.
-
-If the noise-level direction is specifically load-bearing, random directions should
-require substantially larger alpha to achieve the same level shift — the alpha_1
-curve should sit far above the contrastive-patch baseline.
+Orthogonality check: if SPECIES_RECORDINGS is populated, compute the per-layer species
+direction (normalize(mean_species1 - mean_species0)) and report |cosine similarity| with
+the noise direction. Low cosine similarity → noise and species are geometrically separable.
 
 Outputs
 -------
-  noise_direction_alpha_sweep.png  — mean abs level shift vs alpha, one curve per layer
-  noise_direction_summary.png      — alpha_1 per layer (noise vs noise-level direction)
-  result.json                      — written by job wrapper
+  noiselevelexperiment/noise_snr_curves.png         — L2 activation shift vs SNR, per layer
+  noiselevelexperiment/noise_direction_variance.png — variance explained by noise PC1, per layer
+  noiselevelexperiment/noise_species_ortho.png      — |cos sim| noise dir vs species dir (optional)
+  result.json                                       — written by job wrapper
 """
 
 from __future__ import annotations
@@ -33,9 +39,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 from aves import load_feature_extractor
 from aves.utils import load_audio
@@ -48,322 +52,255 @@ MODEL_PATH = "./models/aves-base-all.torchaudio.pt"
 NUM_LAYERS = 12
 MAX_FRAMES_PER_RECORDING = 1000
 
-# Alpha sweep — same range as contrastive_patch_species.py for direct comparison
-ALPHA_VALUES = [0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0]
+# 10 SNR levels in dB: 40dB (nearly clean) → 0dB (signal power ≈ noise power)
+SNR_LEVELS_DB = [40.0, 30.0, 20.0, 15.0, 10.0, 7.0, 5.0, 3.0, 1.0, 0.0]
 
-# Number of independent random directions to average over per (layer, fold)
-NUM_NOISE_TRIALS = 20
+# Recordings for noise analysis — single species, populate before running
+RECORDINGS: dict[str, str] = {
+    # "rec_id": "audio/species/XC???.mp3",
+}
 
-RECORDINGS = {
-    "bullfinch_XC1077468": ("audio/bullfinch/XC1077468.mp3", 0),
-    
+# Optional: populate to enable noise-vs-species orthogonality analysis.
+# Requires at least one recording per species (label 0 and label 1).
+SPECIES_RECORDINGS: dict[str, tuple[str, int]] = {
+    # "bullfinch_XC1077468": ("audio/bullfinch/XC1077468.mp3", 0),
+    # "hawfinch_XC944735":   ("audio/hawfinch/XC944735.mp3",   1),
 }
 
 # ---------------------------------------------------------------------------
-# Embedding extraction
+# Audio noise addition
 # ---------------------------------------------------------------------------
 
-def extract_all_layers(model, paths_labels: dict) -> dict[str, dict]:
-    results = {}
-    for rec_id, (path, label) in paths_labels.items():
-        print(f"  {rec_id}...", end=" ", flush=True)
-        audio = load_audio(path, mono=True, mono_avg=False)
-        t0 = time.time()
-        layer_outputs = model.extract_features(audio, layers=None)
-        elapsed = time.time() - t0
-        stacked = np.stack([lo.squeeze(0).cpu().numpy() for lo in layer_outputs], axis=0)
-        stacked = stacked.transpose(1, 0, 2)  # (n_frames, n_layers, 768)
-        n_frames = stacked.shape[0]
-        if n_frames > MAX_FRAMES_PER_RECORDING:
-            idx = np.random.default_rng(42).choice(n_frames, MAX_FRAMES_PER_RECORDING, replace=False)
+def add_white_noise(audio: torch.Tensor, snr_db: float, rng: np.random.Generator) -> torch.Tensor:
+    """
+    Add white Gaussian noise to audio at a target SNR.
+
+    audio  : (1, n_samples) float32 tensor at 16kHz
+    snr_db : target signal-to-noise ratio in dB
+    Returns noisy audio tensor of same shape.
+    """
+    signal = audio.numpy().astype(np.float64)
+    signal_power = np.mean(signal ** 2)
+    if signal_power < 1e-10:
+        return audio  # silent input — can't calibrate SNR
+    noise_power = signal_power / (10.0 ** (snr_db / 10.0))
+    noise = rng.normal(0.0, np.sqrt(noise_power), signal.shape).astype(np.float32)
+    return torch.from_numpy((signal + noise).astype(np.float32))
+
+# ---------------------------------------------------------------------------
+# Activation extraction
+# ---------------------------------------------------------------------------
+
+def extract_layer_means(
+    model,
+    audio: torch.Tensor,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """
+    Run a single clean forward pass and return per-layer mean activation.
+    Returns (NUM_LAYERS, 768) array.
+    """
+    layer_outputs = model.extract_features(audio, layers=None)
+    means = []
+    for lo in layer_outputs:
+        frames = lo.squeeze(0).cpu().numpy()  # (n_frames, 768)
+        n = frames.shape[0]
+        if n > MAX_FRAMES_PER_RECORDING:
+            idx = rng.choice(n, MAX_FRAMES_PER_RECORDING, replace=False)
             idx.sort()
-            stacked = stacked[idx]
-        print(f"{stacked.shape[0]} frames, {elapsed:.1f}s", flush=True)
-        results[rec_id] = {"embs": stacked, "label": label, "audio_path": path}
+            frames = frames[idx]
+        means.append(frames.mean(axis=0))  # (768,)
+    return np.stack(means, axis=0)  # (NUM_LAYERS, 768)
+
+# ---------------------------------------------------------------------------
+# SNR sweep
+# ---------------------------------------------------------------------------
+
+def run_snr_sweep(model, recordings: dict[str, str]) -> dict:
+    """
+    For each recording × SNR level, extract per-layer mean activations.
+    Returns {rec_id: {"snr_means": (n_snr, NUM_LAYERS, 768), "audio_path": str}}.
+    """
+    rng = np.random.default_rng(42)
+    results = {}
+    for rec_id, path in recordings.items():
+        print(f"  {rec_id}...", flush=True)
+        audio_clean = load_audio(path, mono=True, mono_avg=False)
+        snr_means = []
+        for snr_db in SNR_LEVELS_DB:
+            noisy = add_white_noise(audio_clean, snr_db, rng)
+            t0 = time.time()
+            means = extract_layer_means(model, noisy, rng)  # (NUM_LAYERS, 768)
+            elapsed = time.time() - t0
+            snr_means.append(means)
+            print(f"    SNR={snr_db:5.1f}dB  {elapsed:.1f}s", flush=True)
+        results[rec_id] = {
+            "snr_means": np.stack(snr_means, axis=0),  # (n_snr, NUM_LAYERS, 768)
+            "audio_path": path,
+        }
     return results
 
 # ---------------------------------------------------------------------------
-# Probe training (layer-11, LORO — identical to contrastive_patch_species.py)
+# Noise direction: PCA over SNR-indexed mean activations per layer
 # ---------------------------------------------------------------------------
 
-def train_layer11_probe_loro(
-    data: dict[str, dict],
-) -> tuple[LogisticRegression, StandardScaler, float]:
-    """Train final layer-11 probe on all data; report LORO accuracy."""
-    rec_ids = list(data.keys())
-    fold_accs = []
-    for test_rec in rec_ids:
-        train_recs = [r for r in rec_ids if r != test_rec]
-        X_train = np.concatenate([data[r]["embs"][:, 11, :] for r in train_recs])
-        y_train = np.concatenate([
-            np.full(data[r]["embs"].shape[0], data[r]["label"]) for r in train_recs
-        ])
-        X_test = data[test_rec]["embs"][:, 11, :]
-        y_test = np.full(X_test.shape[0], data[test_rec]["label"])
-        sc = StandardScaler()
-        clf = LogisticRegression(max_iter=500, C=1.0, solver="lbfgs")
-        clf.fit(sc.fit_transform(X_train), y_train)
-        fold_accs.append(accuracy_score(y_test, clf.predict(sc.transform(X_test))))
-
-    X_all = np.concatenate([data[r]["embs"][:, 11, :] for r in rec_ids])
-    y_all = np.concatenate([
-        np.full(data[r]["embs"].shape[0], data[r]["label"]) for r in rec_ids
-    ])
-    sc_final = StandardScaler()
-    clf_final = LogisticRegression(max_iter=500, C=1.0, solver="lbfgs")
-    clf_final.fit(sc_final.fit_transform(X_all), y_all)
-    loro_acc = float(np.mean(fold_accs))
-    print(f"  Layer-11 probe LORO accuracy: {loro_acc:.1%}", flush=True)
-    return clf_final, sc_final, loro_acc
-
-# ---------------------------------------------------------------------------
-# Random unit vector generation
-# ---------------------------------------------------------------------------
-
-def random_unit_vectors(dim: int, n: int, rng: np.random.Generator) -> np.ndarray:
-    """Return (n, dim) array of unit-norm random vectors."""
-    vecs = rng.standard_normal((n, dim)).astype(np.float32)
-    norms = np.linalg.norm(vecs, axis=1, keepdims=True)
-    return vecs / np.where(norms > 1e-8, norms, 1.0)
-
-# ---------------------------------------------------------------------------
-# Noise direction patching (single forward pass)
-# ---------------------------------------------------------------------------
-
-def noise_patch_run(
-    model,
-    audio,
-    patch_layer: int,
-    direction: np.ndarray,  # unit-norm random vector, shape (768,)
-    alpha: float,
-) -> np.ndarray:
+def compute_noise_directions(sweep: dict) -> dict[int, dict]:
     """
-    Run forward pass with additive hook at layer k:
-      output += alpha * direction
-    Returns layer-11 embeddings: (n_frames, 768).
+    For each layer, stack all (rec × snr) mean activations and fit PCA.
+    The first PC is the noise direction.
+    Returns {layer: {"direction": (768,), "variance_explained": float}}.
     """
-    patch_vec = torch.from_numpy(alpha * direction).float()
-    try:
-        device = next(model.model.parameters()).device
-    except Exception:
-        device = torch.device("cpu")
-    patch_vec = patch_vec.to(device)
-
-    def hook_fn(module, input, output):
-        if isinstance(output, tuple):
-            h = output[0]
-            return (h + patch_vec.unsqueeze(0).unsqueeze(0),) + output[1:]
-        return output + patch_vec.unsqueeze(0).unsqueeze(0)
-
-    layer_module = model.model.encoder.transformer.layers[patch_layer]
-    hook = layer_module.register_forward_hook(hook_fn)
-    try:
-        layer_outputs = model.extract_features(audio, layers=None)
-    finally:
-        hook.remove()
-    return layer_outputs[11].squeeze(0).cpu().numpy()
+    rec_ids = list(sweep.keys())
+    directions = {}
+    for layer in range(NUM_LAYERS):
+        rows = []
+        for rec_id in rec_ids:
+            rows.append(sweep[rec_id]["snr_means"][:, layer, :])  # (n_snr, 768)
+        X = np.concatenate(rows, axis=0)  # (n_rec * n_snr, 768)
+        pca = PCA(n_components=1)
+        pca.fit(X)
+        directions[layer] = {
+            "direction": pca.components_[0],  # (768,) unit-norm
+            "variance_explained": float(pca.explained_variance_ratio_[0]),
+        }
+    return directions
 
 # ---------------------------------------------------------------------------
-# Alpha sweep over noise directions
+# Species direction (optional, for orthogonality check)
 # ---------------------------------------------------------------------------
 
-def run_noise_alpha_sweep(
-    model,
-    data: dict[str, dict],
-    probe: LogisticRegression,
-    scaler: StandardScaler,
-) -> dict[int, dict[float, float]]:
+def compute_species_directions(model) -> dict[int, np.ndarray] | None:
     """
-    For each (patch_layer, alpha), average mean absolute level shift over
-    NUM_NOISE_TRIALS random directions and all LORO test recordings.
-    Returns {patch_layer: {alpha: mean_abs_shift}}.
+    Compute normalize(mean_species1 - mean_species0) per layer.
+    Returns None if SPECIES_RECORDINGS is empty or any file is missing.
     """
-    rec_ids = list(data.keys())
+    if not SPECIES_RECORDINGS:
+        return None
     rng = np.random.default_rng(42)
-
-    # Pre-draw noise directions: (NUM_LAYERS, NUM_NOISE_TRIALS, 768)
-    noise_dirs = np.stack([
-        random_unit_vectors(768, NUM_NOISE_TRIALS, rng) for _ in range(NUM_LAYERS)
-    ])  # (NUM_LAYERS, NUM_NOISE_TRIALS, 768)
-
-    # results[layer][alpha] = list of mean abs shifts (one per fold × trial)
-    results: dict[int, dict[float, list[float]]] = {
-        k: {a: [] for a in ALPHA_VALUES} for k in range(NUM_LAYERS)
+    layer_means: dict[int, dict[int, list[np.ndarray]]] = {
+        layer: {0: [], 1: []} for layer in range(NUM_LAYERS)
     }
-
-    for test_rec in rec_ids:
-        test_label = data[test_rec]["label"]
-        audio_path = data[test_rec]["audio_path"]
-        audio = load_audio(audio_path, mono=True, mono_avg=False)
-
-        print(
-            f"  test={test_rec} (noise level {test_label})",
-            flush=True,
-        )
-
-        for patch_layer in range(NUM_LAYERS):
-            layer_results = []
-            for alpha in ALPHA_VALUES:
-                if alpha == 0.0:
-                    # No patch: baseline shift (should be ~0 if probe is accurate)
-                    l11 = model.extract_features(audio, layers=None)[11].squeeze(0).cpu().numpy()
-                    n = min(l11.shape[0], MAX_FRAMES_PER_RECORDING)
-                    if l11.shape[0] > n:
-                        idx = np.random.default_rng(42).choice(l11.shape[0], n, replace=False)
-                        idx.sort()
-                        l11 = l11[idx]
-                    preds = probe.predict(scaler.transform(l11))
-                    shift = float(np.abs(preds - test_label).mean())
-                    results[patch_layer][alpha].append(shift)
-                    layer_results.append(f"α=0→{shift:.2f}")
-                    continue
-
-                trial_shifts = []
-                for trial_idx in range(NUM_NOISE_TRIALS):
-                    direction = noise_dirs[patch_layer, trial_idx]
-                    l11 = noise_patch_run(model, audio, patch_layer, direction, alpha)
-                    n = min(l11.shape[0], MAX_FRAMES_PER_RECORDING)
-                    if l11.shape[0] > n:
-                        idx = np.random.default_rng(42).choice(l11.shape[0], n, replace=False)
-                        idx.sort()
-                        l11 = l11[idx]
-                    preds = probe.predict(scaler.transform(l11))
-                    trial_shifts.append(float(np.abs(preds - test_label).mean()))
-
-                shift = float(np.mean(trial_shifts))
-                results[patch_layer][alpha].append(shift)
-                layer_results.append(f"α={alpha:.0f}→{shift:.2f}")
-
-            print(f"    layer {patch_layer:2d}: {' | '.join(layer_results)}", flush=True)
-
-    return {
-        k: {a: float(np.mean(v)) for a, v in alphas.items()}
-        for k, alphas in results.items()
-    }
-
-# ---------------------------------------------------------------------------
-# Alpha_50 interpolation (identical to contrastive_patch_species.py)
-# ---------------------------------------------------------------------------
-
-def compute_alpha1(shifts: dict[float, float]) -> float:
-    """Interpolate alpha at which mean abs level shift = 1.0. Returns inf if never reached."""
-    alphas = sorted(shifts.keys())
-    for i in range(len(alphas) - 1):
-        a0, a1 = alphas[i], alphas[i + 1]
-        r0, r1 = shifts[a0], shifts[a1]
-        if r0 <= 1.0 <= r1:
-            if r1 == r0:
-                return a0
-            t = (1.0 - r0) / (r1 - r0)
-            return float(a0 + t * (a1 - a0))
-    return float("inf")
+    for rec_id, (path, label) in SPECIES_RECORDINGS.items():
+        if not Path(path).exists():
+            print(f"  Warning: {path} not found — skipping orthogonality analysis", flush=True)
+            return None
+        audio = load_audio(path, mono=True, mono_avg=False)
+        means = extract_layer_means(model, audio, rng)  # (NUM_LAYERS, 768)
+        for layer in range(NUM_LAYERS):
+            layer_means[layer][label].append(means[layer])
+    directions = {}
+    for layer in range(NUM_LAYERS):
+        m0 = np.mean(layer_means[layer][0], axis=0)
+        m1 = np.mean(layer_means[layer][1], axis=0)
+        diff = m1 - m0
+        norm = np.linalg.norm(diff)
+        directions[layer] = diff / norm if norm > 1e-8 else diff
+    return directions
 
 # ---------------------------------------------------------------------------
 # Plotting
 # ---------------------------------------------------------------------------
 
-def plot_results(sweep: dict[int, dict[float, float]]) -> dict:
-    alphas = sorted(ALPHA_VALUES)
+def plot_results(
+    sweep: dict,
+    noise_dirs: dict[int, dict],
+    species_dirs: dict[int, np.ndarray] | None,
+) -> dict:
     layers = list(range(NUM_LAYERS))
     colors = plt.cm.plasma(np.linspace(0.1, 0.9, NUM_LAYERS))
+    rec_ids = list(sweep.keys())
 
-    alpha1_per_layer = {k: compute_alpha1(sweep[k]) for k in layers}
-    finite_alpha1 = [v for v in alpha1_per_layer.values() if not np.isinf(v)]
-    best_layer = int(min(alpha1_per_layer, key=lambda k: alpha1_per_layer[k]))
-
-    # ---- Figure 1: alpha sweep curves ----
-    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
+    # ---- Figure 1: L2 shift vs SNR per layer ----
+    fig, ax = plt.subplots(figsize=(12, 6))
     fig.suptitle(
-        "Noise Direction Patching: Control Experiment\n"
-        f"(random unit vectors, {NUM_NOISE_TRIALS} trials/layer, LORO, mean abs level shift)",
+        "Activation shift vs. recording SNR\n"
+        "(mean L2 distance from clean-audio baseline, per layer)",
         fontsize=13, fontweight="bold",
     )
-
-    ax = axes[0]
     for layer in layers:
-        shifts = [sweep[layer][a] for a in alphas]
-        ax.plot(alphas, shifts, "o-", color=colors[layer],
+        shifts = []
+        for snr_idx in range(len(SNR_LEVELS_DB)):
+            layer_means = np.array([
+                sweep[r]["snr_means"][snr_idx, layer, :] for r in rec_ids
+            ])  # (n_rec, 768)
+            baseline = np.array([
+                sweep[r]["snr_means"][0, layer, :] for r in rec_ids  # index 0 = 40dB (cleanest)
+            ])
+            shift = float(np.mean(np.linalg.norm(layer_means - baseline, axis=1)))
+            shifts.append(shift)
+        # Plot with x-axis as SNR descending (left = noisier)
+        ax.plot(list(range(len(SNR_LEVELS_DB))), shifts, "o-", color=colors[layer],
                 linewidth=1.5, markersize=4, label=f"L{layer}")
-    ax.axhline(1.0, color="black", linestyle="--", linewidth=1, alpha=0.5, label="shift=1 level")
-    ax.set_xscale("symlog", linthresh=0.1)
-    ax.set_xlabel("Patch scale α (log scale)", fontsize=12)
-    ax.set_ylabel("Mean abs level shift at layer 11", fontsize=12)
-    ax.set_title("Mean abs level shift vs. patch scale (noise directions)", fontsize=11)
-    ax.set_ylim(-0.1, 4.1)
+    ax.set_xticks(range(len(SNR_LEVELS_DB)))
+    ax.set_xticklabels([f"{s:.0f}" for s in SNR_LEVELS_DB], fontsize=9)
+    ax.set_xlabel("SNR (dB) — right = noisier", fontsize=12)
+    ax.set_ylabel("Mean L2 shift from 40dB baseline", fontsize=12)
     ax.legend(fontsize=7, ncol=2, loc="upper left")
-
-    # ---- Figure 2: alpha_1 bar chart ----
-    ax = axes[1]
-    a1_vals = [
-        alpha1_per_layer[k] if not np.isinf(alpha1_per_layer[k]) else max(alphas) * 2
-        for k in layers
-    ]
-    bar_colors = plt.cm.RdYlGn_r(np.array(a1_vals) / (max(alphas) * 2))
-    bars = ax.bar(layers, a1_vals, color=bar_colors, edgecolor="black", linewidth=0.5)
-    ax.axhline(max(alphas), color="gray", linestyle=":", alpha=0.5, label="Max α tested")
-    ax.set_xlabel("Patch layer", fontsize=12)
-    ax.set_ylabel("α₁ (scale to shift 1 noise level)", fontsize=12)
-    ax.set_title(
-        "Noise direction α₁ per layer\n(compare to noise-level direction — higher = less specific)",
-        fontsize=11,
-    )
-    ax.set_xticks(layers)
-    ax.legend(fontsize=9)
-
-    ax.bar(best_layer, a1_vals[best_layer], color="gold", edgecolor="black",
-           linewidth=1.5, label=f"Best: L{best_layer}")
-    ax.legend(fontsize=9)
-
-    for bar, val in zip(bars, a1_vals):
-        label = f"{val:.1f}" if val < max(alphas) * 1.5 else ">max"
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            bar.get_height() + max(alphas) * 0.02,
-            label,
-            ha="center", va="bottom", fontsize=7,
-        )
-
     plt.tight_layout()
-    plt.savefig("noise_direction_alpha_sweep.png", dpi=150, bbox_inches="tight")
-    print("Saved noise_direction_alpha_sweep.png")
+    plt.savefig("noiselevelexperiment/noise_snr_curves.png", dpi=150, bbox_inches="tight")
+    print("Saved noiselevelexperiment/noise_snr_curves.png")
 
-    # ---- Figure 3: heatmap (layer × alpha → flip rate) ----
-    flip_matrix = np.array([
-        [sweep[k][a] for a in alphas] for k in layers
-    ])  # (n_layers, n_alphas)
-
-    fig, ax = plt.subplots(figsize=(14, 6))
+    # ---- Figure 2: variance explained by noise PC1 per layer ----
+    fig, ax = plt.subplots(figsize=(10, 5))
     fig.suptitle(
-        "Noise Direction Patching Heatmap\n"
-        "(mean abs level shift at layer 11 vs. patch layer and scale α, random directions)",
+        "Variance explained by noise direction (PC1) per layer\n"
+        "(higher = noise defines a consistent linear direction at this layer)",
         fontsize=13, fontweight="bold",
     )
-    im = ax.imshow(flip_matrix, aspect="auto", cmap="RdYlGn_r", vmin=0, vmax=4,
-                   origin="lower")
-    ax.set_xticks(range(len(alphas)))
-    ax.set_xticklabels([str(a) for a in alphas], fontsize=9)
-    ax.set_yticks(layers)
-    ax.set_yticklabels([f"Layer {k}" for k in layers], fontsize=9)
-    ax.set_xlabel("Patch scale α", fontsize=12)
-    ax.set_ylabel("Patch layer", fontsize=12)
-    plt.colorbar(im, ax=ax, label="Mean abs level shift at layer 11")
-    for i in range(NUM_LAYERS):
-        for j in range(len(alphas)):
-            ax.text(j, i, f"{flip_matrix[i, j]:.2f}", ha="center", va="center",
-                    fontsize=7, color="black" if 0.2 < flip_matrix[i, j] < 0.8 else "white")
+    var_exp = [noise_dirs[layer]["variance_explained"] for layer in layers]
+    bar_colors = plt.cm.Blues(np.array(var_exp) / max(var_exp))
+    bars = ax.bar(layers, var_exp, color=bar_colors, edgecolor="black", linewidth=0.5)
+    ax.set_xlabel("Layer", fontsize=12)
+    ax.set_ylabel("Fraction of variance explained (PC1)", fontsize=12)
+    ax.set_xticks(layers)
+    for bar, val in zip(bars, var_exp):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
+                f"{val:.2f}", ha="center", va="bottom", fontsize=7)
     plt.tight_layout()
-    plt.savefig("noise_direction_summary.png", dpi=150, bbox_inches="tight")
-    print("Saved noise_direction_summary.png")
+    plt.savefig("noiselevelexperiment/noise_direction_variance.png", dpi=150, bbox_inches="tight")
+    print("Saved noiselevelexperiment/noise_direction_variance.png")
+
+    # ---- Figure 3: orthogonality with species direction (optional) ----
+    ortho_per_layer = None
+    if species_dirs is not None:
+        fig, ax = plt.subplots(figsize=(10, 5))
+        fig.suptitle(
+            "|Cosine similarity| between noise direction and species direction per layer\n"
+            "(lower = noise and species are geometrically separable)",
+            fontsize=13, fontweight="bold",
+        )
+        ortho_per_layer = {}
+        cosines = []
+        for layer in layers:
+            nd = noise_dirs[layer]["direction"]
+            sd = species_dirs[layer]
+            cos_sim = float(abs(np.dot(nd, sd) / (np.linalg.norm(nd) * np.linalg.norm(sd) + 1e-10)))
+            ortho_per_layer[layer] = cos_sim
+            cosines.append(cos_sim)
+        bar_colors = plt.cm.RdYlGn_r(np.array(cosines))
+        bars = ax.bar(layers, cosines, color=bar_colors, edgecolor="black", linewidth=0.5)
+        ax.axhline(0.1, color="gray", linestyle=":", alpha=0.5, label="|cos|=0.1 reference")
+        ax.set_xlabel("Layer", fontsize=12)
+        ax.set_ylabel("|Cosine similarity|", fontsize=12)
+        ax.set_ylim(0, 1.05)
+        ax.set_xticks(layers)
+        ax.legend(fontsize=9)
+        for bar, val in zip(bars, cosines):
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+                    f"{val:.3f}", ha="center", va="bottom", fontsize=7)
+        plt.tight_layout()
+        plt.savefig("noiselevelexperiment/noise_species_ortho.png", dpi=150, bbox_inches="tight")
+        print("Saved noiselevelexperiment/noise_species_ortho.png")
 
     return {
-        "best_layer_noise": best_layer,
-        "best_alpha1_noise": float(alpha1_per_layer[best_layer])
-        if not np.isinf(alpha1_per_layer[best_layer]) else None,
-        "alpha1_per_layer_noise": {
-            str(k): (float(v) if not np.isinf(v) else None)
-            for k, v in alpha1_per_layer.items()
+        "variance_explained_per_layer": {
+            str(k): noise_dirs[k]["variance_explained"] for k in layers
         },
-        "num_noise_trials": NUM_NOISE_TRIALS,
+        "best_noise_layer": int(max(layers, key=lambda k: noise_dirs[k]["variance_explained"])),
+        "ortho_per_layer": (
+            {str(k): v for k, v in ortho_per_layer.items()}
+            if ortho_per_layer is not None else None
+        ),
     }
 
 # ---------------------------------------------------------------------------
@@ -371,6 +308,10 @@ def plot_results(sweep: dict[int, dict[float, float]]) -> dict:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
+    if not RECORDINGS:
+        print("RECORDINGS is empty — populate it with audio file paths before running.")
+        return
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Loading AVES model on {device}...", flush=True)
     model = load_feature_extractor(
@@ -380,25 +321,34 @@ def main() -> None:
         for_inference=True,
     )
 
-    print("\nExtracting all-layer embeddings...", flush=True)
-    data = extract_all_layers(model, RECORDINGS)
+    print(
+        f"\nRunning SNR sweep ({len(SNR_LEVELS_DB)} levels × {len(RECORDINGS)} recordings)...",
+        flush=True,
+    )
+    sweep = run_snr_sweep(model, RECORDINGS)
 
-    print("\nTraining layer-11 probe...", flush=True)
-    probe, scaler, loro_acc = train_layer11_probe_loro(data)
+    print("\nFitting noise directions (PCA per layer)...", flush=True)
+    noise_dirs = compute_noise_directions(sweep)
 
-    print(f"\nRunning noise direction sweep ({NUM_NOISE_TRIALS} trials/layer)...", flush=True)
-    sweep = run_noise_alpha_sweep(model, data, probe, scaler)
+    print("\nComputing species directions (if available)...", flush=True)
+    species_dirs = compute_species_directions(model)
+    if species_dirs is None:
+        print("  Skipping orthogonality analysis (SPECIES_RECORDINGS not populated or files missing).")
 
     print("\nPlotting...", flush=True)
-    summary = plot_results(sweep)
+    summary = plot_results(sweep, noise_dirs, species_dirs)
 
-    best = summary["best_layer_noise"]
-    a1 = summary["best_alpha1_noise"]
+    best = summary["best_noise_layer"]
     print(f"\nNoise Direction Summary:")
-    print(f"  Best layer (noise): {best} (alpha_1 = {a1})")
-    print(f"  Alpha_1 per layer (noise):", flush=True)
-    for k, v in summary["alpha1_per_layer_noise"].items():
-        print(f"    Layer {int(k):2d}: {v if v is not None else '>max'}")
+    print(f"  Layer with highest noise variance explained: {best} "
+          f"({noise_dirs[best]['variance_explained']:.3f})")
+    print("  Variance explained per layer:")
+    for k, v in summary["variance_explained_per_layer"].items():
+        print(f"    Layer {int(k):2d}: {v:.3f}")
+    if summary["ortho_per_layer"]:
+        print("  |Cosine similarity| noise vs species:")
+        for k, v in summary["ortho_per_layer"].items():
+            print(f"    Layer {int(k):2d}: {v:.4f}")
 
 
 if __name__ == "__main__":
