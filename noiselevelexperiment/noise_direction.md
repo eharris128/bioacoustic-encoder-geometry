@@ -129,3 +129,33 @@ direction and species direction at each layer. Values near 0 mean noise and spec
 occupy orthogonal axes — a denoising intervention could be applied without disturbing
 species identity. Values near 1 mean the two directions are aligned, making separability
 harder.
+
+---
+
+## Key Findings (Helmeted Guineafowl, 3 recordings, 10 SNR levels)
+
+| Layer | Variance explained (PC1) |
+|-------|--------------------------|
+| 0     | 0.455 ← highest          |
+| 1     | 0.439                    |
+| 2     | 0.421                    |
+| 3     | 0.421                    |
+| 4     | 0.421                    |
+| 5     | 0.404                    |
+| 6     | 0.404                    |
+| 7     | 0.382 ← lowest           |
+| 8     | 0.376                    |
+| 9     | 0.398                    |
+| 10    | 0.399                    |
+| 11    | 0.401                    |
+
+Noise is most linearly concentrated at **Layer 0** (45.5%) and gradually diffuses through
+the network, reaching a minimum around Layer 8 (37.6%) before slightly recovering at
+layers 9–11 (~40%). The gradient is shallow — no single layer cleanly suppresses noise.
+This means noise leaves a traceable linear signature all the way to layer 11, but it is
+most geometrically coherent in the earliest transformer layer.
+
+This is consistent with the broader pattern in CLAUDE.md: early layers preserve more
+low-level acoustic structure, while the transformer progressively abstracts away from it.
+The lack of a sharp drop-off suggests noise is not actively filtered at any specific layer
+but rather gradually diluted as higher-level representations dominate.

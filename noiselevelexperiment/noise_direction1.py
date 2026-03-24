@@ -39,10 +39,25 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+import soundfile as sf
+from scipy import signal as scipy_signal
 from sklearn.decomposition import PCA
 
 from aves import load_feature_extractor
-from aves.utils import load_audio
+
+# ---------------------------------------------------------------------------
+# Audio loading (bypasses torchaudio/torchcodec entirely)
+# ---------------------------------------------------------------------------
+
+def load_audio(path: str, target_sr: int = 16000) -> torch.Tensor:
+    """Load WAV via soundfile, convert to mono, resample to target_sr.
+    Returns (1, n_samples) float32 tensor."""
+    data, sr = sf.read(path, always_2d=True)  # (n_samples, n_channels)
+    data = data.mean(axis=1)                   # mono
+    if sr != target_sr:
+        n_out = int(round(len(data) * target_sr / sr))
+        data = scipy_signal.resample(data, n_out)
+    return torch.from_numpy(data.astype(np.float32)).unsqueeze(0)  # (1, n_samples)
 
 # ---------------------------------------------------------------------------
 # Config
@@ -52,16 +67,15 @@ MODEL_PATH = "./models/aves-base-all.torchaudio.pt"
 NUM_LAYERS = 12
 MAX_FRAMES_PER_RECORDING = 1000
 
-# 10 SNR levels in dB: 40dB (nearly clean) → 0dB (signal power ≈ noise power)
 SNR_LEVELS_DB = [40.0, 30.0, 20.0, 15.0, 10.0, 7.0, 5.0, 3.0, 1.0, 0.0]
 
-# Recordings for noise analysis — single species, populate before running
 RECORDINGS: dict[str, str] = {
-    # "rec_id": "audio/species/XC???.mp3",
-}
+     "guineafowl_01": "audio/helmeted-guinea-fowl/XC280506 - Helmeted Guineafowl - Numida meleagris.wav",                                           
+      "guineafowl_02": "audio/helmeted-guinea-fowl/XC364521 - Helmeted Guineafowl - Numida meleagris.wav",                                           
+      "guineafowl_03": "audio/helmeted-guinea-fowl/XC709655 - Helmeted Guineafowl - Numida meleagris.wav",                                           
+  }       
 
-# Optional: populate to enable noise-vs-species orthogonality analysis.
-# Requires at least one recording per species (label 0 and label 1).
+
 SPECIES_RECORDINGS: dict[str, tuple[str, int]] = {
     # "bullfinch_XC1077468": ("audio/bullfinch/XC1077468.mp3", 0),
     # "hawfinch_XC944735":   ("audio/hawfinch/XC944735.mp3",   1),
@@ -125,7 +139,7 @@ def run_snr_sweep(model, recordings: dict[str, str]) -> dict:
     results = {}
     for rec_id, path in recordings.items():
         print(f"  {rec_id}...", flush=True)
-        audio_clean = load_audio(path, mono=True, mono_avg=False)
+        audio_clean = load_audio(path)
         snr_means = []
         for snr_db in SNR_LEVELS_DB:
             noisy = add_white_noise(audio_clean, snr_db, rng)
@@ -184,7 +198,7 @@ def compute_species_directions(model) -> dict[int, np.ndarray] | None:
         if not Path(path).exists():
             print(f"  Warning: {path} not found — skipping orthogonality analysis", flush=True)
             return None
-        audio = load_audio(path, mono=True, mono_avg=False)
+        audio = load_audio(path)
         means = extract_layer_means(model, audio, rng)  # (NUM_LAYERS, 768)
         for layer in range(NUM_LAYERS):
             layer_means[layer][label].append(means[layer])
