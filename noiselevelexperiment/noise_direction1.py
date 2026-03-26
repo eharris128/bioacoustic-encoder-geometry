@@ -180,6 +180,34 @@ def compute_noise_directions(sweep: dict) -> dict[int, dict]:
     return directions
 
 # ---------------------------------------------------------------------------
+# PC elbow: minimum components to explain threshold variance per layer
+# ---------------------------------------------------------------------------
+
+def find_num_components(sweep: dict, threshold: float = 0.80) -> dict[int, int]:
+    """
+    For each layer, find the minimum number of PCs needed to explain
+    `threshold` fraction of variance in the (n_rec × n_snr, 768) activation matrix.
+    Returns {layer: n_components}.
+    """
+    rec_ids = list(sweep.keys())
+    max_components = min(10, len(rec_ids) * len(SNR_LEVELS_DB))
+    components_needed = {}
+    for layer in range(NUM_LAYERS):
+        rows = []
+        for rec_id in rec_ids:
+            rows.append(sweep[rec_id]["snr_means"][:, layer, :])
+        X = np.concatenate(rows, axis=0)
+        pca = PCA(n_components=max_components)
+        pca.fit(X)
+        cumulative = np.cumsum(pca.explained_variance_ratio_)
+        hits = np.where(cumulative >= threshold)[0]
+        n_components = int(hits[0] + 1) if len(hits) > 0 else max_components
+        components_needed[layer] = n_components
+        print(f"    Layer {layer:2d}: {n_components} components to explain {threshold:.0%} variance "
+              f"(PC1={pca.explained_variance_ratio_[0]:.3f})", flush=True)
+    return components_needed
+
+# ---------------------------------------------------------------------------
 # Species direction (optional, for orthogonality check)
 # ---------------------------------------------------------------------------
 
@@ -344,6 +372,9 @@ def main() -> None:
     print("\nFitting noise directions (PCA per layer)...", flush=True)
     noise_dirs = compute_noise_directions(sweep)
 
+    print("\nFinding PC elbow (components needed for 80% variance)...", flush=True)
+    elbow = find_num_components(sweep, threshold=0.80)
+
     print("\nComputing species directions (if available)...", flush=True)
     species_dirs = compute_species_directions(model)
     if species_dirs is None:
@@ -359,6 +390,9 @@ def main() -> None:
     print("  Variance explained per layer:")
     for k, v in summary["variance_explained_per_layer"].items():
         print(f"    Layer {int(k):2d}: {v:.3f}")
+    print("\n  Components for 80% variance per layer:")
+    for k, v in elbow.items():
+        print(f"    Layer {k:2d}: {v}")
     if summary["ortho_per_layer"]:
         print("  |Cosine similarity| noise vs species:")
         for k, v in summary["ortho_per_layer"].items():
