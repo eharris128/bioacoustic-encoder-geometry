@@ -38,6 +38,7 @@ Our monotonicity check results for variance show a consistent, linear direction 
 
 
 (Figure 2 - Noise activation shift vs recording SNR)
+
 The x axis for this plot depicts noise SNR level going from clean(40dB) to degraded(0dB). The y axis, meanwhile, is the L2 shift, or how far the mean activation vector at each layer has moved from the baseline per sound increase. A general, visual analysis can depict that the L2 shift is prominent during the early sound additions. Later on, the shift still occurs for each layer, but each layer has a smaller and smaller difference between the clean and augmented activation vector. As their curves are generally consistent, layers 1-10 can be interpreted somewhat equally. The SNR curve graph shows that the AVES model initially reacts sensitively to the first introduction of augmented white noise, then progressively gets less sensitive to later added noise. This means that the model does not treat noise linearly, with each addition of noise producing diminishing returns in L2 shift. Practically, this implies that the model is more sensitive to the differences between high quality and medium quality datasets rather than poor quality and medium quality datasets. Furthermore, this also shows that noise direction is most meaningful at the clean and moderate levels. Going forward, this suggests discarding degraded data through human annotation. 
 
 ## Monotonicity check continued 
