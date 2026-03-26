@@ -33,12 +33,19 @@ Noise_direction1.py takes each recording in RECORDINGS, generating 10 versions o
 ## Monotonicity check results
 
 (Figure 1 - noise_direction_variance.png - variance explained between activation vector movement across 10 noise levels)
+![Noisedirectionvariance](noise_direction_variance.png)
+
 
 Our monotonicity check results for variance show a consistent, linear direction at every layer. This means that we are able to extract and subtract this noise direction at every layer. However,this model shows that noise is not perfectly linear, at least at PC1. While subtraction is possible, this suggests that testing PC2, PC3, and possibly other directions may be necessary for clean representation. 
 
 
 (Figure 2 - Noise activation shift vs recording SNR)
+<<<<<<< Updated upstream
+=======
+![Noisedirectionvariance](noise_snr_curves.png)
+>>>>>>> Stashed changes
 
 The x axis for this plot depicts noise SNR level going from clean(40dB) to degraded(0dB). The y axis, meanwhile, is the L2 shift, or how far the mean activation vector at each layer has moved from the baseline per sound increase. A general, visual analysis can depict that the L2 shift is prominent during the early sound additions. Later on, the shift still occurs for each layer, but each layer has a smaller and smaller difference between the clean and augmented activation vector. As their curves are generally consistent, layers 1-10 can be interpreted somewhat equally. The SNR curve graph shows that the AVES model initially reacts sensitively to the first introduction of augmented white noise, then progressively gets less sensitive to later added noise. This means that the model does not treat noise linearly, with each addition of noise producing diminishing returns in L2 shift. Practically, this implies that the model is more sensitive to the differences between high quality and medium quality datasets rather than poor quality and medium quality datasets. Furthermore, this also shows that noise direction is most meaningful at the clean and moderate levels. Going forward, this suggests discarding degraded data through human annotation. 
 
 ## Monotonicity check continued 
+Our monotonicity check started with a calculation of the PC elbow. A PC is essentially an explanation of the way noise changes activations. A PC captures the main path of activation movement, not all of it. The PC elbow, meanwhile, signifies when we have found the maximum amount of ways that noise changes activations, all of them being independant of each other. The updated PC elbow calculation in noise_direction1.py shows that there are 3 PCs to explain 80% of the variance at each layer. This means that noise is not a single direction in AVES' activation space, it occupies a 3-dimensional subspace(a plane with 3 axises). Practically, this means that further SAE training experiments will need to project out a 3d subsace rather than one single direction during the cleaning substep. 
