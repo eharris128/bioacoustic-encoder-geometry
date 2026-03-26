@@ -7,15 +7,15 @@ The experiment starts with inputting a single clean guineafowl reference recordi
 
 Recording 1 sonogram: 
 
-![Sonogram 1](Screenshot 2026-03-25 at 10.39.05 PM.png)
+![Sonogram 1](Screenshot%202026-03-25%20at%2010.39.05%20PM.png)
 
 Recording 2 Sonogram:
 
-![Sonogram 2](Screenshot 2026-03-25 at 10.41.58 PM.png)
+![Sonogram 2](Screenshot%202026-03-25%20at%2010.41.58%20PM.png)
 
 Recording 3 Sonogram: 
 
-![Sonogram 3](Screenshot 2026-03-25 at 10.43.05 PM.png)
+![Sonogram 3](Screenshot%202026-03-25%20at%2010.43.05%20PM.png)
 
 ### AVES / BirdAVES (Earth Species Project) 
 ***Paper***: Hagiwara (2023), ICASSP. BirdAVES update: ESP blog post, 2024.
