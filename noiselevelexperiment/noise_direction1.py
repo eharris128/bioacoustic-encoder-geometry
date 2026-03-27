@@ -76,9 +76,20 @@ RECORDINGS: dict[str, str] = {
   }       
 
 
+# Full filenames as downloaded from xeno-canto (include species name).
+# Files marked .mp3 must be converted to .wav before running:
+#   cd audio/bullfinch && for f in *.mp3; do ffmpeg -i "$f" "${f%.mp3}.wav"; done
+#   cd audio/hawfinch  && for f in *.mp3; do ffmpeg -i "$f" "${f%.mp3}.wav"; done
 SPECIES_RECORDINGS: dict[str, tuple[str, int]] = {
-    # "bullfinch_XC1077468": ("audio/bullfinch/XC1077468.mp3", 0),
-    # "hawfinch_XC944735":   ("audio/hawfinch/XC944735.mp3",   1),
+    "bullfinch_XC1077468": ("audio/bullfinch/XC1077468 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",        0),
+    "bullfinch_XC965743":  ("audio/bullfinch/XC965743 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",         0),
+    "bullfinch_XC938052":  ("audio/bullfinch/XC938052 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",         0),
+    "bullfinch_XC805629":  ("audio/bullfinch/XC805629 - Eurasian Bullfinch - Pyrrhula pyrrhula rosacea.wav", 0),
+    "hawfinch_XC944735":   ("audio/hawfinch/XC944735 - Hawfinch - Coccothraustes coccothraustes.wav",        1),
+    "hawfinch_XC1087947":  ("audio/hawfinch/XC1087947 - Hawfinch - Coccothraustes coccothraustes.wav",       1),
+    "hawfinch_XC1086752":  ("audio/hawfinch/XC1086752 - Hawfinch - Coccothraustes coccothraustes.wav",       1),
+    "hawfinch_XC1084204":  ("audio/hawfinch/XC1084204 - Hawfinch - Coccothraustes coccothraustes.wav",       1),
+    "hawfinch_XC1083076":  ("audio/hawfinch/XC1083076 - Hawfinch - Coccothraustes coccothraustes.wav",       1),
 }
 
 # ---------------------------------------------------------------------------
