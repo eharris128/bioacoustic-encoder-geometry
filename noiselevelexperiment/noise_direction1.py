@@ -1,4 +1,4 @@
-"""Noise-in-audio experiment: where does recording noise live in AVES activation space?
+"""
 
 Motivation
 ----------
@@ -14,21 +14,6 @@ For each recording in RECORDINGS and each SNR level in SNR_LEVELS_DB:
   2. Run a clean forward pass through AVES (no activation hooks)
   3. Extract and subsample frame-level activations at all 12 layers
   4. Compute per-layer mean activation across frames
-
-Per layer, fit PCA to the (n_snr × n_recordings, 768) matrix of SNR-indexed mean
-activations. The first PC is the noise direction at that layer — the axis of maximum
-variance explained by noise level.
-
-Orthogonality check: if SPECIES_RECORDINGS is populated, compute the per-layer species
-direction (normalize(mean_species1 - mean_species0)) and report |cosine similarity| with
-the noise direction. Low cosine similarity → noise and species are geometrically separable.
-
-Outputs
--------
-  noiselevelexperiment/noise_snr_curves.png         — L2 activation shift vs SNR, per layer
-  noiselevelexperiment/noise_direction_variance.png — variance explained by noise PC1, per layer
-  noiselevelexperiment/noise_species_ortho.png      — |cos sim| noise dir vs species dir (optional)
-  result.json                                       — written by job wrapper
 """
 
 from __future__ import annotations
@@ -45,7 +30,7 @@ from sklearn.decomposition import PCA
 
 from aves import load_feature_extractor
 
-# ---------------------------------------------------------------------------
+
 # Audio loading (bypasses torchaudio/torchcodec entirely)
 # ---------------------------------------------------------------------------
 
@@ -59,7 +44,7 @@ def load_audio(path: str, target_sr: int = 16000) -> torch.Tensor:
         data = scipy_signal.resample(data, n_out)
     return torch.from_numpy(data.astype(np.float32)).unsqueeze(0)  # (1, n_samples)
 
-# ---------------------------------------------------------------------------
+
 # Config
 # ---------------------------------------------------------------------------
 CONFIG_PATH = "./aves/config/default_cfg_aves-base-all.json"
@@ -76,10 +61,7 @@ RECORDINGS: dict[str, str] = {
   }       
 
 
-# Full filenames as downloaded from xeno-canto (include species name).
-# Files marked .mp3 must be converted to .wav before running:
-#   cd audio/bullfinch && for f in *.mp3; do ffmpeg -i "$f" "${f%.mp3}.wav"; done
-#   cd audio/hawfinch  && for f in *.mp3; do ffmpeg -i "$f" "${f%.mp3}.wav"; done
+
 SPECIES_RECORDINGS: dict[str, tuple[str, int]] = {
     "bullfinch_XC1077468": ("audio/bullfinch/XC1077468 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",        0),
     "bullfinch_XC965743":  ("audio/bullfinch/XC965743 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",         0),
@@ -92,7 +74,7 @@ SPECIES_RECORDINGS: dict[str, tuple[str, int]] = {
     "hawfinch_XC1083076":  ("audio/hawfinch/XC1083076 - Hawfinch - Coccothraustes coccothraustes.wav",       1),
 }
 
-# ---------------------------------------------------------------------------
+
 # Audio noise addition
 # ---------------------------------------------------------------------------
 
@@ -112,7 +94,6 @@ def add_white_noise(audio: torch.Tensor, snr_db: float, rng: np.random.Generator
     noise = rng.normal(0.0, np.sqrt(noise_power), signal.shape).astype(np.float32)
     return torch.from_numpy((signal + noise).astype(np.float32))
 
-# ---------------------------------------------------------------------------
 # Activation extraction
 # ---------------------------------------------------------------------------
 
@@ -137,7 +118,6 @@ def extract_layer_means(
         means.append(frames.mean(axis=0))  # (768,)
     return np.stack(means, axis=0)  # (NUM_LAYERS, 768)
 
-# ---------------------------------------------------------------------------
 # SNR sweep
 # ---------------------------------------------------------------------------
 
@@ -165,7 +145,6 @@ def run_snr_sweep(model, recordings: dict[str, str]) -> dict:
         }
     return results
 
-# ---------------------------------------------------------------------------
 # Noise direction: PCA over SNR-indexed mean activations per layer
 # ---------------------------------------------------------------------------
 
@@ -190,7 +169,6 @@ def compute_noise_directions(sweep: dict) -> dict[int, dict]:
         }
     return directions
 
-# ---------------------------------------------------------------------------
 # PC elbow: minimum components to explain threshold variance per layer
 # ---------------------------------------------------------------------------
 
@@ -218,7 +196,6 @@ def find_num_components(sweep: dict, threshold: float = 0.80) -> dict[int, int]:
               f"(PC1={pca.explained_variance_ratio_[0]:.3f})", flush=True)
     return components_needed
 
-# ---------------------------------------------------------------------------
 # Species direction (optional, for orthogonality check)
 # ---------------------------------------------------------------------------
 
@@ -250,7 +227,7 @@ def compute_species_directions(model) -> dict[int, np.ndarray] | None:
         directions[layer] = diff / norm if norm > 1e-8 else diff
     return directions
 
-# ---------------------------------------------------------------------------
+
 # Plotting
 # ---------------------------------------------------------------------------
 
@@ -313,7 +290,7 @@ def plot_results(
     plt.savefig("noiselevelexperiment/noise_direction_variance.png", dpi=150, bbox_inches="tight")
     print("Saved noiselevelexperiment/noise_direction_variance.png")
 
-    # ---- Figure 3: orthogonality with species direction (optional) ----
+    # ---- Figure 3: orthogonality with species direction  ----
     ortho_per_layer = None
     if species_dirs is not None:
         fig, ax = plt.subplots(figsize=(10, 5))
@@ -356,7 +333,7 @@ def plot_results(
         ),
     }
 
-# ---------------------------------------------------------------------------
+
 # Main
 # ---------------------------------------------------------------------------
 
