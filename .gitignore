@@ -3,7 +3,7 @@ models/
 __pycache__/
 *.pyc
 aves/
-audio/
+# audio/ — un-gitignored to share with team
 cluster_output/bullfinch/
 cluster_output/guineafowl/
 download_model.sh
