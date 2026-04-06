@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import torch
 import soundfile as sf
 from scipy import signal as scipy_signal
+from scipy.stats import spearmanr
 from sklearn.decomposition import PCA
 
 from aves import load_feature_extractor
@@ -35,14 +36,23 @@ from aves import load_feature_extractor
 # ---------------------------------------------------------------------------
 
 def load_audio(path: str, target_sr: int = 16000) -> torch.Tensor:
-    """Load WAV via soundfile, convert to mono, resample to target_sr.
+    """Load audio (WAV or MP3), convert to mono, resample to target_sr.
+    Tries soundfile first (WAV/FLAC), falls back to torchaudio for MP3.
     Returns (1, n_samples) float32 tensor."""
-    data, sr = sf.read(path, always_2d=True)  # (n_samples, n_channels)
-    data = data.mean(axis=1)                   # mono
-    if sr != target_sr:
-        n_out = int(round(len(data) * target_sr / sr))
-        data = scipy_signal.resample(data, n_out)
-    return torch.from_numpy(data.astype(np.float32)).unsqueeze(0)  # (1, n_samples)
+    try:
+        data, sr = sf.read(path, always_2d=True)  # (n_samples, n_channels)
+        data = data.mean(axis=1)                   # mono
+        if sr != target_sr:
+            n_out = int(round(len(data) * target_sr / sr))
+            data = scipy_signal.resample(data, n_out)
+        return torch.from_numpy(data.astype(np.float32)).unsqueeze(0)
+    except Exception:
+        import torchaudio
+        waveform, sr = torchaudio.load(path)
+        waveform = waveform.mean(dim=0, keepdim=True)  # mono (1, n_samples)
+        if sr != target_sr:
+            waveform = torchaudio.functional.resample(waveform, sr, target_sr)
+        return waveform.float()
 
 
 # Config
@@ -55,12 +65,21 @@ MAX_FRAMES_PER_RECORDING = 1000
 SNR_LEVELS_DB = [40.0, 30.0, 20.0, 15.0, 10.0, 7.0, 5.0, 3.0, 1.0, 0.0]
 
 RECORDINGS: dict[str, str] = {
-     "guineafowl_01": "audio/helmeted-guinea-fowl/XC280506 - Helmeted Guineafowl - Numida meleagris.wav",                                           
-      "guineafowl_02": "audio/helmeted-guinea-fowl/XC364521 - Helmeted Guineafowl - Numida meleagris.wav",                                           
-      "guineafowl_03": "audio/helmeted-guinea-fowl/XC709655 - Helmeted Guineafowl - Numida meleagris.wav",                                           
-  }       
-
-
+    # --- Helmeted Guineafowl (3) --- add more by copying pattern below
+    "guineafowl_01": "audio/helmeted-guinea-fowl/XC280506 - Helmeted Guineafowl - Numida meleagris.wav",
+    "guineafowl_02": "audio/helmeted-guinea-fowl/XC364521 - Helmeted Guineafowl - Numida meleagris.wav",
+    "guineafowl_03": "audio/helmeted-guinea-fowl/XC709655 - Helmeted Guineafowl - Numida meleagris.wav",
+    # --- Eurasian Bullfinch (4) ---
+    "bullfinch_01": "audio/bullfinch/XC1077468 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",
+    "bullfinch_02": "audio/bullfinch/XC965743 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",
+    "bullfinch_03": "audio/bullfinch/XC938052 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",
+    "bullfinch_04": "audio/bullfinch/XC805629 - Eurasian Bullfinch - Pyrrhula pyrrhula rosacea.wav",
+    # --- Hawfinch (4) ---
+    "hawfinch_01": "audio/hawfinch/XC944735 - Hawfinch - Coccothraustes coccothraustes.wav",
+    "hawfinch_02": "audio/hawfinch/XC1087947 - Hawfinch - Coccothraustes coccothraustes.wav",
+    "hawfinch_03": "audio/hawfinch/XC1086752 - Hawfinch - Coccothraustes coccothraustes.wav",
+    "hawfinch_04": "audio/hawfinch/XC1083076 - Hawfinch - Coccothraustes coccothraustes.wav",
+}
 
 SPECIES_RECORDINGS: dict[str, tuple[str, int]] = {
     "bullfinch_XC1077468": ("audio/bullfinch/XC1077468 - Eurasian Bullfinch - Pyrrhula pyrrhula.wav",        0),
@@ -151,21 +170,25 @@ def run_snr_sweep(model, recordings: dict[str, str]) -> dict:
 def compute_noise_directions(sweep: dict) -> dict[int, dict]:
     """
     For each layer, stack all (rec × snr) mean activations and fit PCA.
-    The first PC is the noise direction.
-    Returns {layer: {"direction": (768,), "variance_explained": float}}.
+    Returns top 3 PCs (the noise subspace) plus variance explained.
+    Returns {layer: {"direction": (768,), "directions_3d": (3, 768),
+                     "variance_explained": float, "variance_explained_3d": float}}.
     """
     rec_ids = list(sweep.keys())
+    n_components = min(3, len(rec_ids) * len(SNR_LEVELS_DB) - 1)
     directions = {}
     for layer in range(NUM_LAYERS):
         rows = []
         for rec_id in rec_ids:
             rows.append(sweep[rec_id]["snr_means"][:, layer, :])  # (n_snr, 768)
         X = np.concatenate(rows, axis=0)  # (n_rec * n_snr, 768)
-        pca = PCA(n_components=1)
+        pca = PCA(n_components=n_components)
         pca.fit(X)
         directions[layer] = {
-            "direction": pca.components_[0],  # (768,) unit-norm
+            "direction": pca.components_[0],             # (768,) PC1 unit-norm
+            "directions_3d": pca.components_,            # (3, 768) noise subspace
             "variance_explained": float(pca.explained_variance_ratio_[0]),
+            "variance_explained_3d": float(pca.explained_variance_ratio_.sum()),
         }
     return directions
 
@@ -196,7 +219,57 @@ def find_num_components(sweep: dict, threshold: float = 0.80) -> dict[int, int]:
               f"(PC1={pca.explained_variance_ratio_[0]:.3f})", flush=True)
     return components_needed
 
-# Species direction (optional, for orthogonality check)
+# 3D subspace overlap utility
+# ---------------------------------------------------------------------------
+
+def full_subspace_overlap(noise_pcs: np.ndarray, species_dir: np.ndarray) -> tuple[float, np.ndarray]:
+    """
+    Compute how much of species_dir lies in the noise subspace spanned by noise_pcs.
+
+    noise_pcs   : (k, 768) — k orthonormal noise PCs
+    species_dir : (768,)   — unit-norm species direction
+
+    Returns:
+        total_overlap : scalar in [0, 1] — ||proj of species_dir onto noise subspace||
+        per_pc_cos    : (k,) — |cos(theta)| between species_dir and each PC individually
+    """
+    projections = noise_pcs @ species_dir          # (k,) coordinates in noise subspace
+    total_overlap = float(np.linalg.norm(projections))
+    per_pc_cos = np.abs(projections)               # (k,) individual cosines
+    return total_overlap, per_pc_cos
+
+# Monotonicity check via Spearman correlation
+# ---------------------------------------------------------------------------
+
+def compute_monotonicity(sweep: dict, noise_dirs: dict[int, dict]) -> dict[int, dict]:
+    """
+    For each layer, project each (recording × SNR) mean activation onto noise PC1
+    and compute Spearman ρ between the projection and descending SNR level.
+    A high |ρ| (negative, since lower SNR = higher noise = larger projection)
+    confirms that the noise direction captures a monotonic noise response.
+
+    Returns {layer: {"mean_rho": float, "per_rec_rho": list[float]}}.
+    """
+    rec_ids = list(sweep.keys())
+    # SNR_LEVELS_DB is ordered high→low; noise increases as index increases
+    snr_indices = list(range(len(SNR_LEVELS_DB)))  # 0=cleanest, 9=noisiest
+    results = {}
+    for layer in range(NUM_LAYERS):
+        pc1 = noise_dirs[layer]["direction"]  # (768,)
+        per_rec_rho = []
+        for rec_id in rec_ids:
+            means = sweep[rec_id]["snr_means"][:, layer, :]  # (n_snr, 768)
+            projections = means @ pc1                         # (n_snr,) scalar projection per SNR
+            rho, _ = spearmanr(snr_indices, projections)
+            per_rec_rho.append(float(rho))
+        results[layer] = {
+            "mean_rho": float(np.mean(per_rec_rho)),
+            "per_rec_rho": per_rec_rho,
+        }
+        print(f"    Layer {layer:2d}: mean Spearman ρ = {results[layer]['mean_rho']:+.3f}", flush=True)
+    return results
+
+# Species direction (for orthogonality check)
 # ---------------------------------------------------------------------------
 
 def compute_species_directions(model) -> dict[int, np.ndarray] | None:
@@ -228,6 +301,49 @@ def compute_species_directions(model) -> dict[int, np.ndarray] | None:
     return directions
 
 
+# UMAP visualization
+# ---------------------------------------------------------------------------
+
+def plot_umap(sweep: dict, layers_to_plot: list[int] = [0, 3, 6, 9, 11]) -> None:
+    """
+    For selected layers, project all (rec × SNR) mean activations to 2D with UMAP.
+    Color = SNR level (clean → noisy). Saves noise_umap.png.
+    """
+    import umap as umap_lib
+    rec_ids = list(sweep.keys())
+    n_snr = len(SNR_LEVELS_DB)
+    snr_vals = np.array(SNR_LEVELS_DB)
+
+    fig, axes = plt.subplots(1, len(layers_to_plot), figsize=(5 * len(layers_to_plot), 5))
+    fig.suptitle(
+        "UMAP of noise sweep activations per layer\n"
+        "(color = SNR level: yellow=clean, purple=noisy)",
+        fontsize=13, fontweight="bold",
+    )
+
+    sc = None
+    for ax, layer in zip(axes, layers_to_plot):
+        X = np.concatenate(
+            [sweep[r]["snr_means"][:, layer, :] for r in rec_ids], axis=0
+        )  # (n_rec * n_snr, 768)
+        labels_snr = np.tile(snr_vals, len(rec_ids))
+
+        reducer = umap_lib.UMAP(n_components=2, random_state=42, n_neighbors=15, min_dist=0.1)
+        emb = reducer.fit_transform(X)  # (n_rec * n_snr, 2)
+
+        sc = ax.scatter(emb[:, 0], emb[:, 1], c=labels_snr, cmap="plasma_r",
+                        s=40, alpha=0.85, vmin=0, vmax=40)
+        ax.set_title(f"Layer {layer}", fontsize=11)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    if sc is not None:
+        plt.colorbar(sc, ax=axes[-1], label="SNR (dB)")
+    plt.tight_layout()
+    plt.savefig("noiselevelexperiment/noise_umap.png", dpi=150, bbox_inches="tight")
+    print("Saved noiselevelexperiment/noise_umap.png")
+
+
 # Plotting
 # ---------------------------------------------------------------------------
 
@@ -235,10 +351,26 @@ def plot_results(
     sweep: dict,
     noise_dirs: dict[int, dict],
     species_dirs: dict[int, np.ndarray] | None,
+    monotonicity: dict[int, dict],
 ) -> dict:
     layers = list(range(NUM_LAYERS))
     colors = plt.cm.plasma(np.linspace(0.1, 0.9, NUM_LAYERS))
     rec_ids = list(sweep.keys())
+
+    # Precompute per-layer L2 shifts (used in two figures)
+    all_shifts = {}  # layer -> list of shifts, one per SNR index
+    for layer in layers:
+        shifts = []
+        for snr_idx in range(len(SNR_LEVELS_DB)):
+            layer_means = np.array([
+                sweep[r]["snr_means"][snr_idx, layer, :] for r in rec_ids
+            ])
+            baseline = np.array([
+                sweep[r]["snr_means"][0, layer, :] for r in rec_ids  # 40dB = cleanest
+            ])
+            shift = float(np.mean(np.linalg.norm(layer_means - baseline, axis=1)))
+            shifts.append(shift)
+        all_shifts[layer] = shifts
 
     # ---- Figure 1: L2 shift vs SNR per layer ----
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -248,18 +380,7 @@ def plot_results(
         fontsize=13, fontweight="bold",
     )
     for layer in layers:
-        shifts = []
-        for snr_idx in range(len(SNR_LEVELS_DB)):
-            layer_means = np.array([
-                sweep[r]["snr_means"][snr_idx, layer, :] for r in rec_ids
-            ])  # (n_rec, 768)
-            baseline = np.array([
-                sweep[r]["snr_means"][0, layer, :] for r in rec_ids  # index 0 = 40dB (cleanest)
-            ])
-            shift = float(np.mean(np.linalg.norm(layer_means - baseline, axis=1)))
-            shifts.append(shift)
-        # Plot with x-axis as SNR descending (left = noisier)
-        ax.plot(list(range(len(SNR_LEVELS_DB))), shifts, "o-", color=colors[layer],
+        ax.plot(list(range(len(SNR_LEVELS_DB))), all_shifts[layer], "o-", color=colors[layer],
                 linewidth=1.5, markersize=4, label=f"L{layer}")
     ax.set_xticks(range(len(SNR_LEVELS_DB)))
     ax.set_xticklabels([f"{s:.0f}" for s in SNR_LEVELS_DB], fontsize=9)
@@ -270,54 +391,97 @@ def plot_results(
     plt.savefig("noiselevelexperiment/noise_snr_curves.png", dpi=150, bbox_inches="tight")
     print("Saved noiselevelexperiment/noise_snr_curves.png")
 
-    # ---- Figure 2: variance explained by noise PC1 per layer ----
-    fig, ax = plt.subplots(figsize=(10, 5))
+    # ---- Figure 2: variance explained by noise PC1 + monotonicity vs SNR curve ----
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
     fig.suptitle(
-        "Variance explained by noise direction (PC1) per layer\n"
-        "(higher = noise defines a consistent linear direction at this layer)",
+        "Monotonicity confirmation: noise PC1 variance explained vs. Spearman ρ (SNR curve)",
         fontsize=13, fontweight="bold",
     )
+
     var_exp = [noise_dirs[layer]["variance_explained"] for layer in layers]
     bar_colors = plt.cm.Blues(np.array(var_exp) / max(var_exp))
-    bars = ax.bar(layers, var_exp, color=bar_colors, edgecolor="black", linewidth=0.5)
-    ax.set_xlabel("Layer", fontsize=12)
-    ax.set_ylabel("Fraction of variance explained (PC1)", fontsize=12)
-    ax.set_xticks(layers)
+    bars = ax1.bar(layers, var_exp, color=bar_colors, edgecolor="black", linewidth=0.5)
+    ax1.set_xlabel("Layer", fontsize=12)
+    ax1.set_ylabel("Fraction of variance explained (PC1)", fontsize=12)
+    ax1.set_title("Noise direction PC1 variance explained", fontsize=11)
+    ax1.set_xticks(layers)
     for bar, val in zip(bars, var_exp):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
-                f"{val:.2f}", ha="center", va="bottom", fontsize=7)
+        ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
+                 f"{val:.2f}", ha="center", va="bottom", fontsize=7)
+
+    rhos = [monotonicity[layer]["mean_rho"] for layer in layers]
+    rho_colors = plt.cm.RdYlGn(np.array(rhos))  # green = positive (monotonic with noise increase)
+    bars2 = ax2.bar(layers, rhos, color=rho_colors, edgecolor="black", linewidth=0.5)
+    ax2.axhline(0, color="black", linewidth=0.8)
+    ax2.axhline(0.9, color="gray", linestyle=":", alpha=0.5, label="ρ=0.9 reference")
+    ax2.set_xlabel("Layer", fontsize=12)
+    ax2.set_ylabel("Mean Spearman ρ (noise index vs PC1 projection)", fontsize=12)
+    ax2.set_title("Monotonicity: SNR index vs PC1 projection per layer", fontsize=11)
+    ax2.set_xticks(layers)
+    ax2.set_ylim(-1.05, 1.05)
+    ax2.legend(fontsize=9)
+    for bar, val in zip(bars2, rhos):
+        ax2.text(bar.get_x() + bar.get_width() / 2,
+                 bar.get_height() + (0.02 if val >= 0 else -0.07),
+                 f"{val:+.2f}", ha="center", va="bottom", fontsize=7)
+
     plt.tight_layout()
     plt.savefig("noiselevelexperiment/noise_direction_variance.png", dpi=150, bbox_inches="tight")
     print("Saved noiselevelexperiment/noise_direction_variance.png")
 
-    # ---- Figure 3: orthogonality with species direction  ----
+    # ---- Figure 3: 3D subspace orthogonality with species direction ----
     ortho_per_layer = None
     if species_dirs is not None:
-        fig, ax = plt.subplots(figsize=(10, 5))
+        fig, (ax_top, ax_bot) = plt.subplots(2, 1, figsize=(12, 9), sharex=True)
         fig.suptitle(
-            "|Cosine similarity| between noise direction and species direction per layer\n"
-            "(lower = noise and species are geometrically separable)",
+            "Noise subspace vs. species direction orthogonality per layer\n"
+            "(3D noise subspace: PC1 + PC2 + PC3)",
             fontsize=13, fontweight="bold",
         )
+
         ortho_per_layer = {}
-        cosines = []
+        total_overlaps, pc1_cos, pc2_cos, pc3_cos = [], [], [], []
+
         for layer in layers:
-            nd = noise_dirs[layer]["direction"]
-            sd = species_dirs[layer]
-            cos_sim = float(abs(np.dot(nd, sd) / (np.linalg.norm(nd) * np.linalg.norm(sd) + 1e-10)))
-            ortho_per_layer[layer] = cos_sim
-            cosines.append(cos_sim)
-        bar_colors = plt.cm.RdYlGn_r(np.array(cosines))
-        bars = ax.bar(layers, cosines, color=bar_colors, edgecolor="black", linewidth=0.5)
-        ax.axhline(0.1, color="gray", linestyle=":", alpha=0.5, label="|cos|=0.1 reference")
-        ax.set_xlabel("Layer", fontsize=12)
-        ax.set_ylabel("|Cosine similarity|", fontsize=12)
-        ax.set_ylim(0, 1.05)
-        ax.set_xticks(layers)
-        ax.legend(fontsize=9)
-        for bar, val in zip(bars, cosines):
-            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
-                    f"{val:.3f}", ha="center", va="bottom", fontsize=7)
+            noise_pcs = noise_dirs[layer]["directions_3d"]   # (3, 768)
+            sd = species_dirs[layer]                          # (768,) unit-norm
+            total, per_pc = full_subspace_overlap(noise_pcs, sd)
+            ortho_per_layer[layer] = {
+                "total_overlap": total,
+                "pc1_cos": float(per_pc[0]),
+                "pc2_cos": float(per_pc[1]) if len(per_pc) > 1 else 0.0,
+                "pc3_cos": float(per_pc[2]) if len(per_pc) > 2 else 0.0,
+            }
+            total_overlaps.append(total)
+            pc1_cos.append(float(per_pc[0]))
+            pc2_cos.append(float(per_pc[1]) if len(per_pc) > 1 else 0.0)
+            pc3_cos.append(float(per_pc[2]) if len(per_pc) > 2 else 0.0)
+
+        # Top panel: total 3D subspace overlap
+        top_colors = plt.cm.RdYlGn_r(np.array(total_overlaps))
+        bars_top = ax_top.bar(layers, total_overlaps, color=top_colors, edgecolor="black", linewidth=0.5)
+        ax_top.axhline(0.1, color="gray", linestyle=":", alpha=0.5, label="0.1 reference")
+        ax_top.set_ylabel("||proj(species → noise subspace)||", fontsize=11)
+        ax_top.set_title("Total species overlap with 3D noise subspace (lower = more separable)", fontsize=11)
+        ax_top.set_ylim(0, 1.05)
+        ax_top.legend(fontsize=9)
+        for bar, val in zip(bars_top, total_overlaps):
+            ax_top.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+                        f"{val:.3f}", ha="center", va="bottom", fontsize=7)
+
+        # Bottom panel: per-PC breakdown
+        x = np.array(layers)
+        w = 0.25
+        ax_bot.bar(x - w, pc1_cos, width=w, label="PC1 |cos|", color="#4C72B0", edgecolor="black", linewidth=0.5)
+        ax_bot.bar(x,     pc2_cos, width=w, label="PC2 |cos|", color="#DD8452", edgecolor="black", linewidth=0.5)
+        ax_bot.bar(x + w, pc3_cos, width=w, label="PC3 |cos|", color="#55A868", edgecolor="black", linewidth=0.5)
+        ax_bot.set_xlabel("Layer", fontsize=12)
+        ax_bot.set_ylabel("|Cosine similarity|", fontsize=11)
+        ax_bot.set_title("Per-PC breakdown: species direction vs each noise PC", fontsize=11)
+        ax_bot.set_ylim(0, 1.05)
+        ax_bot.set_xticks(layers)
+        ax_bot.legend(fontsize=9)
+
         plt.tight_layout()
         plt.savefig("noiselevelexperiment/noise_species_ortho.png", dpi=150, bbox_inches="tight")
         print("Saved noiselevelexperiment/noise_species_ortho.png")
@@ -327,6 +491,7 @@ def plot_results(
             str(k): noise_dirs[k]["variance_explained"] for k in layers
         },
         "best_noise_layer": int(max(layers, key=lambda k: noise_dirs[k]["variance_explained"])),
+        "monotonicity_rho_per_layer": {str(k): monotonicity[k]["mean_rho"] for k in layers},
         "ortho_per_layer": (
             {str(k): v for k, v in ortho_per_layer.items()}
             if ortho_per_layer is not None else None
@@ -357,11 +522,14 @@ def main() -> None:
     )
     sweep = run_snr_sweep(model, RECORDINGS)
 
-    print("\nFitting noise directions (PCA per layer)...", flush=True)
+    print("\nFitting noise directions (PCA per layer, 3 components)...", flush=True)
     noise_dirs = compute_noise_directions(sweep)
 
     print("\nFinding PC elbow (components needed for 80% variance)...", flush=True)
     elbow = find_num_components(sweep, threshold=0.80)
+
+    print("\nChecking monotonicity (Spearman ρ: SNR index vs PC1 projection)...", flush=True)
+    monotonicity = compute_monotonicity(sweep, noise_dirs)
 
     print("\nComputing species directions (if available)...", flush=True)
     species_dirs = compute_species_directions(model)
@@ -369,22 +537,31 @@ def main() -> None:
         print("  Skipping orthogonality analysis (SPECIES_RECORDINGS not populated or files missing).")
 
     print("\nPlotting...", flush=True)
-    summary = plot_results(sweep, noise_dirs, species_dirs)
+    summary = plot_results(sweep, noise_dirs, species_dirs, monotonicity)
+
+    print("\nRunning UMAP...", flush=True)
+    plot_umap(sweep)
 
     best = summary["best_noise_layer"]
     print(f"\nNoise Direction Summary:")
     print(f"  Layer with highest noise variance explained: {best} "
           f"({noise_dirs[best]['variance_explained']:.3f})")
-    print("  Variance explained per layer:")
-    for k, v in summary["variance_explained_per_layer"].items():
-        print(f"    Layer {int(k):2d}: {v:.3f}")
+    print("  Variance explained per layer (PC1 / 3D subspace):")
+    for k in range(NUM_LAYERS):
+        v1 = noise_dirs[k]["variance_explained"]
+        v3 = noise_dirs[k]["variance_explained_3d"]
+        print(f"    Layer {k:2d}: PC1={v1:.3f}  3D={v3:.3f}")
     print("\n  Components for 80% variance per layer:")
     for k, v in elbow.items():
         print(f"    Layer {k:2d}: {v}")
+    print("\n  Monotonicity (mean Spearman ρ per layer):")
+    for k, v in summary["monotonicity_rho_per_layer"].items():
+        print(f"    Layer {int(k):2d}: {float(v):+.3f}")
     if summary["ortho_per_layer"]:
-        print("  |Cosine similarity| noise vs species:")
+        print("\n  3D noise subspace overlap with species direction:")
         for k, v in summary["ortho_per_layer"].items():
-            print(f"    Layer {int(k):2d}: {v:.4f}")
+            print(f"    Layer {int(k):2d}: total={v['total_overlap']:.3f}  "
+                  f"PC1={v['pc1_cos']:.3f}  PC2={v['pc2_cos']:.3f}  PC3={v['pc3_cos']:.3f}")
 
 
 if __name__ == "__main__":
