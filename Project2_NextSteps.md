@@ -15,6 +15,7 @@ This phase covers the separations not yet handled:
 | Animals vs Music | `experiments/animals_vs_music.py` | Does AVES linearly separate biological vocalizations from structured non-biological audio (violin)? |
 | Music vs Speech | `experiments/music_vs_speech.py` | Does AVES distinguish musical instruments from human speech despite being trained on animals? |
 | Species pairs | `experiments/species.py` | At which layer does fine-grained species identity become linearly decodable? |
+| Species vs Species (custom) | `experiments/species_vs_species.py` | Generic binary probe for any two species — populated once sample sizes are verified and pairs confirmed with mentor. |
 
 ---
 
@@ -54,6 +55,11 @@ Config + entry point for all species-pair probes. Three pairs pre-configured:
 (cross-order), `hawfinch_vs_guineafowl` (cross-order). Add new pairs directly
 in the `PAIRS` dict.
 
+**`experiments/species_vs_species.py`**
+Generic binary probe stub for a single custom species pair. `SPECIES_A`,
+`SPECIES_B`, and `RECORDINGS` are left empty — populate once sample sizes have
+been verified and the target pair confirmed with the mentor.
+
 **`results/`**
 Output directory. All PNGs and any future summary CSVs land here. Tracked by git
 via `.gitkeep`.
@@ -89,6 +95,7 @@ via `.gitkeep`.
 - [ ] Peak accuracy layer identified for each experiment and noted in the summary table below
 - [ ] Results compared to mentor's class/order baselines — does the layer hierarchy hold?
 - [ ] `music_vs_speech` has ≥5 speech recordings (not just 2)
+- [ ] `species_vs_species.py` populated with confirmed pair and run end-to-end
 
 Once all boxes are checked, move to the attribution phase (causal tracing /
 activation patching to identify which heads and layers drive each separation).
