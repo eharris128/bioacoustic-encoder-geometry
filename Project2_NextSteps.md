@@ -32,17 +32,115 @@ Trains one logistic regression probe per layer using leave-one-recording-out
 (LORO) cross-validation. Applies StandardScaler → PCA(50 dims) → LogisticRegression
 per fold. Returns `{ layer: mean_loro_accuracy }`.
 
+*How `loro_cross_validate` works:*
+
+`build_dataset` stacks all recordings into one contiguous array in order.
+`loro_cross_validate` tracks where each recording starts via cumulative frame
+offsets, then iterates over folds — each fold holds out one recording's frames,
+trains the full pipeline (scaler → PCA → LR) on the rest, and applies the fitted
+transforms to the held-out frames (`.transform`, never `.fit_transform` on test
+data). Fold accuracies are averaged per layer to produce the final profile.
+
+LORO is used instead of a random split because each recording carries recording-level
+structure (noise floor, individual timbre, microphone) that a random split would leak
+into training, artificially inflating accuracy. LORO ensures the probe only ever
+evaluates on recordings it has never seen.
+
+*How to analyze effectiveness:*
+
+- **Layer accuracy profile** — plot `accuracy_per_layer` (layer on x, accuracy on y).
+  A non-monotone profile (peak early, dip mid-network, partial recovery late) is the
+  interesting signal — it means layers serve different functional roles. A flat profile
+  means the probe can't detect differences across depth. A monotone rise means the
+  feature is built up progressively.
+- **Compare to chance** — chance = `1 / n_classes` (50% for binary probes). Layers
+  barely above chance are not linearly encoding the probed feature.
+- **Fold variance** — high variance across folds indicates outlier recordings (class
+  imbalance, corrupted audio, or the probe overfitting to one recording's artifacts).
+  Low variance = the probe generalizes stably across individuals.
+- **PCA variance explained** — inspect `pca.explained_variance_ratio_.sum()` on a
+  representative fold. If < 60%, consider raising `pca_components`; if > 95%, you can
+  reduce components to speed up training without accuracy loss.
+- **Ablate PCA** — run once with raw 768-dim input to confirm PCA compression isn't
+  discarding discriminative directions. A significant accuracy drop means the relevant
+  structure is spread across more than 50 dimensions.
+
+*How `train_all_layers` works:*
+
+`train_all_layers` is the single entry point that experiment scripts call. It does
+three things:
+
+1. **Infer class count and chance level** — reads the label array from any layer
+   (`np.unique(y)`), counts distinct classes, and computes `chance = 1 / n_classes`.
+   This is done once here so callers don't have to pass it in, and so it's always
+   consistent with the actual data rather than a hardcoded assumption.
+
+2. **Delegate to `loro_cross_validate`** — passes through all arguments unchanged.
+   The separation exists so `loro_cross_validate` can be called independently (e.g.
+   for a single experiment sweep without the metadata wrapper).
+
+3. **Print a per-layer accuracy table** — immediately after LORO finishes, prints
+   each layer's accuracy and its delta over chance so you can inspect results without
+   waiting for plots. Format: `embedding | layer N | accuracy% | +delta%`.
+
+Returns a dict with four keys:
+- `accuracy_per_layer` — `{ layer_int: float }`, the main result consumed by `evaluate.py`
+- `chance_level` — `1 / n_classes`, used by `evaluate.py` to draw the reference line on plots
+- `n_classes` — sanity-check that the right number of classes were loaded
+- `n_recordings` — sanity-check on dataset size
+
 **`probes/evaluate.py`**
 Produces two outputs per experiment:
 1. Accuracy curve (`*_accuracy.png`) — per-layer LORO accuracy with chance-level reference
-2. LDA projection (`*_lda.png`) — 2D discriminant projection at layers 0, 3, 6, 9, 11
+2. LDA projection (`*_lda.png`) — 2D discriminant projection at layers 0, 3, 6, 9, 12
 
-All PNGs are written to `results/`.
+All PNGs are written to `results/`. The single entry point is `run_evaluation`, which
+experiment scripts call after `train_all_layers`.
+
+*How `plot_accuracy_curve` works:*
+
+Takes `accuracy_per_layer` (the dict from `train_all_layers`) and plots a line chart
+with one point per layer. Layer 0 is labeled `emb` (CNN embedding); layers 1–12 are
+labeled `T0`–`T11` (transformer layers). A dashed gray line marks chance level. A gold
+dot marks the peak layer so it's immediately visible. Saved at 150 dpi.
+
+*How `plot_lda_projection` works:*
+
+For each layer in `layers_to_plot`, fits a `LinearDiscriminantAnalysis` on the full
+dataset for that layer (standardized first, same convention as the probes) and projects
+to 2D. Each class is scatter-plotted in a distinct color with `alpha=0.3, s=3` (same
+style as existing project LDA plots). One subplot per layer, arranged in a single row.
+For binary experiments only LD1 exists — the y-axis is zeroed so points still render
+as a 2D scatter rather than a 1D strip.
+
+*How `run_evaluation` works:*
+
+Calls both plot functions, clips the requested `lda_layers` to layers that are actually
+present in the dataset, then prints a formatted summary table to stdout showing accuracy
+and delta-over-chance per layer. Experiment scripts only need to call this one function
+after training — they don't interact with the individual plot functions directly.
 
 **`experiments/animals_vs_music.py`**
-Config + entry point for the binary animal-vs-music probe. Label 0 = bird recordings
-(bullfinch, hawfinch, guineafowl), label 1 = violin. 9 animal recordings, 5 music
-recordings currently configured.
+Config + entry point for the binary animal-vs-music probe. Label 0 = animal, label 1 = music.
+
+*Data available on disk (as of 2026-04-16):*
+
+| Class | Species / Source | Files on disk | Configured in RECORDINGS |
+|---|---|---|---|
+| Animal (0) | Eurasian Bullfinch | 38 (WAV) | 3 |
+| Animal (0) | Hawfinch | 5 unique recordings (WAV + duplicate MP3s) | 3 |
+| Animal (0) | Helmeted Guineafowl | 3 unique recordings (WAV + MP3 pairs) | 3 |
+| Music (1) | Violin | 5 MP3s | 5 |
+
+**9 animal recordings vs 5 violin recordings are wired into RECORDINGS** — a mild class
+imbalance (9:5). LORO will train on 8 animal + 5 violin per fold when holding out an
+animal recording, and 9 animal + 4 violin per fold when holding out a violin recording.
+This is acceptable but worth noting when interpreting per-fold variance.
+
+**Unused data:** 35 additional bullfinch WAVs and 2 additional hawfinch WAVs are on disk
+but not configured. Adding more animal recordings would better balance the dataset (aim
+for ~14 animal vs 5 music, or add more violin). Guineafowl WAV/MP3 duplicates — only
+use the WAV paths (already correct in RECORDINGS).
 
 **`experiments/music_vs_speech.py`**
 Config + entry point for the binary music-vs-speech probe. Label 0 = violin,

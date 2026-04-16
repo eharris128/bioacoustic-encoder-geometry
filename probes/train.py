@@ -46,7 +46,16 @@ def train_probe_single_layer(
     scaler  : fitted StandardScaler (applied before PCA)
     pca     : fitted PCA transformer
     """
-    ...
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_train)
+
+    pca = PCA(n_components=pca_components, random_state=random_state)
+    X_pca = pca.fit_transform(X_scaled)
+
+    probe = LogisticRegression(max_iter=1000, random_state=random_state)
+    probe.fit(X_pca, y_train)
+
+    return probe, scaler, pca
 
 
 # ---------------------------------------------------------------------------
@@ -78,7 +87,44 @@ def loro_cross_validate(
     -------
     accuracy_per_layer : { layer_index: mean_loro_accuracy }
     """
-    ...
+    # Build cumulative frame offsets so we can slice out each recording's rows
+    # from the stacked X/y arrays produced by build_dataset.
+    offsets: list[int] = []
+    cursor = 0
+    for rec_id in recording_ids:
+        offsets.append(cursor)
+        cursor += frames_per_recording[rec_id]
+
+    accuracy_per_layer: dict[int, float] = {}
+
+    for layer, (X, y) in dataset.items():
+        fold_accuracies: list[float] = []
+
+        for i, rec_id in enumerate(recording_ids):
+            start = offsets[i]
+            end   = start + frames_per_recording[rec_id]
+
+            # Hold out recording i; train on everything else
+            X_test  = X[start:end]
+            y_test  = y[start:end]
+            X_train = np.concatenate([X[:start], X[end:]], axis=0)
+            y_train = np.concatenate([y[:start], y[end:]], axis=0)
+
+            probe, scaler, pca = train_probe_single_layer(
+                X_train, y_train,
+                pca_components=pca_components,
+                random_state=random_state,
+            )
+
+            # Apply the same scaler and PCA fitted on train to the test set
+            X_test_scaled = scaler.transform(X_test)
+            X_test_pca    = pca.transform(X_test_scaled)
+
+            fold_accuracies.append(probe.score(X_test_pca, y_test))
+
+        accuracy_per_layer[layer] = float(np.mean(fold_accuracies))
+
+    return accuracy_per_layer
 
 
 # ---------------------------------------------------------------------------
@@ -112,4 +158,37 @@ def train_all_layers(
         "n_recordings": int,
     }
     """
-    ...
+    # Infer n_classes from the label set of any layer (all layers share the same y)
+    any_y = next(iter(dataset.values()))[1]
+    n_classes = int(len(np.unique(any_y)))
+    chance_level = 1.0 / n_classes
+
+    print(
+        f"train_all_layers: {len(recording_ids)} recordings, "
+        f"{n_classes} classes, chance={chance_level:.3f}",
+        flush=True,
+    )
+
+    accuracy_per_layer = loro_cross_validate(
+        dataset=dataset,
+        recording_ids=recording_ids,
+        frames_per_recording=frames_per_recording,
+        pca_components=pca_components,
+        random_state=random_state,
+    )
+
+    # Print a quick per-layer accuracy table for immediate inspection
+    print(f"\n{'Layer':>6}  {'Accuracy':>9}  {'vs chance':>10}")
+    print("-" * 30)
+    for layer in sorted(accuracy_per_layer):
+        acc = accuracy_per_layer[layer]
+        delta = acc - chance_level
+        label = "embedding" if layer == 0 else f"layer {layer:>2}"
+        print(f"{label:>9}  {acc:>8.1%}  {delta:>+9.1%}")
+
+    return {
+        "accuracy_per_layer": accuracy_per_layer,
+        "chance_level": chance_level,
+        "n_classes": n_classes,
+        "n_recordings": len(recording_ids),
+    }

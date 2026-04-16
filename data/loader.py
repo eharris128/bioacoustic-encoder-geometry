@@ -199,12 +199,13 @@ def _audio_from_hf_item(item: dict, target_sr: int = 16000) -> torch.Tensor:
 
 
 # ---------------------------------------------------------------------------
-# Core activation extraction (13 layers)
+# Core activation 
+# extraction (13 layers)
 # ---------------------------------------------------------------------------
 
 def extract_all_layers(
     model,
-    audio: torch.Tensor,
+    audio: torch.Tensor,  
     max_frames: int = DEFAULT_MAX_FRAMES_LOCAL,
     rng: np.random.Generator | None = None,
     mode: str = "raw",
@@ -509,8 +510,7 @@ def build_naturelm_dataset(
     Parameters
     ----------
     model                 : loaded AVES model
-    source_dataset        : whitelist of source_dataset values, e.g. ["xeno-canto"].
-                            None = no filter.
+    source_dataset        : whitelist of source_dataset values, 
     class_filter          : ordered list of taxonomic class names for multiclass probes,
                             e.g. ["Aves", "Mammalia", "Amphibia"]. Label = list index.
                             None = no filter.
