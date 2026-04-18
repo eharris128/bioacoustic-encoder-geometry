@@ -2,6 +2,42 @@
 
 Exploratory interpretability research on [AVES/BirdAVES](https://github.com/earthspecies/aves), a HuBERT-based self-supervised transformer for animal vocalizations (Earth Species Project).
 
+## Reference materials
+
+- Roadmap PDF: [references/roadmaps/aves2_interp_roadmap.pdf](references/roadmaps/aves2_interp_roadmap.pdf)
+- Raphael result screenshot 1: [references/raphael_results/raphael_result_2026-04-11_142344.png](references/raphael_results/raphael_result_2026-04-11_142344.png)
+- Raphael result screenshot 2: [references/raphael_results/raphael_result_2026-04-11_142359.png](references/raphael_results/raphael_result_2026-04-11_142359.png)
+- Raphael result screenshot 3: [references/raphael_results/raphael_result_2026-04-11_142425.png](references/raphael_results/raphael_result_2026-04-11_142425.png)
+- Raphael result screenshot 4: [references/raphael_results/raphael_result_2026-04-11_142434.png](references/raphael_results/raphael_result_2026-04-11_142434.png)
+
+## Roadmap Part 1 Pilot
+
+The current pilot for roadmap part 1 uses the four ESP AVES2 EAT model repos against
+`EarthSpeciesProject/NatureLM-audio-training`, stratified by `source_dataset`.
+
+- Manifest builder: `sample_naturelm_by_source.py`
+- Activation extractor: `collect_esp_aves2_activations.py`
+- Frozen `100/source_dataset` pilot manifest: `artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl`
+- Raw activation shards live under `artifacts/roadmap_part1/<manifest_id>/<model>/` and should stay out of git.
+
+Current extraction flow:
+
+```bash
+# Build a frozen manifest by source_dataset
+python sample_naturelm_by_source.py --samples_per_source 100
+
+# Collect residual-stream activations for the two working supervised EAT checkpoints
+python collect_esp_aves2_activations.py \
+  --manifest artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl \
+  --models sl_eat_all_ssl_all,sl_eat_bio_ssl_all
+```
+
+Notes:
+- Each extracted sample produces a `(13, 513, 768)` tensor: embedding state plus post-layer outputs for transformer blocks `0..11`.
+- The manifest stores exact global row indices so extraction can fetch audio through the Hugging Face dataset viewer backend without rescanning the full dataset.
+- The roadmap scripts require network access to Hugging Face for Parquet metadata, checkpoint downloads, and presigned audio asset fetches.
+- As of 2026-04-18, `esp-aves2-eat-all` and `esp-aves2-eat-bio` on Hugging Face expose placeholder safetensors files with zero tensors, so the extractor fails fast on those two until upstream weights are fixed.
+
 ## What we've done so far
 
 ### 1. Layer representation analysis (`explore_layers.py`)
@@ -112,6 +148,7 @@ source venv/bin/activate
 # CPU-only PyTorch (use the default pip install torch for GPU)
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install esp-aves torchcodec matplotlib scikit-learn
+pip install duckdb transformers safetensors timm requests
 
 # Clone AVES repo for configs and example audio
 git clone https://github.com/earthspecies/aves.git

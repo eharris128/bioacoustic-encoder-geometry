@@ -1,5 +1,13 @@
 # Open Questions
 
+## Reference Materials
+
+- Roadmap PDF: [references/roadmaps/aves2_interp_roadmap.pdf](references/roadmaps/aves2_interp_roadmap.pdf)
+- Raphael result screenshot 1: [references/raphael_results/raphael_result_2026-04-11_142344.png](references/raphael_results/raphael_result_2026-04-11_142344.png)
+- Raphael result screenshot 2: [references/raphael_results/raphael_result_2026-04-11_142359.png](references/raphael_results/raphael_result_2026-04-11_142359.png)
+- Raphael result screenshot 3: [references/raphael_results/raphael_result_2026-04-11_142425.png](references/raphael_results/raphael_result_2026-04-11_142425.png)
+- Raphael result screenshot 4: [references/raphael_results/raphael_result_2026-04-11_142434.png](references/raphael_results/raphael_result_2026-04-11_142434.png)
+
 ## 1. What samples do we want (or not want) from NatureLM-audio-training?
 
 The dataset has 26.4M samples across multiple source datasets and task types. We need to decide what to pull for the activation statistics work.
@@ -77,3 +85,18 @@ The roadmap asks: "Where do we store activations?"
 - Local disk? (fine for prototyping)
 - Shared storage accessible by the team?
 - Format: .npy, .pt, or HDF5?
+
+### Current pilot decision
+
+- Frozen sample manifests live in `artifacts/manifests/`
+- Raw activation shards live in `artifacts/roadmap_part1/<manifest_id>/<model>/shards/`
+- Shards are `.pt` files containing:
+  - `activations`: `(N, 13, 513, 768)` tensors
+  - `samples`: manifest metadata plus extraction metadata (`row_index`, `source_dataset`, `valid_token_count`, etc.)
+- Keep raw activations private and out of git; only commit code, manifests if useful, and summaries
+
+### Current blocker on model coverage
+
+- `EarthSpeciesProject/esp-aves2-sl-eat-bio-ssl-all` and `EarthSpeciesProject/esp-aves2-sl-eat-all-ssl-all` currently load and are usable for extraction
+- `EarthSpeciesProject/esp-aves2-eat-bio` and `EarthSpeciesProject/esp-aves2-eat-all` currently expose placeholder safetensors exports with zero tensors on Hugging Face as of 2026-04-18
+- So the practical pilot is `2` working models now, with code paths ready for all `4` once the upstream `eat_*` repos are fixed

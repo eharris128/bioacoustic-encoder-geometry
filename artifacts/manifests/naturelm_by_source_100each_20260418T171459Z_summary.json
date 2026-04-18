@@ -1,0 +1,31 @@
+{
+  "dataset": "EarthSpeciesProject/NatureLM-audio-training",
+  "config": "NatureLM-audio-training",
+  "split": "train",
+  "parquet_revision": "e98500754629b63dd8d2400c1a20798337da92f5",
+  "samples_per_source": 100,
+  "max_rows_to_scan": 250000,
+  "max_parquet_files": null,
+  "target_sources": [
+    "Animal Sound Archive",
+    "NatureLM",
+    "WavCaps",
+    "Watkins",
+    "Xeno-canto",
+    "iNaturalist"
+  ],
+  "counts_by_source": {
+    "Animal Sound Archive": 100,
+    "NatureLM": 100,
+    "WavCaps": 100,
+    "Watkins": 100,
+    "Xeno-canto": 100,
+    "iNaturalist": 100
+  },
+  "total_records": 600,
+  "rows_scanned": 22500,
+  "parquet_files_scanned": 9,
+  "missing_by_source": {},
+  "manifest_path": "artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl",
+  "created_at_utc": "20260418T171459Z"
+}

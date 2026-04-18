@@ -11,3 +11,5 @@ download_model.sh
 .researchctl/archive/
 .researchctl/workspaces/
 artifacts/runs/
+artifacts/roadmap_part1*/
+artifacts/manifests_smoke/
