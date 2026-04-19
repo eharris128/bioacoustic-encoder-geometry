@@ -1,0 +1,72 @@
+[
+  {
+    "index": 0,
+    "file_name": "XC693334-LS_58842%20Dusky-headed%20brushfinch%20song%20B.flac",
+    "source_dataset": "Xeno-canto",
+    "task": "taxonomic-classification",
+    "output": "Chordata Aves Passeriformes Passerellidae Atlapetes fuscoolivaceus",
+    "duration_s": 31.49,
+    "n_frames": 1574,
+    "species": "Atlapetes fuscoolivaceus",
+    "genus": "Atlapetes",
+    "family": "Passerellidae",
+    "order": "Passeriformes",
+    "class": "Aves"
+  },
+  {
+    "index": 1,
+    "file_name": "XC126939-Tristram%27s_Starling_2.flac",
+    "source_dataset": "Xeno-canto",
+    "task": "species-sci-detection-hard",
+    "output": "Onychognathus tristramii",
+    "duration_s": 12.06,
+    "n_frames": 602,
+    "species": "Onychognathus tristramii",
+    "genus": "Onychognathus",
+    "family": "Sturnidae",
+    "order": "Passeriformes",
+    "class": "Aves"
+  },
+  {
+    "index": 2,
+    "file_name": "530.flac",
+    "source_dataset": "WavCaps",
+    "task": "wavcaps-qa",
+    "output": "A tattoo gun.",
+    "duration_s": 9.7,
+    "n_frames": 484,
+    "species": "",
+    "genus": "",
+    "family": "",
+    "order": "",
+    "class": ""
+  },
+  {
+    "index": 3,
+    "file_name": "keyboard_electronic_023-032-100.wav",
+    "source_dataset": "NatureLM",
+    "task": "nsynth",
+    "output": "keyboard",
+    "duration_s": 2.71,
+    "n_frames": 135,
+    "species": "",
+    "genus": "",
+    "family": "",
+    "order": "",
+    "class": ""
+  },
+  {
+    "index": 4,
+    "file_name": "XC739803-LS_51498%20Yellow-eyed%20Black%20Flycatcher%20duet%20A.flac",
+    "source_dataset": "Xeno-canto",
+    "task": "family-detection",
+    "output": "Muscicapidae",
+    "duration_s": 66.86,
+    "n_frames": 3342,
+    "species": "Melaenornis ardesiacus",
+    "genus": "Melaenornis",
+    "family": "Muscicapidae",
+    "order": "Passeriformes",
+    "class": "Aves"
+  }
+]

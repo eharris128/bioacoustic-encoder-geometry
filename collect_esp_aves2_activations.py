@@ -24,12 +24,11 @@ import argparse
 import io
 import json
 import math
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List
 
-import requests
+import pyarrow.dataset as ds
 import torch
 import torch.nn.functional as F
 import torchaudio
@@ -41,7 +40,6 @@ from transformers import AutoModel
 DATASET_ID = "EarthSpeciesProject/NatureLM-audio-training"
 DATASET_CONFIG = "NatureLM-audio-training"
 DATASET_SPLIT = "train"
-ROWS_API_URL = "https://datasets-server.huggingface.co/rows"
 
 BASE_EAT_MODEL_ID = "worstchan/EAT-base_epoch30_pretrain"
 TARGET_SAMPLE_RATE = 16_000
@@ -53,10 +51,6 @@ TOKENS_PER_SAMPLE = 513
 EMBED_DIM = 768
 NUM_BLOCKS = 12
 DEFAULT_LAYER_NAMES = ["model.pos_drop"] + [f"model.blocks.{i}" for i in range(NUM_BLOCKS)]
-
-REQUEST_TIMEOUT_S = 60
-REQUEST_RETRIES = 4
-REQUEST_RETRY_DELAY_S = 2.0
 
 
 @dataclass(frozen=True)
@@ -185,70 +179,103 @@ def valid_token_count_from_frames(num_frames: int) -> int:
     return 1 + (valid_time_patches * valid_freq_patches)
 
 
-def request_json(session: requests.Session, *, url: str, params: dict | None = None) -> dict:
-    last_error: Exception | None = None
-    for attempt in range(REQUEST_RETRIES):
-        try:
-            response = session.get(url, params=params, timeout=REQUEST_TIMEOUT_S)
-            response.raise_for_status()
-            return response.json()
-        except Exception as exc:  # noqa: BLE001
-            last_error = exc
-            if attempt + 1 == REQUEST_RETRIES:
-                break
-            time.sleep(REQUEST_RETRY_DELAY_S * (attempt + 1))
-    raise RuntimeError(f"Request failed after {REQUEST_RETRIES} attempts: {url}") from last_error
+class ManifestParquetAudioResolver:
+    """Resolve audio bytes from the exact manifest parquet shard and row id."""
 
+    def __init__(self, records: List[dict]) -> None:
+        expected_ids_by_relpath: Dict[str, set[str]] = {}
+        for record in records:
+            relpath = record.get("parquet_relpath") or ""
+            sample_id = record.get("id") or ""
+            if not relpath or not sample_id:
+                continue
+            expected_ids_by_relpath.setdefault(relpath, set()).add(sample_id)
 
-def request_bytes(session: requests.Session, *, url: str) -> bytes:
-    last_error: Exception | None = None
-    for attempt in range(REQUEST_RETRIES):
-        try:
-            response = session.get(url, timeout=REQUEST_TIMEOUT_S)
-            response.raise_for_status()
-            return response.content
-        except Exception as exc:  # noqa: BLE001
-            last_error = exc
-            if attempt + 1 == REQUEST_RETRIES:
-                break
-            time.sleep(REQUEST_RETRY_DELAY_S * (attempt + 1))
-    raise RuntimeError(f"Download failed after {REQUEST_RETRIES} attempts: {url}") from last_error
+        self.expected_ids_by_relpath = expected_ids_by_relpath
+        self.current_relpath: str | None = None
+        self.current_local_path: Path | None = None
+        self.current_rows: Dict[str, dict] = {}
 
+    def _load_relpath(self, record: dict) -> None:
+        relpath = record.get("parquet_relpath") or ""
+        revision = record.get("parquet_revision") or ""
+        sample_id = record.get("id") or ""
+        if not relpath or not revision or not sample_id:
+            raise RuntimeError(f"Manifest record is missing parquet metadata: {record}")
 
-def fetch_dataset_row(session: requests.Session, record: dict) -> dict:
-    payload = request_json(
-        session,
-        url=ROWS_API_URL,
-        params={
-            "dataset": DATASET_ID,
-            "config": DATASET_CONFIG,
-            "split": DATASET_SPLIT,
-            "offset": int(record["row_index"]),
-            "length": 1,
-        },
-    )
-    rows = payload.get("rows") or []
-    if len(rows) != 1:
-        raise RuntimeError(f"Expected one row for row_index={record['row_index']}, got {len(rows)}")
+        expected_ids = sorted(self.expected_ids_by_relpath.get(relpath) or [])
+        if not expected_ids:
+            raise RuntimeError(f"No expected ids registered for parquet shard: {relpath}")
 
-    row = rows[0]["row"]
-    if record.get("id") and row.get("id") != record["id"]:
-        raise RuntimeError(
-            "Manifest row-index mismatch: "
-            f"row_index={record['row_index']} expected id={record['id']} got id={row.get('id')}"
+        local_path = Path(
+            hf_hub_download(
+                repo_id=record.get("dataset") or DATASET_ID,
+                repo_type="dataset",
+                filename=relpath,
+                revision=revision,
+            )
         )
-    return row
+        print(
+            f"  loading manifest parquet {relpath} locally for {len(expected_ids)} expected samples",
+            flush=True,
+        )
 
+        dataset = ds.dataset(str(local_path), format="parquet")
+        table = dataset.to_table(
+            columns=["id", "file_name", "source_dataset", "audio"],
+            filter=ds.field("id").isin(expected_ids),
+        )
+        rows = {item["id"]: item for item in table.to_pylist()}
+        missing_ids = [item_id for item_id in expected_ids if item_id not in rows]
+        if missing_ids:
+            raise RuntimeError(
+                f"Parquet shard {relpath} is missing {len(missing_ids)} manifest ids; "
+                f"first missing id={missing_ids[0]}"
+            )
 
-def fetch_audio_for_record(session: requests.Session, record: dict) -> tuple[torch.Tensor, int, str]:
-    row = fetch_dataset_row(session, record)
-    audio_items = row.get("audio") or []
-    if not audio_items:
-        raise RuntimeError(f"No audio asset returned for row_index={record['row_index']}")
-    audio_url = audio_items[0]["src"]
-    audio_bytes = request_bytes(session, url=audio_url)
-    waveform, sample_rate = torchaudio.load(io.BytesIO(audio_bytes))
-    return ensure_mono(waveform).to(torch.float32), int(sample_rate), audio_url
+        self.current_relpath = relpath
+        self.current_local_path = local_path
+        self.current_rows = rows
+
+    def fetch_audio(self, record: dict) -> tuple[torch.Tensor, int, str, str]:
+        relpath = record.get("parquet_relpath") or ""
+        sample_id = record.get("id") or ""
+        if not relpath or not sample_id:
+            raise RuntimeError(f"Manifest record is missing parquet lookup fields: {record}")
+
+        if relpath != self.current_relpath:
+            self.current_relpath = None
+            self.current_local_path = None
+            self.current_rows = {}
+            self._load_relpath(record)
+
+        row = self.current_rows.get(sample_id)
+        if row is None:
+            raise RuntimeError(f"Could not find sample id={sample_id} in cached parquet rows")
+        if record.get("file_name") and row.get("file_name") != record["file_name"]:
+            raise RuntimeError(
+                f"Parquet id mismatch for {sample_id}: expected file_name={record['file_name']} "
+                f"got {row.get('file_name')}"
+            )
+        if record.get("source_dataset") and row.get("source_dataset") != record["source_dataset"]:
+            raise RuntimeError(
+                f"Parquet source mismatch for {sample_id}: expected source_dataset="
+                f"{record['source_dataset']} got {row.get('source_dataset')}"
+            )
+
+        audio = row.get("audio") or {}
+        audio_bytes = audio.get("bytes")
+        if isinstance(audio_bytes, memoryview):
+            audio_bytes = audio_bytes.tobytes()
+        elif isinstance(audio_bytes, bytearray):
+            audio_bytes = bytes(audio_bytes)
+        if not audio_bytes:
+            raise RuntimeError(f"Parquet row for id={sample_id} does not contain audio bytes")
+
+        audio_path = audio.get("path") or ""
+        waveform, sample_rate = torchaudio.load(io.BytesIO(audio_bytes))
+        local_path = str(self.current_local_path or "")
+        return ensure_mono(waveform).to(torch.float32), int(sample_rate), local_path, audio_path
 
 
 def load_eat_model(model_key: str, device: str) -> torch.nn.Module:
@@ -333,6 +360,69 @@ def flush_shard(
     print(f"  wrote {shard_path} | samples={len(sample_batch)} | shape={tuple(activations.shape)}", flush=True)
 
 
+def scan_existing_shards(shard_dir: Path) -> tuple[set[int], Dict[str, int], int, int]:
+    processed_row_indices: set[int] = set()
+    counts_by_source: Dict[str, int] = {}
+    next_shard_index = 0
+    total_samples = 0
+
+    if not shard_dir.exists():
+        return processed_row_indices, counts_by_source, next_shard_index, total_samples
+
+    shard_paths = sorted(shard_dir.glob("shard_*.pt"))
+    for shard_path in shard_paths:
+        payload = torch.load(shard_path, map_location="cpu", weights_only=False)
+        samples = payload.get("samples") or []
+        for sample in samples:
+            row_index = int(sample["row_index"])
+            processed_row_indices.add(row_index)
+            source_dataset = sample.get("source_dataset") or ""
+            counts_by_source[source_dataset] = counts_by_source.get(source_dataset, 0) + 1
+            total_samples += 1
+
+        try:
+            shard_num = int(shard_path.stem.split("_")[-1])
+            next_shard_index = max(next_shard_index, shard_num + 1)
+        except ValueError:
+            continue
+
+    return processed_row_indices, counts_by_source, next_shard_index, total_samples
+
+
+def write_summary(
+    *,
+    summary_path: Path,
+    args: argparse.Namespace,
+    manifest_id: str,
+    spec: ModelSpec,
+    model_key: str,
+    total_samples: int,
+    counts_by_source: Dict[str, int],
+) -> None:
+    summary = {
+        "manifest_path": str(args.manifest),
+        "manifest_id": manifest_id,
+        "dataset": DATASET_ID,
+        "config": DATASET_CONFIG,
+        "split": DATASET_SPLIT,
+        "data_access": "manifest parquet shards via hf_hub_download + pyarrow dataset filter",
+        "model_key": model_key,
+        "hf_repo": spec.hf_repo,
+        "checkpoint_filename": spec.checkpoint_filename,
+        "total_samples": total_samples,
+        "counts_by_source": counts_by_source,
+        "layer_names": DEFAULT_LAYER_NAMES,
+        "activation_shape_per_sample": [13, TOKENS_PER_SAMPLE, EMBED_DIM],
+        "dtype": args.dtype,
+        "window_selection": args.window_selection,
+        "window_duration_s": WINDOW_DURATION_S,
+        "shard_size": args.shard_size,
+    }
+    with summary_path.open("w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"Saved summary to {summary_path}", flush=True)
+
+
 def collect_for_model(
     model_key: str,
     records: List[dict],
@@ -349,22 +439,44 @@ def collect_for_model(
         return
 
     shard_dir.mkdir(parents=True, exist_ok=True)
-    model = load_eat_model(model_key, args.device)
-    hooks, hook_outputs = register_hooks(model, DEFAULT_LAYER_NAMES)
-    session = requests.Session()
-
     target_dtype = torch.float16 if args.dtype == "float16" else torch.float32
     target_num_samples = int(TARGET_SAMPLE_RATE * WINDOW_DURATION_S)
 
+    processed_row_indices, counts_by_source, shard_index, total_samples = scan_existing_shards(shard_dir)
+    if processed_row_indices:
+        print(
+            (
+                f"Resuming {model_key}: found {total_samples} saved samples across "
+                f"{shard_index} shard(s)."
+            ),
+            flush=True,
+        )
+    records_to_process = [record for record in records if int(record["row_index"]) not in processed_row_indices]
+    if not records_to_process:
+        print(f"No remaining records for {model_key}; all manifest rows already have saved shards.", flush=True)
+        write_summary(
+            summary_path=summary_path,
+            args=args,
+            manifest_id=manifest_id,
+            spec=spec,
+            model_key=model_key,
+            total_samples=total_samples,
+            counts_by_source=counts_by_source,
+        )
+        return
+
+    audio_resolver = ManifestParquetAudioResolver(records_to_process)
+    model = load_eat_model(model_key, args.device)
+    hooks, hook_outputs = register_hooks(model, DEFAULT_LAYER_NAMES)
+
     activation_batch: List[torch.Tensor] = []
     sample_batch: List[dict] = []
-    shard_index = 0
-    total_samples = 0
-    counts_by_source: Dict[str, int] = {}
 
     try:
-        for manifest_record in records:
-            waveform, sample_rate, audio_url = fetch_audio_for_record(session, manifest_record)
+        for manifest_record in records_to_process:
+            waveform, sample_rate, parquet_local_path, audio_asset_path = audio_resolver.fetch_audio(
+                manifest_record
+            )
             if sample_rate != TARGET_SAMPLE_RATE:
                 waveform = torchaudio.functional.resample(waveform, sample_rate, TARGET_SAMPLE_RATE)
             waveform = crop_window(
@@ -402,7 +514,9 @@ def collect_for_model(
             sample_record = dict(manifest_record)
             sample_record.update(
                 {
-                    "audio_asset_url": audio_url,
+                    "audio_data_access": "manifest_parquet",
+                    "audio_asset_path": audio_asset_path,
+                    "audio_parquet_local_path": parquet_local_path,
                     "window_selection": args.window_selection,
                     "window_duration_s": WINDOW_DURATION_S,
                     "effective_sample_rate": TARGET_SAMPLE_RATE,
@@ -439,6 +553,19 @@ def collect_for_model(
                 activation_batch = []
                 sample_batch = []
 
+    except Exception:
+        if activation_batch:
+            flush_shard(
+                shard_dir=shard_dir,
+                shard_index=shard_index,
+                activation_batch=activation_batch,
+                sample_batch=sample_batch,
+                model_key=model_key,
+                dtype=target_dtype,
+            )
+            print(f"Saved partial shard before aborting {model_key}.", flush=True)
+        raise
+    else:
         if activation_batch:
             flush_shard(
                 shard_dir=shard_dir,
@@ -449,30 +576,16 @@ def collect_for_model(
                 dtype=target_dtype,
             )
 
-        summary = {
-            "manifest_path": str(args.manifest),
-            "manifest_id": manifest_id,
-            "dataset": DATASET_ID,
-            "config": DATASET_CONFIG,
-            "split": DATASET_SPLIT,
-            "data_access": "datasets-server rows endpoint + presigned audio assets",
-            "model_key": model_key,
-            "hf_repo": spec.hf_repo,
-            "checkpoint_filename": spec.checkpoint_filename,
-            "total_samples": total_samples,
-            "counts_by_source": counts_by_source,
-            "layer_names": DEFAULT_LAYER_NAMES,
-            "activation_shape_per_sample": [13, TOKENS_PER_SAMPLE, EMBED_DIM],
-            "dtype": args.dtype,
-            "window_selection": args.window_selection,
-            "window_duration_s": WINDOW_DURATION_S,
-            "shard_size": args.shard_size,
-        }
-        with summary_path.open("w") as f:
-            json.dump(summary, f, indent=2)
-        print(f"Saved summary to {summary_path}", flush=True)
+        write_summary(
+            summary_path=summary_path,
+            args=args,
+            manifest_id=manifest_id,
+            spec=spec,
+            model_key=model_key,
+            total_samples=total_samples,
+            counts_by_source=counts_by_source,
+        )
     finally:
-        session.close()
         for hook in hooks.values():
             hook.remove()
 
