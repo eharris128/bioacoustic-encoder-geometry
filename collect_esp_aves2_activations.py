@@ -278,6 +278,35 @@ class ManifestParquetAudioResolver:
         return ensure_mono(waveform).to(torch.float32), int(sample_rate), local_path, audio_path
 
 
+def _remap_checkpoint_keys(state: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    # ESP-AVES2 ships the EAT backbone in two checkpoint families that need
+    # different remapping to the AutoModel-flat namespace:
+    #   sl-eat-*-ssl-all: keys live under `backbone.model.*` plus a
+    #     `classifier.*` head from the downstream fine-tune.
+    #   eat-* (data2vec/EAT pretraining): bare `blocks.*` keys for the shared
+    #     transformer body, plus a fairseq-style `modality_encoders.IMAGE.*`
+    #     sub-tree that holds the audio (mel-as-2D-patches) input pathway.
+    #     The `decoder.*` branch is reconstruction-only and unused for
+    #     activation extraction.
+    out: Dict[str, torch.Tensor] = {}
+    for key, value in state.items():
+        if key.startswith("classifier."):
+            continue
+        cleaned = key.removeprefix("backbone.")
+        if cleaned.startswith("modality_encoders.IMAGE."):
+            sub = cleaned[len("modality_encoders.IMAGE.") :]
+            if sub.startswith("decoder."):
+                continue
+            if sub.startswith("context_encoder.norm."):
+                cleaned = "pre_norm." + sub[len("context_encoder.norm.") :]
+            else:
+                cleaned = sub
+        if not cleaned.startswith("model."):
+            cleaned = "model." + cleaned
+        out[cleaned] = value
+    return out
+
+
 def load_eat_model(model_key: str, device: str) -> torch.nn.Module:
     spec = MODEL_SPECS[model_key]
     model = AutoModel.from_pretrained(BASE_EAT_MODEL_ID, trust_remote_code=True).to(device)
@@ -296,25 +325,17 @@ def load_eat_model(model_key: str, device: str) -> torch.nn.Module:
             "appears to have an empty safetensors export."
         )
 
-    cleaned_state = {}
-    for key, value in state.items():
-        if key.startswith("classifier."):
-            continue
-        cleaned_key = key.removeprefix("backbone.")
-        cleaned_state[cleaned_key] = value
+    cleaned_state = _remap_checkpoint_keys(state)
 
     incompatible = model.load_state_dict(cleaned_state, strict=False)
-    unexpected = [k for k in incompatible.unexpected_keys if not k.startswith("classifier.")]
-    if unexpected:
-        raise RuntimeError(f"Unexpected checkpoint keys for {model_key}: {unexpected[:10]}")
-
-    significant_missing = [
-        key
-        for key in incompatible.missing_keys
-        if not key.startswith("classifier.")
-    ]
-    if significant_missing:
-        raise RuntimeError(f"Missing checkpoint keys for {model_key}: {significant_missing[:10]}")
+    if incompatible.unexpected_keys:
+        raise RuntimeError(
+            f"Unexpected checkpoint keys for {model_key}: {incompatible.unexpected_keys[:10]}"
+        )
+    if incompatible.missing_keys:
+        raise RuntimeError(
+            f"Missing checkpoint keys for {model_key}: {incompatible.missing_keys[:10]}"
+        )
 
     model.eval()
     return model
