@@ -1,0 +1,601 @@
+row_index,id,file_name,source_dataset,task,output,valid_token_count,fbank_frames_before_pad
+0,345526af-20c5-437b-8741-e197ac6511ed,XC693334-LS_58842%20Dusky-headed%20brushfinch%20song%20B.flac,Xeno-canto,taxonomic-classification,Chordata Aves Passeriformes Passerellidae Atlapetes fuscoolivaceus,505,998
+1,e605b07a-87dd-4723-b812-f84b781c9583,XC126939-Tristram%27s_Starling_2.flac,Xeno-canto,species-sci-detection-hard,Onychognathus tristramii,505,998
+2,61fc36ad-03d6-4171-97fe-5c67821ec6de,530.flac,WavCaps,wavcaps-qa,A tattoo gun.,489,968
+3,67961220-1a93-4cce-84c6-cbe1bf6aa1bb,keyboard_electronic_023-032-100.wav,NatureLM,nsynth,keyboard,137,269
+4,5bf599ed-dfa6-41c7-918b-ae6e2f8e4113,XC739803-LS_51498%20Yellow-eyed%20Black%20Flycatcher%20duet%20A.flac,Xeno-canto,family-detection,Muscicapidae,505,998
+5,4d1f5da3-4aa7-4381-9949-f9d4ea9bc7fa,XC682803-5999-4004024-4438.flac,Xeno-canto,taxonomic-detection,"Chordata Aves Passeriformes Corvidae Pica pica, Chordata Aves Passeriformes Fringillidae Fringilla coelebs",505,998
+6,a7f4feca-c0a2-4598-b8a1-c508590d0f31,XC717693-Willow%20Warbler%20%2B%20Wren_Song_Mizen%20Head_15.04.22_A%2B.flac,Xeno-canto,genus-detection,"Phylloscopus, Troglodytes",505,998
+7,ba79dda8-f0de-4b2a-8947-c1e7feeb58c9,SSW_269_20170819_120014Z.016_007.wav,NatureLM,species-common-options-detection,None,505,998
+8,3a5b71f7-0fda-4a9f-b693-0327aba0b306,SSW_055_20170325_060004Z.055_010.wav,NatureLM,species-common-simple-detection,None,505,998
+9,3e92ca8d-18a6-48b2-84d9-e18b76078e72,SSW_039_20170311_110008Z.031_001.wav,NatureLM,species-sci-simple-detection,None,505,998
+10,53030683-a00c-4303-92c8-5b104a41ad3c,9750402P.flac,Watkins,genus-detection,None,89,175
+11,16eaecc1-b297-4dce-bfc4-c5ca0d7fa81d,20ta010j_2.0053_209c0108_-2.0053.wav,NatureLM,species-common-simple-detection,None,489,964
+12,5781d7a0-80ea-4be6-9fd1-9f6be373528b,XC385115-T15.flac,Xeno-canto,species-common-multiple-detection,"Great Tit, Eurasian Blue Tit, Eurasian Collared-Dove, European Starling",505,998
+13,b795d66d-a577-4b68-bdc1-810b5ff09052,NorthernParula1.flac,Xeno-canto,call-type,song,505,998
+14,519199ae-1ece-451d-a8e7-16b393685585,256179.flac,iNaturalist,species-common-multiple-detection,Red-eyed Vireo,505,998
+15,484018cf-99a4-4310-a58a-e24c1f9b8d5f,SSW_023_20170304_130010Z.036_009.wav,NatureLM,species-sci-options-detection,None,505,998
+16,3035d7a6-e138-4057-baad-948b688a26d7,XC744361-Bachstelze%2C%20Gesang%20%209.4.2015%20%20Egelsee%2C%20Badesteg%20%20%E2%80%8F%E2%80%8E15_33_24%20VOC_150409-2357.flac,Xeno-canto,species-sci-detection-random,None,505,998
+17,639d5440-7745-4fbf-943b-2393c1a84ddf,324452.flac,iNaturalist,genus-detection,Megascops,505,998
+18,833701b2-b661-4fbd-868f-07dda09059bf,XC486056-Xiphocolaptes%20promerohyporhynchus.flac,Xeno-canto,caption-common,"Song, and flight call of a strong-billed woodcreeper",505,998
+19,ac225d2d-bbcb-4f39-8b85-7916f5d8bb94,XC402294-sturnus%20unicolor%203%20chapatales%2024-09-2017.flac,Xeno-canto,species-common-detection-hard,Spotless Starling,505,998
+20,60f1c1bf-2a2e-4c1e-8172-522d397fe80c,XC301952-160131_011%20CANG%20parvipes%204x.flac,Xeno-canto,species-common-classification-context,Canada Goose,313,620
+21,b0e33146-8f91-4aad-b6d1-9fcd7e68e54c,mallet_acoustic_030-087-050.wav,NatureLM,nsynth,This sound is fast decaying.,201,398
+22,9ad7750b-961c-4b95-b04c-2d69c8bce4d2,XC541270-Pied%20Currawong%2009_05_34.flac,Xeno-canto,species-sci-options-classification,Strepera graculina,505,998
+23,5083d955-24a1-4232-97a5-37e945c676c7,XC360007-LS104552%20Black%20Magpie%20calls%20B.flac,Xeno-canto,species-sci-classification-context,Platysmurus aterrimus,505,998
+24,12556fc5-c2b5-4020-81f4-c47d4c1466e0,XC688225-Goudvink%2020211021%201000%201a.flac,Xeno-canto,caption-scientific,"Subsong, call, and flight call of a pyrrhula pyrrhula with background sounds from acanthis flammea.",505,998
+25,8dc6aec6-51c4-46f8-bb35-238eacb223aa,310057.flac,iNaturalist,species-common-classification,Laughing Kookaburra,345,686
+26,b74d3698-d9ed-4c8c-8ab7-b0621a69de4e,XC682514-stenkn%C3%A4ck%20lock.flac,Xeno-canto,caption-common-structured,Call of a hawfinch sex: undetermined. life stage: uncertain.,97,188
+27,1d8220c1-f1dd-44b6-89a6-8f73c01aefb3,192125.flac,iNaturalist,species-sci-detection-hard,Porzana porzana,321,632
+28,75cd84ad-8c2c-4333-88c9-7327f5e3bf23,XC420018-Common%20Bulbul%20on%202.9.17%20at%20Twinga%20Lodge%20TZ%20at%207.10%20for%20.10%20_0448.flac,Xeno-canto,species-common-detection-random,None,505,998
+29,eeb57353-2d95-488d-af35-add7e1716977,XC282848-HETH_3-4-15_1330_MtOrd1.flac,Xeno-canto,species-common-classification-context,Hermit Thrush,105,195
+30,8798231a-34af-4290-b188-7ddff7e20192,126066.flac,iNaturalist,family-detection,Passerellidae,153,292
+31,ff86a050-6731-45f6-b0df-0d4be52cd0d8,XC473849-Prinia_socialis_nom-FL%20calls%20Above%20Munnar%204Feb16%208.40am%20LS119888a.flac,Xeno-canto,species-sci-classification-context,Prinia socialis,505,998
+32,c91eeae1-4c7c-4d46-bf6a-b81bf31ae996,513777.flac,WavCaps,wavcaps-qa,Searching for candies.,209,408
+33,6fada358-92cd-4951-bf39-973c259f45e1,7801800C.flac,Watkins,species-common-classification-context,Bowhead Whale,145,273
+34,04092021-10de-4665-8246-c41d4c842ae9,XC426300-Limpkin%20Corkscrew%20B%2012-21-17.flac,Xeno-canto,species-common-classification-context,Limpkin,505,998
+35,a195c3dd-a998-41d3-b4a8-6cda1e490504,Brown_Lory_Nimbokrang_2009-07-12.flac,Xeno-canto,caption-scientific-rich,Sound of a chalcopsitta duivenbodei with background sounds from aceros plicatus.,505,998
+36,a4cde161-5f7d-46b0-815d-a5e906e24984,598299.flac,iNaturalist,family-classification,Hylidae,505,998
+37,94635d4d-9fc1-4914-a6c7-2f5f7b03f1e0,172953.flac,iNaturalist,species-sci-classification-context,Erithacus rubecula,417,832
+38,cb3a6d2d-fb28-4c97-bca8-4f9b108de2f2,79776.flac,iNaturalist,species-sci-classification,Leiothlypis celata,505,998
+39,d461f4d6-1645-4ea6-a593-3aec461ed21d,XC563725-PROW%20%28M2%29%20-%20Song%20-%20Les%20Arends%20-%202020-05-31%2006_48.flac,Xeno-canto,species-sci-options-classification,Protonotaria citrea,505,998
+40,878a679a-f3c4-4277-aae3-b31c9a59c959,XC714401-Grey-winged%20Blackbird%20female%20Call.flac,Xeno-canto,species-sci-detection-random,Turdus boulboul,505,998
+41,f939687a-741c-44f2-b128-f146b4fa529b,XC308832-westMexicanChachalaca-Col-Mx150809.flac,Xeno-canto,taxonomic-classification,Chordata Aves Galliformes Cracidae Ortalis poliocephala,505,998
+42,fa147d6d-55ca-4786-8269-3a37cb17ce28,XC625226-Carrion%20Crow%200649.flac,Xeno-canto,family-classification,Corvidae,281,548
+43,64b22456-5987-405b-a70e-7acd9c8604c9,20090914_WayKambas_BandedPitta_song.flac,Xeno-canto,species-sci-options-classification,Hydrornis irena,505,998
+44,2c99f75f-28e7-4df9-b7eb-5ca44807bedd,XC193967-THRUSH_Swainson%27s_c%20ustulatus%20Fish%20Creek%2C%20Hyder%20AK%20062314%201438.flac,Xeno-canto,animal-instruct,A call note,505,998
+45,28da31b7-3b02-4799-a4d5-4d22351dc633,XC510628-Cranioleuca%20sulphurea_Rio%20Grande_1164.flac,Xeno-canto,call-type,song,505,998
+46,9c91916b-7620-42c6-a2b4-8da3f3bcf140,XC210152-Corythopis_delalandi_14_12_2014_Amparo_SP_RSS.flac,Xeno-canto,taxonomic-detection,None,505,998
+47,c0265934-ab70-410e-a560-21f91e93e762,XC543571-Mino%20kreffti%20kreffti_pcm_191013_06.flac,Xeno-canto,family-classification,Sturnidae,505,998
+48,a32a40cb-43da-4114-9668-455fc632df45,XC226630-Long-billed%20Woodcreeper%20%206212.flac,Xeno-canto,genus-classification,Nasica,505,998
+49,823eb09a-bc66-4ab4-ae43-ec1e805e341b,SSW_070_20170401_100007Z.059_004.wav,NatureLM,species-sci-options-detection,Corvus brachyrhynchos,505,998
+50,99c07b43-3676-4c79-90cb-1c98d412bcca,83084.flac,iNaturalist,species-sci-classification-context,Pelophylax perezi,505,998
+51,f2650314-83b4-4e4b-a1f1-f93edd739272,SgriseicollisLepipuertoMD5track30.flac,Xeno-canto,caption-scientific-simple,Song of a scytalopus griseicollis gilesi,441,879
+52,39c8e491-e1d9-4ab0-97e7-74067bf186b4,259389.flac,iNaturalist,family-detection,None,505,998
+53,1b4e638a-ef28-406c-933d-83aacd20fdfd,XC137559-Cyanomitra_cyanolaema_130404_06.flac,Xeno-canto,taxonomic-detection,None,505,998
+54,68df0cb0-a0af-45df-9066-d7d9424040a9,THRUSH%20Slaty%20%28Andean%29_08_Acambuco_Salta_AR_8OCT05_B%20Lopez-Lanus%20%28BLL%20et%20al%202007%29.flac,Xeno-canto,species-common-multiple-detection,Andean Slaty Thrush,505,998
+55,777045eb-b58b-4bc6-a9ba-900580ff5387,2411%2F15.flac,Xeno-canto,taxonomic-detection,None,505,998
+56,1104888f-75ba-4676-b2f3-7095f601daef,XC740599-ziegenm0439.flac,Xeno-canto,taxonomic-classification,Chordata Aves Caprimulgiformes Caprimulgidae Caprimulgus europaeus,505,998
+57,bf372c58-e740-4020-a974-80d3865f9a60,CARDINAL%20Yellow-billed_05_Otamendi_Campana_Buenos%20Aires_AR_22NOV01_Bernabe%20Lopez-Lanus.flac,Xeno-canto,family-classification,Thraupidae,257,497
+58,ea4a5b95-6574-468a-8c16-7df995c2ec25,XC413916-RedBelliedPitta_Talaud_072217_song.flac,Xeno-canto,caption-common,Song of a philippine pitta,505,998
+59,ccb717f9-b508-4e72-a149-36bfa38d9f13,541272.flac,WavCaps,caption-general-domain,Trainers inside a washing machine are making noise for a full cycle.,505,998
+60,d92bc3a1-d8f7-439c-a0c3-2ab375d2c753,2836_5355_000026_0000002.wav,NatureLM,speech_nspeakers,2,257,507
+61,6cbd2eb7-b791-452c-95d5-750947a379bd,27686.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Gruiformes Aramidae Aramus guarauna,281,559
+62,afb37eee-ce7c-4964-9b19-86b9b477797a,A%20Buchfink%20C.flac,Xeno-canto,taxonomic-detection,Chordata Aves Passeriformes Fringillidae Fringilla coelebs,505,998
+63,eb6d9779-2525-4889-8e90-fef798a9e447,XC585592-200829_2330a.flac,Xeno-canto,caption-scientific-rich,"Call, and nocturnal flight call of a tyto alba",457,898
+64,26df3063-fe3c-48d5-9f5b-f1cdd1c39ddd,XC273712-Lance-tailed%20Manakin%20call.flac,Xeno-canto,species-common-detection-hard,None,505,998
+65,e9077a18-b2ee-444e-b7ce-d9ce1a4344fd,XC427482-Hylocharis%20sapphirina%20CONFIRMAR-Caio%20Brito-%28Porto%20Seguro-BA%29-BRITO2813.flac,Xeno-canto,species-sci-classification-context,Hylocharis sapphirina,329,643
+66,dfa945a5-d725-4213-8024-e95444d30022,SSW_131_20170506_160014Z.056_012.wav,NatureLM,species-sci-simple-detection,"Spinus tristis, Cardinalis cardinalis",153,298
+67,724ad83d-b8bf-40b4-8871-a63ef9997a2d,80951.flac,iNaturalist,taxonomic-detection,Chordata Aves Passeriformes Parulidae Icteria virens,505,998
+68,22d963f6-b54e-4af3-af09-f900ef4999a3,498419.flac,iNaturalist,species-sci-classification,Lanius collurio,505,998
+69,f2b30269-44ca-4699-a140-8dd03cec428d,XC346690-LS102883%20Pied%20Kingfisher%20call%20B.flac,Xeno-canto,species-common-detection-hard,None,505,998
+70,c83f22a7-fcf1-4fae-be2b-63a0e713fef5,XC703174-DUFL_2021-06-04_Surveyor_Campground_Klamath_County_OR_0834.flac,Xeno-canto,lifestage,adult,505,998
+71,64fee962-59fe-4b32-a996-53a8f0a500b0,XC256074-THRASHE_Cur-bil_c_dawn%20OPCNM%20500m%20082012%200531.flac,Xeno-canto,call-type,call,505,998
+72,767551e6-6aee-488f-b86a-934001633d21,XC684441-Cape%20Batis%204%20note%20call.flac,Xeno-canto,species-common-classification-context,Cape Batis,505,998
+73,f65f769a-7e0f-4a8f-b4c5-407c13a0f3df,XC276215-Muscigralla_brevicauda54cut2A.flac,Xeno-canto,species-common-detection-random,None,505,998
+74,0f5c174e-631e-443c-b669-913d7a104b82,413492.flac,WavCaps,caption-general-domain,Steps on snow.,505,998
+75,e3017e9b-8dde-411e-9379-397d61190dfa,XC280005-LS_56546%20FALSE%20BAY%20AREA%20Scarlet-chested%20Sunbird%20call%20A.flac,Xeno-canto,species-common-multiple-detection,Scarlet-chested Sunbird,505,998
+76,a012a70a-7061-4d78-99d2-95bfe85811eb,519647.flac,iNaturalist,species-sci-classification-context,Dryocopus martius,385,762
+77,d8591970-8835-4997-a360-34765d5f69bf,XC428511-Campylorhamphus%20falcularius3.flac,Xeno-canto,species-sci-detection-hard,Campylorhamphus falcularius,505,998
+78,22d30df2-b2ec-4bb6-94ed-143303dce57e,631192.flac,iNaturalist,family-detection,Tyrannidae,505,998
+79,45b9c5c2-0617-4b49-845c-ba57e4de9d37,XC698221-RECAV0_210507_1017_lim026_alarme.flac,Xeno-canto,family-classification,Recurvirostridae,505,998
+80,b93a5062-b645-4972-afa0-64f8b52eaf7b,46680.flac,iNaturalist,species-common-multiple-detection,Common Chiffchaff,505,998
+81,f73d5b6c-4e75-4706-8879-10efb3f9dd6d,XC590985-Megascops%20roraimae%20MNML%20092020.flac,Xeno-canto,family-classification,Strigidae,505,998
+82,3c561d9f-faeb-4095-a8df-db39c9f90e29,2413%2F27.flac,Xeno-canto,species-taxonomic-classification-context,Chordata Aves Passeriformes Tyrannidae Myiotheretes striaticollis,505,998
+83,5ff1b801-99e2-4468-8d1a-003bc3b04b9b,XC304310-Coppersmith%20Barbet.flac,Xeno-canto,species-common-classification,Coppersmith Barbet,505,998
+84,55b259de-bb5a-430f-b244-4074b68ab8e8,Yyy2Msyv3j5Q.flac,WavCaps,wavcaps-qa,"Cheering, crowd noise, a man speaking, laughter, whoops, and music",505,998
+85,95ee6b95-ab25-4dea-9368-291d38239041,XC499085-190917-100410alveolacinzenta.flac,Xeno-canto,caption-scientific-rich,"Song, call, and flight call of a motacilla cinerea with background sounds from picus sharpei, passer domesticus.",505,998
+86,95692cfb-15bf-4154-972c-e5b56cd998d3,650032.flac,iNaturalist,species-sci-detection-hard,Turdus merula,505,998
+87,d2e93f15-608a-4d0a-95c5-fe87761ced2d,XC139158-Northern%20Puffback%20Manegusha.flac,Xeno-canto,taxonomic-classification,Chordata Aves Passeriformes Malaconotidae Dryoscopus gambensis,505,998
+88,44931f2b-2ab3-4914-8242-05d44c65b572,83_11691_000076_0000044.wav,NatureLM,speech_nspeakers,4,505,998
+89,ce541065-12f5-4555-ad32-64dcb6a2cbd9,XC538724-Indian%20pitta.flac,Xeno-canto,species-taxonomic-classification-context,Chordata Aves Passeriformes Pittidae Pitta brachyura,505,998
+90,880d47c7-4327-42c4-a423-4b34ab155b4b,133566.flac,iNaturalist,species-common-classification,Garden Warbler,505,998
+91,5746276e-db0b-49eb-8508-ac908d8e3677,XC133023-2006022014_Cuculus%20clamosus_Nysvli_F%20DEROUSSEN.flac,Xeno-canto,caption-scientific-simple,Song of a cuculus clamosus,505,998
+92,58256ccf-1484-4797-acd3-15a9751cc3d9,XC157730-Gampsorhynchus-rufulus-FL%20response%20Chidu%20area%2C%20Mishmi%20%207Apr13%207.33am%20LS113820.flac,Xeno-canto,species-common-options-classification,White-hooded Babbler,505,998
+93,9d183521-c0ab-445b-941e-add62ef1a4bb,40452.flac,iNaturalist,taxonomic-detection,Chordata Aves Passeriformes Pnoepygidae Pnoepyga formosana,505,998
+94,831a5856-1d86-4990-b6d0-4647d9d4bbe4,XC218938-Chestnut-fronted%20Macaw%20B%202035.flac,Xeno-canto,caption-common-simple,"Call, and calls of a chestnut-fronted macaw",505,998
+95,cb524d84-593e-4d3b-b733-d8b747ce513c,XC760819-201016_0034-Vattenrall-kattuggla.flac,Xeno-canto,species-common-options-classification,Water Rail,505,998
+96,57ccbcb8-2320-49db-b21a-1b75139f3ee9,115565.flac,iNaturalist,species-common-multiple-detection,Winter Wren,505,998
+97,8bec7a0c-beaf-4a10-adb4-567825faa1cf,XC664893-9%20Saborta%20Warning.flac,Xeno-canto,caption-scientific-structured,Alarm call of a calendulauda sabota sex: undetermined. life stage: adult with background sounds from pycnonotus nigricans.,505,998
+98,768010b4-e17e-48d6-8a0f-02736799380d,XC561638-cho%20hul%20femelle2.flac,Xeno-canto,taxonomic-detection,Chordata Aves Strigiformes Strigidae Strix aluco,505,998
+99,098334ce-c397-4222-8296-8ffca7fae437,194139.flac,iNaturalist,species-common-options-classification,Indigo Bunting,505,998
+100,dfd6cbf9-31a5-4bb6-b123-9f59b3ff4daa,SSW_118_20170429_220023Z.001_008.wav,NatureLM,species-common-options-detection,None,153,298
+101,3cb08433-cebb-4c98-898b-80e54ecb219f,32802.flac,iNaturalist,genus-classification,Junco,505,998
+102,938bd247-c632-47bd-bbe2-f00ed2e54ea8,Serinus_mozambicus_barbatus_20100701_zang_Lake_Bunyonyi_OEG_LS100329egg-z.flac,Xeno-canto,species-sci-detection-random,None,505,998
+103,0f9889a9-b9a6-4e30-8b08-d0242da6a515,410922.flac,iNaturalist,species-sci-classification,Troglodytes aedon,281,557
+104,137895f2-c6ee-406a-9eb4-40e40df36b48,XC413503-Surucua%20variado3%20%28Trogon%20surrucura-OK-OK%29.flac,Xeno-canto,species-common-multiple-detection,"Surucua Trogon, Great Kiskadee",505,998
+105,547a075d-83d1-4019-8116-45f9dcc43c5e,XC422294-Blue-banded%20en%20Blue-headed%20Pitta%202%20260218%20Danum.flac,Xeno-canto,species-common-detection-random,None,505,998
+106,bdc650b9-36d5-47ed-824c-13cca43302ff,SSW_154_20170513_190014Z.028_017.wav,NatureLM,species-common-options-detection,None,153,298
+107,6e6fd995-7fe2-447c-8162-1dc4f2f22e6a,XC699785-29-01-2022%206e24%20Pomba%20asa%20branca%20CARAIBAS.flac,Xeno-canto,taxonomic-detection,Chordata Aves Columbiformes Columbidae Patagioenas picazuro,505,998
+108,c99b124b-07b7-4093-a90b-ffdd2c65a727,684349.flac,iNaturalist,caption-common,The sound of a Rose-breasted Grosbeak high up in the canopy of an elm tree.,505,998
+109,20ba605b-ee08-422c-ba42-f5dcc27d0a22,XC228328-Summer%20Tanager%20A%2015074.flac,Xeno-canto,taxonomic-detection,None,505,998
+110,5e87f433-d182-4e50-9aa9-27922cdcbfd2,XC374312-rossignol%20philomele%20tarerach%2066%20not%20seen%20A.flac,Xeno-canto,caption-common,Song of a common nightingale with background sounds from common cuckoo.,505,998
+111,58d9139e-0f1e-463a-bdf7-0be4801378fd,XC784638-fou-mac-ENC-kerlidic-220123.flac,Xeno-canto,caption-scientific-structured,Nocturnal flight call of a fulica atra sex: undetermined. life stage: adult.,401,792
+112,76dd7bc3-8435-48c0-9f78-d0a3ab3b5b10,YDTngmSh5wnI.wav,NatureLM,open-ended question,"The children’s shouting suggests a playful or excitement element, indicating the setting is family-friendly and further enhances the lively atmosphere.",505,998
+113,2c3c454c-0b4e-46df-92f6-e31c1ddc72e1,XC557317-BlackThroatedGreen.flac,Xeno-canto,species-sci-classification,Setophaga virens,505,998
+114,9b448211-8049-4506-9419-b87c7eb56679,145647.flac,iNaturalist,family-classification,Strigidae,505,998
+115,61b544a0-e4aa-4ae3-b37c-d5f4dab651ec,XC498630-GRACKLE_Gre-tai%20Tepic%20900m%20042519%200707.flac,Xeno-canto,taxonomic-classification,Chordata Aves Passeriformes Icteridae Quiscalus mexicanus,505,998
+116,93113a3a-def3-467f-a6a8-0aea0e83c63e,XC614959-Pipit%20de%20Richard%20Carolles%2012%20nov%2019.flac,Xeno-canto,species-sci-options-classification,Anthus richardi,129,244
+117,24b8e155-3f39-4502-8d6c-ae5b54479f95,XC510190-LS_58313%20Hildebrandt%27s%20Starling%20predawn%20song%20B%20Superb%20Starling%20C%20Slender-tailed%20Nightjar%20C.flac,Xeno-canto,species-common-multiple-detection,Hildebrandt's Starling,505,998
+118,aaa9904c-848a-4384-87b1-240b3b528125,121638.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Accipitriformes Accipitridae Buteo jamaicensis,505,998
+119,1be2c6f6-d8c9-4f70-92e4-b56e5cdea7f0,252028.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Passeriformes Turdidae Catharus ustulatus,177,347
+120,0de51500-38b0-4fba-91d8-4197b88be5c0,XC268851-carduelis%20carduelis%202%20parque%20alamillo%2010-05-2015.flac,Xeno-canto,taxonomic-detection,None,505,998
+121,e5e7833a-1fb9-40f5-a213-ca0cd70e516e,51356.flac,iNaturalist,family-classification,Meliphagidae,505,998
+122,c9baa9ca-fe4c-47a6-914f-639f436c7bfb,SSW_110_20170429_110008Z.012_001.wav,NatureLM,species-common-options-detection,Northern Cardinal,505,998
+123,c51efe87-1e37-4b67-9577-fdc4f81e35dc,COOT%20Red-gartered_02_La%20Verdosa_25%20de%20Mayo_Buenos%20Aires_AR_20OCT01_Bernabe%20Lopez-Lanus.flac,Xeno-canto,genus-detection,None,369,729
+124,93c18450-b237-4c1a-86b8-f3f083500889,151117.flac,iNaturalist,species-common-options-classification,Tufted Titmouse,505,998
+125,6abc42ac-bced-4f8e-bc1b-15d06257a15c,453053.flac,WavCaps,caption-general-domain,An iPhone is vibrating.,353,693
+126,259b6cdc-b252-4618-b2dd-2002b3a00c2b,411097.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Passeriformes Menuridae Menura novaehollandiae,505,998
+127,3afa59d0-3f62-4840-8d8b-166a12870993,XC424030-Myiarchus%20tuberculifer%20R%20Bellavista%2012%2006%202017%203%2055%20pm.flac,Xeno-canto,species-taxonomic-classification-context,Chordata Aves Passeriformes Tyrannidae Myiarchus tuberculifer,505,998
+128,f36d9ee1-b897-4137-91f7-bdf664bc16f7,ICLISTENHF1251_20140904T175409.262Z_038.wav,NatureLM,,None,505,998
+129,b5f12d26-7328-4f78-b2a5-a3f7a363e89f,XC465758-R37_0108%20Coraya%20Wren.flac,Xeno-canto,species-sci-classification-context,Pheugopedius coraya,505,998
+130,ad0c2a47-07f3-4f39-93e4-184b117456c3,XC426860-LS108242%20Black-crested%20Bulbul%20song%20B.flac,Xeno-canto,species-sci-detection-random,Rubigula flaviventris,505,998
+131,0881cd4e-e788-4668-b4b3-a8dce94f0306,156708.flac,iNaturalist,species-sci-classification-context,Pomatorhinus musicus,505,998
+132,e5e0eb45-0623-43f2-9fc6-fdffffdcea69,XC390467-White-throated%20Laughingthrush%2001%20-%2015Dec16%20-%20Sigri%20-%201109.flac,Xeno-canto,genus-classification,Garrulax,505,998
+133,1a705b9e-4b45-4fc0-9ca9-0dc306e7e1e8,SALTATOR%20Golden-billed_17_Putre_I%20Region_CH_4NOV99_Alvaro%20Jaramillo.flac,Xeno-canto,call-type-with-common-name,song,505,998
+134,a50d1daf-2f9a-4f8a-822f-51ad13bbadb4,YIA3Um5JtMqU.wav,NatureLM,open-ended question,"The presence of bees and other insects suggests a buzzing, active environment, potentially near a hive or flower-rich area.",481,945
+135,f56125d7-e8ff-429a-887a-cf6cc7717b3a,XC277200-PODCRI10h40m35s23jul2015%20%282%29.flac,Xeno-canto,species-sci-detection-hard,Podiceps cristatus,505,998
+136,1bff0b95-7210-4a2d-b0f4-8269923f8144,XC504170-26-10-19%2000.07%20Gru%20sopra%20casa%20%28online-audio-converter.com%29.flac,Xeno-canto,species-sci-classification,Grus grus,505,998
+137,c5a97ecb-3eb2-41e8-82fd-ffd90d062fd7,XC684562-vite-vite-de-cabe%C3%A7a-cinza.flac,Xeno-canto,call-type,"song, call",505,998
+138,9c65b9d3-98d4-4d13-a705-94529a1c3241,ICLISTENHF1251_20140404T200459.775Z_051.wav,NatureLM,,None,505,998
+139,09f37e69-9a9c-416b-9c44-86358a8ac40d,XC314241-Unknown%20-%20poss%20gw.flac,Xeno-canto,caption-scientific-simple,Song of a sylvia borin,505,998
+140,6754e8a8-358b-4094-8b60-c013fa7fa5d8,XC773008-170519_01-Buskskv%C3%A4tta-s%C3%A5ngl%C3%A4rka.flac,Xeno-canto,taxonomic-detection,None,505,998
+141,4031dcbb-cf15-4625-8794-0a18eba07430,110409.flac,iNaturalist,species-common-classification-context,Gray Catbird,505,998
+142,f86852f7-a734-4245-a146-857bac1d5a7d,32073.flac,iNaturalist,family-classification,Picidae,505,998
+143,d67a295c-5acf-455b-9e1f-2e7e9b8751f7,XC336055-160409-191944_Cyanistes%20teneriffae%20teneriffae_R.flac,Xeno-canto,genus-classification,Cyanistes,505,998
+144,4bfa106e-19e4-4a55-bee6-bccdae6395f2,XC762905-LS_51891-Common-Newtonia-song-A.flac,Xeno-canto,species-sci-options-classification,Newtonia brunneicauda,505,998
+145,b7f488dd-4a90-46eb-8d15-2e26c469c741,XC646539-Guira%20guira%20Maceio%20AL%20Ilha%20do%20Lisboa%205%20May%202021%20RSS.flac,Xeno-canto,taxonomic-detection,None,505,998
+146,c5fd87a3-5302-492d-bdd6-b742b5cb396b,XC525575-x_IAvH-CSA-5771.flac,Xeno-canto,species-common-classification-context,Great Jacamar,505,998
+147,ae52ec88-e2b5-4711-946a-a4cfefdb67c0,373451.flac,iNaturalist,species-sci-detection-random,Gallinula chloropus,505,998
+148,38b5e494-6ef7-45a6-8bc6-d889803c202f,XC567554-Cannaiola%20verdognola1.flac,Xeno-canto,caption-common-structured,"Song of a marsh warbler sex: male. life stage: adult with background sounds from common cuckoo, eurasian blackcap, common nightingale, common pheasant, common starling.",505,998
+149,cd8055b7-c454-409a-b847-53fca842a0ed,XC629513-MIXPRE-4304.flac,Xeno-canto,taxonomic-classification,Chordata Aves Passeriformes Paridae Parus major,505,998
+150,713a478b-1866-4ec0-9a2a-838d12805843,XC445196-Slaty%20Finch.flac,Xeno-canto,family-detection,Thraupidae,505,998
+151,fda78aee-aa4a-4375-be28-331f005d0297,bass_synthetic_096-033-100.wav,NatureLM,nsynth,191.42499446868896,65,113
+152,e9bef080-ea2f-4a83-a7f9-6c36320a7b9a,XC439825-BECARD_Ros-thr_c_exc%20Uvalama%20400m%20051018%200619.flac,Xeno-canto,family-detection,None,505,998
+153,028bccfe-4580-40cf-9127-7b283908caf5,XC485317-PICCAN%20kaes%20jvk190707.flac,Xeno-canto,species-common-options-classification,Grey-headed Woodpecker,505,998
+154,86ca1665-8ebc-441f-87c0-121b189c432a,XC515437-Mirafra_apiata_nom-FL%20song%2035km%20from%20Skittykloof%2022Oct19%207%2C50am%20LS114806b.flac,Xeno-canto,genus-detection,None,505,998
+155,d4f3df4e-8485-4e95-95ff-f21f6382abfb,XC397510-Fork-tailed%20Drongo%20exc%20SPCA%20dam.flac,Xeno-canto,genus-classification,Dicrurus,505,998
+156,df8cbea6-9ca8-4947-a792-330de6f059e1,XC673485-gul%C3%A4rla%20lock%20ossora%202.flac,Xeno-canto,species-taxonomic-classification-context,Chordata Aves Passeriformes Motacillidae Motacilla tschutschensis,353,694
+157,e9a8ef71-3906-45ac-965e-ccbb132caa6f,641050.flac,iNaturalist,species-common-options-classification,Willow Warbler,169,325
+158,5cc41868-5483-4ea8-a892-062a57d2d7d0,XC715850-St%C3%B6rre%20korsn%C3%A4bb_120.flac,Xeno-canto,species-sci-classification-context,Loxia pytyopsittacus,505,998
+159,7169c1ff-a981-44f1-af84-f41da149eee2,SSW_165_20170603_010000Z.001_003.wav,NatureLM,species-common-simple-detection,None,505,998
+160,a70ec7f2-0aef-4022-b54b-81c81b40d45e,XC591365-Bar-tailed%20godwit%201226.flac,Xeno-canto,family-classification,Scolopacidae,201,398
+161,3c4ce7f6-faf7-4b3c-972d-18a04464be58,XC650670-Cape%20Batis.flac,Xeno-canto,family-detection,Platysteiridae,505,998
+162,da51ccbe-bd84-450c-8e48-a2406a977b60,XC632257-Black-capped%20Pygmy%20Tyrant%20March%2020%202021%20105617%20AM.flac,Xeno-canto,family-detection,None,505,998
+163,21078a26-1dd8-4efa-8db3-29e257096438,463843.flac,iNaturalist,species-sci-classification-context,Cardellina canadensis,201,399
+164,381969a4-254e-46e8-a473-a7aee66653b1,7538_100043_000013_0000012.wav,NatureLM,speech_nspeakers,2,65,124
+165,aad98f44-759a-4a72-9b30-5bf077bef385,Sylvia_communis_Co0060_13_short.flac,Animal Sound Archive,taxonomic-detection,Chordata Aves Passeriformes Sylviidae Sylvia communis,505,998
+167,c0bb22b8-5fe8-4c8b-a13c-f6761abd1665,YLF-070rGEbQ.flac,WavCaps,caption-general-domain,Glass shatters and footsteps are heard.,505,998
+172,8ce5a3bf-5f04-4fc1-86ed-0d193b5d8026,SSW_130_20170506_150010Z.024_010.wav,NatureLM,species-sci-options-detection,None,505,998
+179,85d6b5cf-22c5-466f-86f0-477c494bfff1,619141.flac,iNaturalist,species-common-detection-random,Carolina Wren,505,998
+181,bf8acb2d-b958-4ffb-9feb-9e89583ac4a7,YoZapEQbSCfw.wav,NatureLM,open-ended question,"The boat is likely moving at a high speed, causing significant water splashes and possibly creating a wake behind it.",505,998
+185,dffb3b5f-5441-4242-93d7-259ecc0145fb,686932.flac,iNaturalist,taxonomic-detection,None,505,998
+186,3eebc371-e43d-4382-9075-2c24d5298cb0,SSW_283_20170826_170022Z.047_008.wav,NatureLM,species-common-simple-detection,None,505,998
+187,b3c983b0-8943-45f0-87fd-a09a0469276f,596384.flac,iNaturalist,taxonomic-detection,Chordata Aves Passeriformes Paridae Cyanistes caeruleus,345,683
+189,155b572c-d1b0-4670-83d1-0e0cdaedb625,SSW_020_20170304_070004Z.030_000.wav,NatureLM,species-common-simple-detection,Canada Goose,505,998
+193,eef42577-4f66-40f6-9836-b064082e6cb7,262702.flac,iNaturalist,species-sci-classification-context,Melanerpes carolinus,169,334
+195,44839bec-6e8d-49fa-9e64-c50c2bad3ff5,224489.flac,iNaturalist,genus-classification,Setophaga,177,351
+197,afa092bb-f85d-4a09-9d0e-d1812b9a0227,brass_acoustic_027-065-100.wav,NatureLM,nsynth,1110.566826953888,65,124
+198,d2553af2-6bda-42e6-bcad-633058a3ce05,SSW_250_20170722_130012Z.053_007.wav,NatureLM,species-sci-options-detection,None,505,998
+199,319b430c-7b69-4254-9274-2c98e945fd78,ICLISTENHF1251_20140504T143153.842Z_040.wav,NatureLM,,None,505,998
+200,28ef18c3-ad07-49c8-838c-654ead86d6a9,44018.flac,iNaturalist,species-common-classification,Northern Parula,505,998
+203,a462f272-cffc-4dda-8dd4-055c5d4c89f1,YfEYaxZoQ188.flac,WavCaps,caption-general-domain,Female singing and music is heard.,505,998
+204,0d9f5134-436f-49aa-b1cd-d5ab070e6917,621985.flac,iNaturalist,species-common-options-classification,Streak-chested Antpitta,505,998
+205,77fe7099-9ac9-43e8-97a9-05680b0e60d9,109318.flac,WavCaps,caption-general-domain,Something is outside a house in a garden.,505,998
+206,0831e3b7-8ca8-4d6a-a12a-b1e18ea91aa0,SSW_226_20170701_190013Z.055_005.wav,NatureLM,species-common-simple-detection,None,505,998
+207,477f40d1-81d0-4c61-b971-9cbec7552c96,keyboard_acoustic_012-023-100.wav,NatureLM,nsynth,keyboard,113,224
+208,bf728c91-628d-4477-98ec-1006028bbb0b,274751.flac,WavCaps,wavcaps-qa,A glass bowl makes a sound when struck.,217,430
+212,9576bf10-17fe-4d70-b256-cb074b749282,7816_108621_000010_0000001.wav,NatureLM,speech_nspeakers_short,1,105,198
+215,d90636cf-daa5-4dcf-b0be-a765fd95a5ae,481690.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Passeriformes Fringillidae Fringilla coelebs,409,811
+226,4a918152-129b-4574-95e4-3553c34c17b9,ICLISTENHF1251_20140702T124216.470Z_047.wav,NatureLM,,None,505,998
+227,bd7a882e-95a8-41ad-8400-271e0e80938d,631338.flac,iNaturalist,family-classification,Meliphagidae,505,998
+229,1653e321-adca-400b-81f7-1544730fd523,SSW_117_20170429_210015Z.022_001.wav,NatureLM,species-common-options-detection,None,505,998
+230,5d03780d-6ef4-469f-b2be-7d22b11b8a50,360006.flac,iNaturalist,species-common-options-classification,Northern Mockingbird,505,998
+231,e426f293-f8e3-49bd-82e4-11828c92724e,SSW_149_20170513_140018Z.008_000.wav,NatureLM,species-common-simple-detection,"American Goldfinch, Black-capped Chickadee",505,998
+238,1abc296c-d293-4b87-baf9-4cf214190f7f,67274.flac,NatureLM,caption-general-domain,Water running followed by water spraying as a woman lightly giggles,505,998
+240,6d0d0205-e1eb-4be7-9cb0-94af70279fe2,477774.flac,iNaturalist,species-common-classification,White-throated Sparrow,505,998
+241,629f1648-8d29-4e5a-940e-79eb0703f101,617913.flac,iNaturalist,species-common-multiple-detection,Black-tailed Prairie Dog,505,998
+248,7a64772f-5aed-4ef6-9225-640fa177075a,630291.flac,iNaturalist,species-sci-options-classification,Tadorna ferruginea,345,679
+252,921825f0-e47e-4fdf-8530-bd859edf9048,mallet_acoustic_039-054-075.wav,NatureLM,nsynth,185.0,201,398
+253,73bec562-bea6-4112-97ff-9cd0601c6e2d,464287.flac,iNaturalist,species-sci-options-classification,Fulica atra,433,857
+254,ae81b11d-cdfe-4f8d-8a1d-dc8e0f3249ad,74843.flac,iNaturalist,taxonomic-detection,Chordata Aves Passeriformes Phylloscopidae Phylloscopus collybita,505,998
+255,27d118a4-5eea-4c8b-b3c5-8104d1340887,7698.flac,WavCaps,caption-general-domain,A noise is generating values at 400Hz.,505,998
+256,83465c78-281b-4f56-9a33-ace4ce79838c,97752009.flac,Watkins,taxonomic-detection,None,121,237
+259,0f9fc4b0-9460-4f57-b0f2-53caea61f5bd,SSW_233_20170708_040004Z.044_001.wav,NatureLM,species-common-options-detection,None,153,298
+267,db9da019-9831-4c00-be40-d3e15f86432a,p374_116_mic23.wav,NatureLM,speech_nspeakers,3,273,532
+269,785cba80-d777-4697-8b08-e92f2e65b547,p244_347_mic22.wav,NatureLM,speech_nspeakers,2,105,208
+273,2d5ee0b3-1aa4-426d-bfb4-e10da5f17f85,9778000S.flac,Watkins,species-sci-classification-context,Orcinus orca,65,127
+279,de27cb8b-2eca-49bc-b151-bd77866e897a,153735.flac,WavCaps,caption-general-domain,A cello is playing a note.,209,403
+282,75b42f8b-fe51-4fb1-9ff5-9991b5efe28b,554938.flac,iNaturalist,caption-scientific,Thryothorus ludovicianus,505,998
+285,57b43305-03ba-4a46-9bf2-d67b0b5f6dde,bass_electronic_032-061-100.wav,NatureLM,nsynth,This sound is distorted.,385,763
+290,a25d96e7-6053-4ac1-bda6-4190e11f087a,mallet_acoustic_019-063-127.wav,NatureLM,nsynth,"mallet, guitar, keyboard",289,570
+291,5803bdb6-5da8-4ef6-b641-bd4fb2191b23,636786.flac,iNaturalist,taxonomic-detection,None,505,998
+293,748178b4-01ef-4f66-9fd2-51a426ba901d,keyboard_electronic_000-069-050.wav,NatureLM,nsynth,50,201,398
+294,2d35202a-c249-40f2-9cc6-5beee26338ca,568035.flac,iNaturalist,genus-detection,Poecile,449,892
+297,5bcc80dc-e86e-4931-b089-c181346c44b8,Y9FDzG0xNp5s.flac,WavCaps,caption-general-domain,"Train sounds, including train horns and squealing wheels, are heard.",505,998
+302,19ee1106-5724-4111-afb2-996b9ca09d31,reed_acoustic_026-040-100.wav,NatureLM,nsynth,"This sound is distorted, is fast decaying.",201,398
+308,bf449bc6-4274-497e-bf2e-69d7e1eb6ade,352813.flac,WavCaps,caption-general-domain,Chopper flies by.,505,998
+310,11a02b0f-18bc-490b-ac70-3497b873e273,egg beater.wav,NatureLM,captioning,A slow electronic whir from something like electronic drills is humming in synchrony.,505,998
+312,2978c4d5-2820-4b09-810c-348fc5354dbc,140487.flac,iNaturalist,taxonomic-detection,None,505,998
+313,63a007cc-9ee9-49c3-be39-f4fa346b9776,SSW_225_20170701_180012Z.052_000.wav,NatureLM,species-sci-simple-detection,None,505,998
+314,b254bdc5-fc58-436e-b900-c91f57a34163,128239.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Cuculiformes Cuculidae Coccyzus americanus,193,379
+315,c05844c0-56fc-48b3-af88-dcb87832b238,organ_electronic_072-046-075.wav,NatureLM,nsynth,organ,505,998
+319,de86b4f6-baa5-4086-825e-1536f74d6c9e,281436.flac,iNaturalist,caption-common-simple,Song Thrush,505,998
+320,b11cc9b5-e7e8-4b34-a501-695b1b557ee1,599521.flac,iNaturalist,species-common-classification-context,Woodlark,505,998
+322,3ded9bf0-b19e-4ac8-96a9-4e85662256a8,360176.flac,iNaturalist,species-taxonomic-classification-context,Chordata Aves Passeriformes Fringillidae Spinus pinus,505,998
+323,f29f24f0-c2c8-4ec0-b4e2-e834b051d04a,p229_032_mic22.wav,NatureLM,speech_nspeakers_short,2,105,198
+324,96bb6b75-cd6e-4f93-9c2b-d97b4102b502,1446_122614_000023_0000013.wav,NatureLM,speech_nspeakers,3,241,475
+326,5ca1ab61-6044-4152-9cbf-a35fdd8d3bea,37490.flac,iNaturalist,species-sci-multiple-detection,Prunella modularis,505,998
+328,94bd8912-1b44-4a77-9970-93316905bd53,ICLISTENHF1251_20140901T070408.359Z_006.wav,NatureLM,,None,505,998
+332,61f8d469-5b3b-4379-8200-cb3faf7486a7,7511_102419_000027_0000014.wav,NatureLM,speech_nspeakers,4,257,508
+333,d759aa3d-4cc8-4805-8026-353637682ddf,SSW_140_20170513_040005Z.018_008.wav,NatureLM,species-sci-simple-detection,None,153,298
+339,494ab59a-9fd8-459e-ba68-b37a832bf186,SSW_086_20170408_130009Z.023_007.wav,NatureLM,species-common-simple-detection,"Northern Flicker, Black-capped Chickadee",505,998
+340,3875840e-2bb2-46ec-892f-f5a899131e5f,436532.flac,iNaturalist,species-sci-classification,Piranga olivacea,505,998
+341,50b80e58-3fd9-4eb4-ac4c-71ec3d5101a2,151600.flac,iNaturalist,caption-scientific-simple,Megaceryle alcyon,505,998
+344,aeebffdb-f337-49f7-a052-3a3452f19f8c,keyboard_electronic_026-097-100.wav,NatureLM,nsynth,100,201,398
+349,db664b46-da75-438e-8757-cc5961fb808c,brass_acoustic_060-063-127.wav,NatureLM,nsynth,311.13,201,398
+353,24579bbb-d9ca-4f44-a94a-1a97f096a9f3,429218.flac,iNaturalist,family-classification,Emberizidae,505,998
+354,f8812b4c-ec37-4da0-bb84-b535a2cf20b1,409679.flac,iNaturalist,species-sci-detection-random,None,209,402
+360,3854c209-2d01-4fdf-8938-ecfe26b9698a,572730.flac,iNaturalist,genus-detection,None,505,998
+366,f52ac1e9-3da5-4323-b8be-50154022bdd0,585506.flac,iNaturalist,species-common-classification-context,Grey Francolin,505,998
+367,7a1b65bd-2d5d-4db2-8f2a-bf66b7d9b1dd,bass_synthetic_126-088-050.wav,NatureLM,nsynth,"bass, keyboard",505,998
+368,e3535cd4-4861-4d41-b5c9-6883957c4d3a,mallet_acoustic_020-086-050.wav,NatureLM,nsynth,mallet,201,398
+370,e0ec1be9-dd40-4477-86b4-dc2d74485cb4,123068.flac,iNaturalist,species-common-classification-context,Pacific Wren,505,998
+371,9874db31-1872-4cba-9942-620e986576ed,625811.flac,WavCaps,wavcaps-qa,A tone with high pitched chirping oscillations is ringing out.,57,101
+375,ba915582-8962-485f-861d-84f87cba0e7f,440191.flac,iNaturalist,caption-scientific,Antrostomus vociferus,505,998
+377,ff6b23d4-3697-4b97-9746-ef7bafec7240,ICLISTENHF1251_20141201T104339.106Z_025.wav,NatureLM,,None,505,998
+380,aca533a1-cdcb-4c13-860a-82c92bdde47d,330711.flac,iNaturalist,taxonomic-classification,Chordata Aves Passeriformes Phylloscopidae Phylloscopus trochilus,305,594
+382,7f9ca590-8228-412d-8945-04c2cd22beec,401495.flac,iNaturalist,species-sci-classification-context,Pseudacris crucifer,505,998
+386,96a47dc8-1bdc-4246-a0fc-ba9fb3233336,83035019.flac,Watkins,genus-classification,Stenella,89,161
+390,ac564bbc-2243-4b3d-ae3b-088eaf4e65ff,536618.flac,iNaturalist,species-common-options-classification,Northern Cardinal,505,998
+392,088da057-5719-4d3b-9beb-e6baaec7206f,231495.flac,iNaturalist,caption-common,Rufous-crowned Sparrow,505,998
+393,8a711d06-4747-4a99-bd49-891b9dae40aa,07046113.flac,WavCaps,caption-general-domain,Pigeons are flying out of a coop in a suburban area.,505,998
+397,9575c601-9417-4f6e-b9f6-373c3ac12cf0,189696.flac,iNaturalist,species-common-multiple-detection,House Finch,497,989
+399,8f3ff8f0-9d15-4c7e-bec7-e1b8d9338f96,73001002.flac,Watkins,species-sci-options-classification,Phoca largha,153,298
+402,734c9e30-160b-45a1-8e19-0cdb8bea7327,reed_acoustic_015-086-100.wav,NatureLM,nsynth,"This sound is fast decaying, is percussive.",73,129
+404,516da4a0-75bb-427d-b12d-e4a97dce00f5,guitar_acoustic_028-056-025.wav,NatureLM,nsynth,guitar,505,998
+406,f07da3dc-c385-450d-9ad2-f09f3db64967,15383.flac,iNaturalist,species-common-options-classification,North Island Kākā,505,998
+409,9740dd80-2577-44da-b97e-7c34fe86126e,bass_synthetic_055-090-050.wav,NatureLM,nsynth,"bass, keyboard, brass",153,297
+410,b2636c9f-22f2-410f-9357-4ca5399c2688,74573.flac,iNaturalist,taxonomic-classification,Chordata Aves Passeriformes Oriolidae Sphecotheres vieilloti,505,998
+412,c1aca1af-5595-4d72-a1d8-71c8b4da3fc5,187180.flac,iNaturalist,family-classification,Turdidae,505,998
+413,553090a2-13b2-442c-9013-2f23ebfc492e,299274.flac,iNaturalist,species-common-detection-random,None,505,998
+415,a39e86af-800c-48cb-a4c6-71a747614bd0,ICLISTENHF1251_20141103T235254.811Z_048.wav,NatureLM,,None,505,998
+418,5d08b01d-eae0-478b-8980-7bd94f971b2a,427181.flac,iNaturalist,species-common-options-classification,Eurasian Skylark,505,998
+419,4c60c3b3-9c2b-493b-ab73-a8bb8c34becc,490100.flac,iNaturalist,family-classification,Troglodytidae,265,515
+430,206a5564-2708-48d7-9916-4331c5afb1f0,369128.flac,iNaturalist,taxonomic-detection,None,505,998
+432,4737a6c3-1dbb-44d5-a48e-9efd1a064bee,562852.flac,iNaturalist,species-common-classification-context,Whooper Swan,505,998
+436,bb4acf9c-af4f-4736-b0ce-7f12cf6fdc59,672642.flac,iNaturalist,species-common-classification,Common Redstart,113,213
+437,59b72759-5956-4f4b-8556-c198f6a29b8a,300806.flac,iNaturalist,species-sci-multiple-detection,Tamias striatus,505,998
+439,e54c1d0b-b018-4416-8430-4c8949687ec8,113491.flac,iNaturalist,taxonomic-detection,Chordata Amphibia Anura Bufonidae Rhinella marina,505,998
+440,cac6fff4-a44c-4ec2-9006-4f57e74888ac,449756.flac,iNaturalist,species-common-detection-hard,None,505,998
+443,0e0ba821-15c4-4c34-afa0-05f4be6c4484,335852.flac,iNaturalist,genus-detection,None,369,726
+444,6725007e-7dd3-4060-a13f-56dd2a5b05a1,YNp5CqgFVwsA.wav,NatureLM,open-ended question,"The music and the guitar strumming suggest a live music performance, which is a common event in a theater-like environment. The genre could be rock, blues, or similar.",505,998
+448,4adde8a7-63e6-4948-ac84-031740678e8b,Y5cezddiPBAo.wav,NatureLM,open-ended question,"The generic impact sounds could represent scene changes, cues for different segments, or reactions to live events in the show, which are common occurrences in television productions.",505,998
+449,2e32c005-b583-43d8-8082-0651abd5274f,103506.flac,iNaturalist,caption-scientific-simple,Catharus ustulatus,505,998
+454,1ed8e7c2-6897-4eef-88d6-86845316f6c6,574908.flac,iNaturalist,species-sci-classification-context,Pauropsalta mneme,377,750
+459,edc2bd4a-373c-44a7-a983-ae61dc069128,574372.flac,iNaturalist,species-common-options-classification,Black-bellied Plover,505,998
+467,32004731-1228-4450-a0e2-a9830daba3b7,Tettigonia_viridissima_V1829_25_short.flac,Animal Sound Archive,species-sci-classification-context,Tettigonia viridissima,505,998
+469,eca527eb-183d-4faa-be06-28ce9543b516,670805.flac,iNaturalist,species-common-classification,White-throated Sparrow,505,998
+472,3e6b1f2c-5dca-4c77-8767-eb5394ec2c14,ICLISTENHF1251_20140802T044029.421Z_027.wav,NatureLM,,None,505,998
+476,41a1dfe4-0973-4f09-988a-329ea7cb7cf5,578883.flac,iNaturalist,species-sci-detection-random,None,505,998
+477,1e08a0f4-be9b-4c76-9c4f-4eac81dc1c40,506582.flac,iNaturalist,species-sci-classification-context,Pipistrellus pipistrellus,185,363
+481,a8253011-aeba-4dc5-976d-747589d08931,p278_023_mic22.wav,NatureLM,speech_nspeakers,2,377,752
+483,1293cd47-9853-4299-8887-04fd759ec354,214557.flac,iNaturalist,caption-common,Boreal Chorus Frog,505,998
+487,ab10bc86-469b-430b-b965-2871ca1ac7d0,YM1KvQp2NUq0.flac,WavCaps,caption-general-domain,"Male speech is heard amidst breathing, scraping, rustling, and a chainsaw starting.",505,998
+489,2300faf5-a5a1-415a-9a63-5b3c676620d6,SSW_151_20170513_160021Z.019_007.wav,NatureLM,species-sci-simple-detection,Seiurus aurocapilla,505,998
+490,f771d67a-807c-4ccc-889c-52ec3410553c,269541.flac,iNaturalist,caption-scientific,Thryothorus ludovicianus,473,929
+491,8756b40f-3d0e-4564-bbd3-7c1f25d22bee,651159.flac,iNaturalist,species-sci-detection-random,None,457,909
+494,e8bb0aa3-403a-4067-9710-7430f5cc5024,2654_158744_000004_0000071.wav,NatureLM,speech_nspeakers_short,1,105,198
+495,4edef489-cb27-4c03-9cb3-c895bdf8cfcd,84426.flac,WavCaps,caption-general-domain,"Birds caw and acorns fall, joined by the sounds of a motorcycle.",505,998
+498,52009b8f-bdf0-4108-b0f9-bd2c6ec8f900,241573.flac,iNaturalist,species-common-detection-random,None,425,846
+500,b6a69aa0-7c34-464e-b220-78787c6981ab,Y3BwlstxbnWc.wav,NatureLM,open-ended question,"The sliding door sound suggests the use of automatic door technology, indicating a relatively modern subway train.",505,998
+504,f511ce8c-4765-40fb-9c0b-15a9a81aab27,300754.flac,iNaturalist,species-sci-classification-context,Cacomantis flabelliformis,497,987
+507,1a52c6b0-0b42-49cc-9129-0c5f72051ac5,2204_131732_000041_0000012.wav,NatureLM,speech_nspeakers_short,2,105,198
+508,c478a113-b56d-4473-bbf3-7b4d73aef7d0,98816.flac,iNaturalist,taxonomic-classification,Chordata Aves Passeriformes Parulidae Setophaga americana,505,998
+509,f4f45305-472d-4860-a969-bf0ce7e2923e,ICLISTENHF1251_20141203T103122.076Z_054.wav,NatureLM,,None,505,998
+510,dd80e013-1b6f-46c8-8d4b-120f83f37c95,40co0316_2.397_408a010z_-2.397.wav,NatureLM,species-sci-options-detection,None,497,989
+512,c5494864-94f2-4e0a-9a6d-fbe9a0765227,490788.flac,WavCaps,caption-general-domain,The sound of a tree's leaves moving in the wind.,505,998
+513,c3706938-d8d8-44b1-a8bd-aa6864d3da7f,184391.flac,iNaturalist,species-sci-classification-context,Fringilla coelebs,217,426
+515,f6d0d363-d291-419f-b412-da0737eb9469,235760.flac,iNaturalist,family-detection,Tyrannidae,161,312
+525,28fb5f7c-13d7-4da7-b5c0-6b328dfc19c5,Turdus_merula_Tre_N0165_07_short.flac,Animal Sound Archive,species-common-classification-context,Blackbird,505,998
+528,439d715d-769c-40bb-bd18-70bd9163ee8d,SSW_227_20170701_200015Z.025_010.wav,NatureLM,species-common-options-detection,Eastern Towhee,153,298
+540,c610ab73-a57b-429c-8430-cd1e7f0f4d6c,609353.flac,WavCaps,wavcaps-qa,Someone is hitting a pillow with another pillow.,505,998
+546,76790e0b-a744-48d6-bc93-2757d8e14dba,keyboard_electronic_033-050-025.wav,NatureLM,nsynth,554.6796832704545,57,104
+549,dc422392-cf30-433e-a7f8-2b025801a7f6,SSW_125_20170506_090007Z.056_007.wav,NatureLM,species-sci-simple-detection,Poecile atricapillus,505,998
+550,8907c5d9-aa7f-4a5c-bb11-5d6b184286ed,organ_electronic_034-054-127.wav,NatureLM,nsynth,organ,273,543
+555,6d6f7493-cc30-4b28-8496-f5773be60572,78007027.flac,Watkins,caption-scientific-rich,"A group of at least three Lagenorhynchus acutuss milling and breaching, with audible clicks and whistles.",73,138
+556,ee783ab4-be88-4dfe-a4d0-3aaac85badc5,ICLISTENHF1251_20141202T011144.851Z_027.wav,NatureLM,,None,505,998
+565,0d0efb49-ae03-4f2e-bc0f-c651d9ce9c6a,p244_082_mic24.wav,NatureLM,speech_nspeakers_short,4,97,190
+567,7bca125f-ba28-4934-9681-fa5916444ee5,vocal_synthetic_005-076-050.wav,NatureLM,nsynth,"This sound has a distinctive crunchy sound and presence of many harmonics, has a long release.",201,398
+575,220b8cb1-f1e1-45bf-9267-a9973d9fb438,guitar_synthetic_008-092-100.wav,NatureLM,nsynth,5646.226447591782,65,116
+577,bb721e59-ee82-466f-91d9-19d3586fdfda,ICLISTENHF1251_20140702T183216.535Z_035.wav,NatureLM,,None,505,998
+578,f777a4d8-a73a-4218-8eaa-f1c8b9602384,reed_acoustic_003-034-100.wav,NatureLM,nsynth,reed,505,998
+590,06d39be0-bfce-4c0c-911b-e9c27ef76c76,ICLISTENHF1251_20140901T121408.411Z_018.wav,NatureLM,,None,505,998
+600,8bc5604b-86f2-4126-aafa-934bd8e56386,SSW_246_20170708_220025Z.018_007.wav,NatureLM,species-sci-options-detection,None,153,298
+602,5c4635a9-bbcb-4055-964e-e1a680f94e50,ICLISTENHF1251_20140702T183216.535Z_054.wav,NatureLM,,None,505,998
+608,a19b22fe-babd-46ad-a94b-fb5909db58e1,ICLISTENHF1251_20141004T035246.107Z_002.wav,NatureLM,,None,505,998
+610,1a22ad44-2627-47b2-99f3-bb14e084abd1,37301.flac,WavCaps,wavcaps-qa,A spectral delay plug-in.,137,257
+611,0c742eaa-2cd8-4877-86fe-82f3c03ad414,6696_73296_000017_0000003.wav,NatureLM,speech_nspeakers,3,225,448
+613,f0b0d77a-d521-40eb-91d2-80f715bc274d,vocal_synthetic_006-090-075.wav,NatureLM,nsynth,vocal,169,322
+614,5443139d-7439-4066-8928-850b443c93e9,Y6GmoFefjuHw.wav,NatureLM,open-ended question,"The sequence of sounds could suggest periodic instances of elevated activity or urgency, like a street sale or a traffic situation.",505,998
+615,e5f13262-458c-4221-8024-8c951f461322,guitar_electronic_037-044-127.wav,NatureLM,nsynth,127,201,398
+628,b0a58bc9-8bde-4c3a-8a03-b77511bcfb67,4214_7146_000054_0000021.wav,NatureLM,speech_nspeakers_short,1,49,91
+640,b195ba59-7a66-436b-b9d7-277d58b90f8f,6608400N.flac,Watkins,species-sci-classification,Hydrurga leptonyx,265,515
+649,ba8f95cd-ce04-4060-b948-e0818a6e8999,bass_synthetic_008-055-127.wav,NatureLM,nsynth,"bass, guitar",505,998
+657,56688b9f-09b2-41be-9708-f87b57fd7c3e,Panthera_tigris_S1423_03_short.flac,Animal Sound Archive,species-common-detection-random,Bagh,505,998
+660,aa4a1377-c129-41d2-a6e3-1418dee8a958,SSW_114_20170429_180011Z.047_017.wav,NatureLM,species-common-simple-detection,None,153,298
+665,d29c730a-30c4-4285-9c49-85b0ce36c05b,882_123267_000037_0000011.wav,NatureLM,speech_nspeakers,1,137,264
+669,811f1467-3a96-402f-91b7-9b20956669a7,5601700A.flac,Watkins,taxonomic-detection,Chordata Mammalia Cetacea Balaenidae Eubalaena glacialis,73,129
+671,7ca1f2b1-76b2-4493-9470-b763c1a6f099,guitar_electronic_014-050-075.wav,NatureLM,nsynth,"guitar, guitar",265,525
+680,6b95a6c1-5c50-4060-938d-0d24bbc7f9bf,p288_356_mic12.wav,NatureLM,speech_nspeakers,2,425,839
+683,f466d0cb-9598-4122-86c6-97f876e8ec94,444c020l_0.75853_22go010b_-0.75853.wav,NatureLM,species-common-simple-detection,None,505,998
+686,f0210edb-302b-4538-b9c5-39be5c0c1c9e,Yzat8mWJSJjo.flac,WavCaps,caption-general-domain,Chopping and speech can be heard along with breathing and microphone wind noise.,505,998
+687,b0dc3b3a-53ea-40dc-9f22-c657e4eb4629,SSW_021_20170304_110008Z.045_009.wav,NatureLM,species-common-simple-detection,None,505,998
+691,29bbc1a7-a86c-4e1b-92b0-409d0f220895,209a010i_0.056719_40gc020o_-0.056719.wav,NatureLM,species-sci-options-detection,None,337,658
+692,6728d88a-5871-4171-a98a-0bfe4dab821d,brass_acoustic_001-037-100.wav,NatureLM,nsynth,"brass, organ, bass",505,998
+693,a8bc19d5-57d6-42d9-95ff-9335d32c0b68,bass_synthetic_106-087-127.wav,NatureLM,nsynth,bass,57,103
+755,d4af2244-e48e-40cd-803e-a0e001d3bf19,YP7WjiBsM5rU.flac,WavCaps,caption-general-domain,Women are speaking and laughing while water and background noise is present.,505,998
+784,46b4375d-7993-477a-adfc-315e1eab1617,Fringilla_coelebs_Tre_N0067_06_short.flac,Animal Sound Archive,species-sci-classification-context,Fringilla coelebs,505,998
+815,e4a1ea08-a1ba-4abb-b487-8c4a1f8fe9cd,348629.flac,WavCaps,wavcaps-qa,An egg timer.,353,699
+817,99613f62-eff5-46ae-8b4e-e9ed7d9e9b33,Y2IP8siC6ID0.flac,WavCaps,caption-general-domain,The sound of wind noise from a microphone is heard repeatedly.,505,998
+829,41fcdf68-9418-468c-842d-73340980ab31,369274.flac,WavCaps,caption-general-domain,Someone made a kick.,201,398
+833,ce979d4c-5bd0-4bb2-b7c4-5574e2c906b8,222523.flac,WavCaps,wavcaps-qa,Vocals,289,573
+846,c6c6f5e7-649b-4254-b411-59319ca8461c,Y8oiyVt6-erA.flac,WavCaps,caption-general-domain,"People speak, whistle, and make bird sounds in a noisy environment.",505,998
+892,f6060001-2a4f-4e41-8e24-0aa5b2091834,7900500U.flac,Watkins,genus-classification,Lagenorhynchus,65,126
+913,e6d6174d-1753-4cee-bbba-95ff4a6895d9,57026077.flac,Watkins,taxonomic-classification,Chordata Mammalia Cetacea Delphinidae Delphinus delphis,129,246
+938,8c41264b-bfd3-4c78-aee7-2c5af4087171,Cuculus_canorus_CoMC0004_10_short.flac,Animal Sound Archive,family-detection,None,169,322
+952,bc1ce63c-8a71-48d4-accb-d4e737357b5c,98681.flac,WavCaps,caption-general-domain,Girls sing.,505,998
+973,dfafbd62-794b-4311-9e5c-97ab3b52d596,351293.flac,WavCaps,wavcaps-qa,Sounds in a swimming pool.,505,998
+981,f2cf73c8-1dd2-46c6-88e1-ab9b06bfa3e0,16109.flac,WavCaps,caption-general-domain,"Birds sing and traffic passes, while the wind blows through the trees.",505,998
+1005,341af722-536d-4a37-a23c-9ecb7ba8fa5e,YvMU7ZKY2Eso.flac,WavCaps,wavcaps-qa,Male singing,505,998
+1006,83008977-cdd0-4edb-879d-d83b0f8265b2,YqdexSzEvG74.flac,WavCaps,wavcaps-qa,Mechanisms,505,998
+1007,2b4b5861-d4e4-4146-aa3e-40877b57dbbb,192431.flac,WavCaps,wavcaps-qa,A man with monkeys on chains is roaming the streets.,505,998
+1019,b1ddbe75-ce05-4bdf-b471-3a3a4cd90dbe,Turdus_viscivorus_Kr0047_01_short.flac,Animal Sound Archive,species-common-options-classification,Mistle Thrush,505,998
+1047,ba14f3f1-9bbc-49e1-b02d-ecbef92ea69e,7100101Y.flac,Watkins,species-sci-detection-hard,None,97,188
+1049,6842bdb1-82ce-4b3f-a569-2873f8c02462,7501201J.flac,Watkins,species-sci-detection-hard,None,113,214
+1059,58e4e64e-6933-424d-9672-339d8858c748,578363.flac,WavCaps,caption-general-domain,A sting is being made.,265,513
+1063,b7b307ab-8046-4718-b84e-8afc0fab5c4c,415265.flac,WavCaps,caption-general-domain,"Someone is saying ""Mmm! Tea!"".",153,299
+1064,603159b1-71e0-41ba-a851-7550142042e1,583282.flac,WavCaps,caption-general-domain,Water bubbles pop and gurgle.,505,998
+1107,2c6743e0-1f2b-4301-b342-a51dda940a2f,Fringilla_coelebs_CoMC0006_05_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Aves Passeriformes Fringillidae Fringilla coelebs,505,998
+1120,c0583b5c-c4f6-4f86-811f-be7d6b36a7fc,61022007.flac,Watkins,genus-detection,None,121,235
+1139,addd98ad-4c9e-4346-b94e-d7acba62b818,Y_fKTbfYFQKM.flac,WavCaps,caption-general-domain,"Wind and bird calls mix with human speech, laughter, and ticks.",457,901
+1142,ede654af-061a-4fde-a37d-2e7aeca6f38b,61064003.flac,Watkins,species-common-detection-random,None,161,309
+1143,4e6fa367-6aa5-4c59-8604-3606a781c2ee,6102102E.flac,Watkins,species-sci-detection-random,Pseudorca crassidens,25,48
+1155,1746e44f-cf83-42ae-9b7d-9172738f6454,94009001.flac,Watkins,caption-none-rich,One Short-Finned (Pacific) Pilot Whale whistling with water noise and sonar.,41,69
+1169,360b140a-467d-4a79-ad1b-47b5e696c804,Y7MJJ3L1t2b0.flac,WavCaps,wavcaps-qa,Raindrops falling accompanied by some mechanical sounds.,505,998
+1174,67a7e886-69c4-43a1-8efd-17f57760fdde,8002001I.flac,Watkins,family-classification,Balaenopteridae,81,159
+1181,7a8d6c21-70f8-4648-9e73-0f9cbd980110,9230200N.flac,Watkins,family-detection,None,457,897
+1194,2fb629a3-99cd-4de4-9249-9e60c314b819,70025008.flac,Watkins,species-common-options-classification,Bearded Seal,73,130
+1290,955301c0-f6fa-431a-b3a4-1cd68f0765a5,6400500M.flac,Watkins,species-common-detection-random,None,89,161
+1306,eaf07a39-41f7-4b05-aab0-5d17bf6f8486,331701.flac,WavCaps,caption-general-domain,Water runs quickly.,257,504
+1316,0d3a7844-9043-41b3-b223-2d5feddd119b,Turdus_merula_Co0046_02_short.flac,Animal Sound Archive,taxonomic-detection,None,505,998
+1414,5abe6f6c-25e8-4626-a96b-ac32b84dcb36,166902.flac,WavCaps,wavcaps-qa,A dtmf tone,257,500
+1461,0c699e26-b423-470e-8fb8-b6dfd69d1312,587777.flac,WavCaps,caption-general-domain,Someone is typing on a keyboard.,209,410
+1468,d77eb5be-0fe0-4f49-be3b-3d38e589ebcb,189216.flac,WavCaps,caption-general-domain,Something heavy is being dropped.,281,549
+1478,f1316d54-d38f-4ba1-bac8-a6a0bb9e9dc5,613097.flac,WavCaps,caption-general-domain,An artificially generated sound effect is being created.,57,111
+1500,21bd08a0-fe5a-4c52-a6aa-2c8d9e9494cc,Anthus_trivialis_Co0099_03_short.flac,Animal Sound Archive,taxonomic-detection,None,505,998
+1540,34b24319-dd43-4d26-9f62-89a81a6aa5c5,643611.flac,WavCaps,wavcaps-qa,Someone is tapping an aluminum mug on a table.,129,248
+1551,10d849db-1f13-49f0-bd31-18bfe1078ff5,6400504E.flac,Watkins,caption-common-rich,"A group of at least four Pantropical Spotted Dolphins traveling and vocalizing with clicks and whistles, and background high frequency noise due to equipment limitations, with one individual observed to be harpooned.",505,998
+1564,317d215c-8f3e-4dcf-b792-7faadee5e3cb,07010175.flac,WavCaps,caption-general-domain,Someone is sanding on a wood lathe.,505,998
+1587,62462589-ea0c-4392-8245-43d9e71c317a,568042.flac,WavCaps,wavcaps-qa,Someone slurping a coffee.,57,101
+1598,6dc17cd6-aaa2-4d7d-ad20-251e755ab8ba,YkCEXTnIJwTY.flac,WavCaps,caption-general-domain,"Wind and music play, a man speaks over microphone and wind noise.",505,998
+1609,49b7ec12-b689-468a-8936-e1ed7e5df334,348266.flac,WavCaps,wavcaps-qa,Frogs,505,998
+1612,6b879f0c-009f-4857-a277-213484450959,60026035.flac,Watkins,species-common-classification-context,Killer Whale,281,555
+1644,79041ed9-600d-4c51-a69b-036c29591f23,7100101E.flac,Watkins,family-classification,Physeteridae,153,296
+1645,2476dede-5a2b-4218-bc14-85e32343248b,YcbYZQRz09bc.flac,WavCaps,wavcaps-qa,A passing car and tweeting birds with clicking sounds.,505,998
+1667,eb10f2e6-5813-4711-a733-93643d9e5ee3,97769008.flac,Watkins,species-sci-detection-random,Orcinus orca,145,281
+1672,8ecc4d79-20a5-404d-b8f3-82e18963ba92,66091007.flac,Watkins,species-taxonomic-classification-context,Chordata Mammalia Cetacea Delphinidae Globicephala macrorhynchus,121,228
+1699,c1d6affa-7d4b-447a-a5be-e60126aea021,457617.flac,WavCaps,caption-general-domain,Birds sing. Wind blows. Traffic moves and construction occurs on a side street.,505,998
+1717,7a593dae-8614-49bf-bd6b-2da696a11908,615913.flac,WavCaps,caption-general-domain,Someone is pouring water.,201,388
+1748,8b2034c7-8d72-4a23-9d87-ab5ac194320f,9776100T.flac,Watkins,genus-detection,Orcinus,17,32
+1763,29da94d6-f609-4c27-b0d1-25c256c1a5a3,91010025.flac,Watkins,species-sci-options-classification,Lagenodelphis hosei,505,998
+1764,dff3bdef-5e3d-482f-aeaa-d946ea04f5b4,YGPZhcnRhI-I.flac,WavCaps,wavcaps-qa,There was an explosion and glass shattered.,505,998
+1766,b3260e59-56ec-4753-bc23-c5745b827b81,Garrulus_glandarius_DIG0172_09_short.flac,Animal Sound Archive,taxonomic-classification,Chordata Aves Passeriformes Corvidae Garrulus glandarius,505,998
+1786,b530fe98-7246-4668-9fe3-7b60e81b2b3a,8800505C.flac,Watkins,taxonomic-detection,Chordata Mammalia Carnivora Phocidae Erignathus barbatus,233,464
+1787,80d7d06d-657f-4081-9d73-82283223ef6d,94008050.flac,Watkins,species-sci-classification-context,Globicephala macrorhynchus,65,123
+1851,e5a898e9-0ef6-41ff-b708-fd8070201206,8303501T.flac,Watkins,genus-detection,Stenella,153,299
+1853,001c3789-ff70-4c1f-97d7-b062a60fd962,8353.flac,WavCaps,caption-general-domain,Machines are clicking in the subway.,369,727
+1874,c874c13f-9022-4835-81c1-5c6feeb0cf28,66807.flac,WavCaps,wavcaps-qa,Laser shot with an echo and swirl.,281,554
+1876,4cb81bda-57a7-4289-979a-e57d43be08c6,456855.flac,WavCaps,wavcaps-qa,A clock is ticking and ringing an alarm.,505,998
+1921,728f8fc5-1e66-405d-862a-b29fe12a7b89,Sylvia_curruca_DIG0145_10_short.flac,Animal Sound Archive,species-sci-classification,Sylvia curruca,345,677
+1934,5d597ac2-d173-4861-996c-b45ff61e0ca2,220619.flac,WavCaps,wavcaps-qa,A horror-scream sound.,89,174
+1935,7caca538-5ed9-48f0-ab2d-f53920567e34,86008029.flac,Watkins,caption-none-rich,"Humpback whale making a 1 upsweep call, accompanied by snapping shrimp and rain sounds.",41,78
+1950,158d4590-4027-4935-9bba-4a5283219054,148760.flac,WavCaps,caption-general-domain,Someone is playing a piano as a harp.,505,998
+1965,428c3c18-b3d3-4ded-bbc4-3c8c981f4c79,575785.flac,WavCaps,caption-general-domain,A robotic sound is playing.,249,486
+1985,c8605f4f-0f8c-4c8f-b072-546af742042f,507771.flac,WavCaps,wavcaps-qa,The sound is being made by smacking.,105,203
+2034,7856c895-b7b4-447c-99f6-94a7f867b293,270384.flac,WavCaps,caption-general-domain,A voice is speaking.,161,313
+2055,d1f2999a-36d6-4408-8316-7cddc8ba1a54,YV5HhpNIiAJk.flac,WavCaps,caption-general-domain,"Music, sound effects, and human voice are heard.",505,998
+2061,85c2f34f-234b-4888-92a7-f6fca3f807df,342211.flac,WavCaps,caption-general-domain,Thunderstorm and television play in the background.,505,998
+2072,8a2d83ae-485c-480a-99a2-01a00f830ca1,Ya46fFNSxAXU.flac,WavCaps,wavcaps-qa,"The engine is making knocking, rattling, and idling sounds.",505,998
+2107,9452ad5b-ac41-4a30-afe7-3a8eef57d137,30814.flac,WavCaps,wavcaps-qa,It sounds like a giant sunfish with teeth.,505,998
+2170,bde9fe04-75f8-48a2-b048-9be0b5dbbddd,41731.flac,WavCaps,caption-general-domain,Chimera of church bells and bouncing ping pong ball.,209,412
+2197,1b90b0b0-b80c-453c-b541-20ae49a6f022,5801801D.flac,Watkins,family-classification,Balaenopteridae,305,597
+2206,99213f38-7400-448c-9f64-4a687d0037ef,7700600F.flac,Watkins,species-common-detection-random,None,41,73
+2222,04cfef8f-4a40-4d48-bd98-cbc0771658b0,322546.flac,WavCaps,caption-general-domain,Sound is being made.,145,279
+2244,381b3671-fa9f-4cc9-b6ee-e98b76664620,Y7ojteAGwjaA.flac,WavCaps,caption-general-domain,Mechanisms are heard.,505,998
+2284,ab8c15c5-0118-4e34-adcd-2c13197609ad,YuiwqKoIiykA.flac,WavCaps,caption-general-domain,"Mechanisms are heard, including ratcheting and pawling.",505,998
+2306,de0e29f9-bf9a-4a7a-978d-5a6c19bba1ab,Y8fMnn6coUhQ.flac,WavCaps,caption-general-domain,"A ticking sound is accompanied by music, barking dogs, and doorbells.",505,998
+2342,29a9b322-8b29-454a-a2c2-e527a19063e0,YfXcm7AaOp_8.flac,WavCaps,caption-general-domain,"Music, mechanisms, and a speech synthesizer are heard.",505,998
+2350,7124506c-9392-4b69-9cf9-a7dd620a311d,9400806F.flac,Watkins,taxonomic-detection,None,41,73
+2358,50016737-7c8a-49d0-8ea9-3c9bb3e39007,207687.flac,WavCaps,caption-general-domain,Subway conductor announces train delay.,505,998
+2366,6bffd177-4827-42f4-9690-fa6dc57646ee,79040003.flac,Watkins,species-common-detection-random,None,505,998
+2371,2cbe148e-f24a-4e6f-830e-341ba4e4a0ed,168681.flac,WavCaps,wavcaps-qa,Opening a soda can.,329,656
+2394,74fad971-8614-4838-b32f-0253b26d260f,75003011.flac,Watkins,taxonomic-classification,Chordata Mammalia Cetacea Delphinidae Stenella coeruleoalba,89,162
+2436,2fe68e99-4633-4eb1-be9f-c9e3600b1977,Sylvia_atricapilla_CoMC0018_21_short.flac,Animal Sound Archive,species-sci-detection-hard,Sylvia atricapilla,505,998
+2460,92c769b5-e035-48f6-83da-457810d37445,615348.flac,WavCaps,wavcaps-qa,All styles of hip hop.,481,958
+2528,4617b5a8-a226-4662-b005-5eaa24eb43c3,9500300I.flac,Watkins,taxonomic-classification,Chordata Mammalia Cetacea Delphinidae Pseudorca crassidens,81,152
+2562,029aeed5-40a1-4728-bdb0-c328c4fa78fa,87003005.flac,Watkins,genus-classification,Delphinus,73,140
+2585,c28e91d9-2870-4611-b52e-32d7b7e611cf,Carduelis_carduelis_PF00656_short.flac,Animal Sound Archive,genus-classification,Carduelis,505,998
+2594,e1502208-c3f6-4ddd-b74f-16743dde4b5a,Cervus_elaphus_S1329_07_short.flac,Animal Sound Archive,species-common-classification-context,Barbary Red Deer (barbarus),505,998
+2602,3eb8700d-deaf-4236-b9c6-ed546b74a1ac,431818.flac,WavCaps,wavcaps-qa,Sound is being recorded in a specific type of vehicle.,505,998
+2607,6f080f55-6198-461a-851c-e725bd9a49ab,7703501T.flac,Watkins,family-classification,Delphinidae,97,192
+2635,ceda174c-4f87-42a3-957b-9b1b3c522b15,395777.flac,WavCaps,caption-general-domain,"Metal clangs, grinds, and bangs as it is processed.",505,998
+2671,c8bc412b-e406-4263-9aaa-4bb641db0f2e,YDxptko9c9pQ.flac,WavCaps,caption-general-domain,People shout and race cars speed by with engine revving.,505,998
+2676,681d70f5-83ed-4826-8e82-a4e46abc0606,Turdus_merula_Tre_N0009_05_short.flac,Animal Sound Archive,genus-detection,None,505,998
+2694,eddd07e8-cb3b-4cfc-8cc6-ac958a5a05e9,75012037.flac,Watkins,genus-detection,Globicephala,137,261
+2704,12eb602b-9d55-478e-a006-9818b078a942,9320100X.flac,Watkins,genus-detection,Balaenoptera,289,565
+2707,2825e212-a3f1-438a-8ccf-fa1238a7cd4f,396665.flac,WavCaps,caption-general-domain,Recorded in a forest.,505,998
+2740,c2c02eb7-8ecf-45dc-afa7-de86d9471e5a,114604.flac,WavCaps,wavcaps-qa,A spin-up noise.,505,998
+2748,43f2653f-f5fe-4ac6-8da5-a0adf649c58f,516056.flac,WavCaps,caption-general-domain,It is raining.,505,998
+2766,58d7483b-26c6-4ba7-8443-8bb7da8a48b6,58014023.flac,Watkins,species-sci-detection-random,None,97,186
+2769,4a83a403-767f-4704-ad86-4de96fde1cf8,273996.flac,WavCaps,caption-general-domain,Water flows in a bathroom.,241,472
+2773,5dde818c-06e5-428e-87a2-796c7c12d177,95706.flac,WavCaps,wavcaps-qa,Water is being poured.,489,968
+2797,83519e91-d36c-450c-a1ef-81fb0d84be7a,97767008.flac,Watkins,species-sci-classification,Orcinus orca,113,224
+2804,30f12a77-e10d-46a0-aad9-82fc21de3ded,YBw_M2cdLIN8.flac,WavCaps,caption-general-domain,Mechanisms and men speaking are heard.,505,998
+2830,be261345-80b0-47bd-adce-81706f310468,9220100L.flac,Watkins,genus-classification,Megaptera,89,170
+2837,d1e9b24b-6be9-45cf-87f3-3235f2c09b97,7100801A.flac,Watkins,species-sci-options-classification,Physeter catodon,113,212
+2847,93ee8aaf-1a68-44ea-8984-f77e1da1f0eb,441988.flac,WavCaps,wavcaps-qa,The sound of a cassette recorder.,505,998
+2848,be26c277-712a-4928-b62a-f1ad152919b0,8501206M.flac,Watkins,species-sci-detection-hard,None,89,175
+2865,435b7e86-bb17-4054-b7f0-d71148818b65,Y6CG4tvk9PN0.flac,WavCaps,caption-general-domain,"A man is speaking and singing, water is splashing and tapping, and a sound effect is heard in the background.",505,998
+2886,dd604f70-ca6c-4bd8-8846-f0daf2911753,Y6LNlyOH7dIY.flac,WavCaps,caption-general-domain,A woman is speaking with pig sounds in the background.,505,998
+2899,3e46fc4f-67a1-491b-a1ac-7b2278f3e7fc,Acrocephalus_scirpaceus_DIG0161_58_short.flac,Animal Sound Archive,species-common-options-classification,Common Reed Warbler,505,998
+2933,07db07b0-ad92-4e0e-929f-f39c70a475f4,580488.flac,WavCaps,caption-general-domain,"Door creaks, someone walks by, and cowbell and birds sing.",505,998
+2949,43436410-0b57-4460-b21c-8938a2a17c38,587142.flac,WavCaps,caption-general-domain,A sound is playing with a fade in and fade out.,505,998
+2955,d92bea55-71e6-4a39-8874-cb663e3442b4,859.flac,WavCaps,wavcaps-qa,A quote about soma.,161,315
+2964,0b3c4edd-0b4d-4d9e-a80f-bded96d02348,Y2A9cNdvHr3w.flac,WavCaps,caption-general-domain,An aircraft is heard in the sky.,505,998
+2984,f1bd35c5-1251-4f81-823d-7ebc25b3b167,Neofelis_nebulosa_S0247_01_short.flac,Animal Sound Archive,species-sci-classification,Neofelis nebulosa,505,998
+2986,5e0a04c0-0697-40ed-9589-86f134f540f7,539809.flac,WavCaps,caption-general-domain,The surf is close with gurgles.,505,998
+3034,7ca89421-38e9-45eb-b79a-1676162963f8,YjVGeXnDCiws.flac,WavCaps,wavcaps-qa,A chant being sung with background music.,505,998
+3048,b685cd3f-362a-42e8-bfb7-5d4e2aded2f1,Y1ILADUzj-M0.flac,WavCaps,caption-general-domain,"A man taps, crumples, speaks, and makes unknown sounds while crinkling.",505,998
+3059,df5a0d4f-43e1-4545-86f4-be32f1372790,YHOtQseh7MIM.flac,WavCaps,wavcaps-qa,Computer keyboard sounds and mechanisms.,505,998
+3086,7db7cab8-2351-40a0-8622-3f96bef6287d,Turdus_merula_Tre_N0119_10_short.flac,Animal Sound Archive,species-sci-multiple-detection,Turdus merula,505,998
+3111,a9546f54-1df9-44f4-b38f-d4e47cedb800,07043290.flac,WavCaps,wavcaps-qa,Gun shots,313,609
+3121,a8685ce4-7100-4e8d-aefa-2078a1383694,393180.flac,WavCaps,wavcaps-qa,A piano.,265,513
+3150,74bd235b-aa72-4d69-8b8b-7cee91fc12d7,72007015.flac,Watkins,species-sci-detection-hard,None,137,272
+3171,9e514d40-77bc-4eb9-b079-94d7837be251,360649.flac,WavCaps,caption-general-domain,Someone is peeling and chopping an onion.,505,998
+3180,cc585b0f-2f72-42ab-8d73-f0e3a4c233e5,9400901S.flac,Watkins,taxonomic-detection,Chordata Mammalia Cetacea Delphinidae Globicephala macrorhynchus,73,136
+3184,9fe9049f-3b3d-4f99-9b2e-14d1b2f792d0,YhsmrvZEc_uw.flac,WavCaps,caption-general-domain,A tap is heard rhythmically with music.,505,998
+3198,ef83a0de-3f8b-4457-a334-4a425d70be7b,YGtodrvgjyj0.flac,WavCaps,caption-general-domain,Tools and mechanisms are hammering and speaking with hubbub.,505,998
+3200,505234a4-4b26-41cf-be2a-4b4d9d9d846a,469126.flac,WavCaps,caption-general-domain,A sprinkle of rain falls on a roof while a dog barks and birds chirp.,505,998
+3272,3d3e1887-fc18-4e70-a41e-8ce5b68305d8,63005001.flac,Watkins,genus-detection,None,105,193
+3287,882cd8ad-9001-4ca0-b021-ae74d7aab5a7,7900400L.flac,Watkins,species-sci-classification-context,Lagenorhynchus acutus,137,269
+3329,d11f1efe-91c5-43a3-991d-bc056976381d,7500303T.flac,Watkins,genus-detection,Delphinus,281,547
+3342,c0962a0a-1409-400d-bffb-9bb6e196051a,8600801Q.flac,Watkins,species-common-classification,Humpback Whale,105,200
+3497,8cfe20d9-2b50-4ffa-841b-eb40ff919dbf,Fringilla_coelebs_Co0062_07_short.flac,Animal Sound Archive,species-sci-multiple-detection,Fringilla coelebs,505,998
+3515,e3048473-cd5d-4ce2-9660-f4f6e0515e0d,6102204S.flac,Watkins,caption-scientific,"Multiple Pseudorca crassidenss producing clicks and whistles in a noisy, busy recording.",161,317
+3601,ff5e3f46-ae1d-4ac0-8b4f-5be1adcf3e0b,79040007.flac,Watkins,species-sci-multiple-detection,Balaenoptera acutorostrata,97,190
+3602,58c0f7cb-8dd8-4f84-bfc1-06b858c224dd,Equus_zebra_S0953_04_short.flac,Animal Sound Archive,genus-detection,Equus,345,688
+3606,70a388bb-71e3-41fd-8632-284cfb15fe4c,88006029.flac,Watkins,species-common-multiple-detection,Bowhead Whale,113,212
+3634,ff71a46a-4a12-44ba-a40b-47f08660dba7,61053003.flac,Watkins,family-detection,Balaenopteridae,137,262
+3687,cd1593b5-8364-4ada-9e89-a284f3c63548,9769200H.flac,Watkins,family-detection,Delphinidae,49,83
+3837,9e2a87e5-2e7c-4334-94ea-7746d2b45433,66091006.flac,Watkins,species-common-options-classification,Short- Finned( Pacific) Pilot Whale,121,229
+3871,35601063-e03d-4668-a80d-c7f53b5fe230,9101200G.flac,Watkins,family-detection,Delphinidae,25,47
+3948,9db5c2bc-ca9b-4b61-8a85-4c8ebc01f24e,7700800A.flac,Watkins,species-sci-detection-hard,Balaenoptera physalus,73,140
+4250,a0d76e86-2da8-407d-bad7-7b1a48178285,94008055.flac,Watkins,species-sci-classification,Globicephala macrorhynchus,97,190
+4311,9ec4f6a7-7afa-4052-a7b9-2c6171619646,75001010.flac,Watkins,taxonomic-classification,Chordata Mammalia Cetacea Delphinidae Lagenorhynchus acutus,89,173
+4316,f8f940fe-9cd3-41c3-a0d0-0c8f0b5f677a,Anthus_trivialis_Co0088_01_short.flac,Animal Sound Archive,species-sci-options-classification,Anthus trivialis,505,998
+4331,b1b82430-988c-4b1b-b442-4cdb17d5bb6b,6403100G.flac,Watkins,species-sci-detection-hard,Orcinus orca,105,208
+4382,b1e2de20-3eab-47b3-9d2d-6c6b9c0d5e80,9002708R.flac,Watkins,genus-classification,Stenella,145,274
+4430,f65ebf13-eb73-4fef-b10c-1e0763b14dbc,60026041.flac,Watkins,genus-classification,Orcinus,73,141
+4497,f1dcdae1-9a77-4c65-bf6d-9468dfa301a9,79005004.flac,Watkins,species-sci-detection-hard,Balaenoptera physalus,81,148
+4510,72e8c01f-385e-40fe-a645-c400d2489a71,97750003.flac,Watkins,species-common-classification-context,Killer Whale,89,175
+4591,2cb01763-57e1-4a0e-b795-eae75656a8b1,5702606N.flac,Watkins,species-sci-multiple-detection,Delphinus delphis,97,177
+4596,41d48329-93ff-404a-8678-151bf3fbb2f0,9101203S.flac,Watkins,species-common-classification,Melon Headed Whale,17,19
+4617,78be6796-a469-4ddd-be22-2f4b3e8c1601,56018004.flac,Watkins,species-taxonomic-classification-context,Chordata Mammalia Cetacea Balaenidae Eubalaena glacialis,113,222
+4619,91c2ef47-bd41-4124-945f-8647f2de5788,Fringilla_coelebs_CoMC0004_20_short.flac,Animal Sound Archive,genus-classification,Fringilla,505,998
+4669,a4612c62-b694-4d48-95ea-d4a99b390271,88006019.flac,Watkins,species-taxonomic-classification-context,Chordata Mammalia Carnivora Phocidae Erignathus barbatus,177,351
+4723,65b49b46-ca07-4eca-9386-d47651d297ee,8600801X.flac,Watkins,species-common-classification-context,Humpback Whale,113,209
+4724,6ac3006f-49e7-4d86-9c9b-6c16b3412a8f,8501201S.flac,Watkins,genus-detection,Stenella,49,83
+4748,bebd1a1c-0365-48b5-8c74-c1e3f5dae00b,Turdus_merula_Tre_N0101_12_short.flac,Animal Sound Archive,genus-classification,Turdus,505,998
+4752,ac0c5ba6-d022-478e-83aa-cd979038f6ce,97781001.flac,Watkins,species-sci-detection-hard,Orcinus orca,81,152
+4781,13145736-ff9f-48ba-901e-eeb040a16495,64055003.flac,Watkins,species-sci-classification,Leptonychotes weddellii,81,147
+4823,4b0cb268-dc0a-4aec-8442-00984f21edeb,7500305J.flac,Watkins,taxonomic-detection,None,65,124
+4825,decbbb99-a8a1-4148-9988-206b6baf183e,5801801M.flac,Watkins,species-taxonomic-classification-context,Chordata Mammalia Cetacea Balaenopteridae Megaptera novaeangliae,465,920
+4844,094e5fd7-f551-496b-811d-f649ad51034c,9776101U.flac,Watkins,species-sci-detection-random,Orcinus orca,65,120
+4850,7611bc32-7e8b-4c6b-beea-38b18ea4ea2c,97766002.flac,Watkins,species-sci-detection-hard,Orcinus orca,89,163
+4890,127d8bc5-ca53-4b42-88fb-677e4e7a3687,9100402F.flac,Watkins,species-sci-classification-context,Globicephala macrorhynchus,145,277
+4915,c82e8a21-181d-451c-a9c4-61b569278c5e,Fringilla_coelebs_Tre_N0067_08_short.flac,Animal Sound Archive,species-sci-detection-hard,None,505,998
+4990,9421a52e-94f1-4c2f-9d14-e4b83fc674fc,97501003.flac,Watkins,family-detection,Delphinidae,57,110
+4998,5393a567-ded0-4b82-939b-af42e7785e10,9777100K.flac,Watkins,family-detection,None,25,47
+5018,5cf424ab-6501-4962-91fd-ba2c0ce38a37,Cervus_elaphus_DIG0117_03_short.flac,Animal Sound Archive,species-sci-classification-context,Cervus elaphus,297,578
+5042,cd88c22f-f94f-47c5-8dd1-c503f28aecaf,57026059.flac,Watkins,species-sci-classification-context,Delphinus delphis,193,373
+5077,c9a2180e-67f3-4154-851d-7b2443469e62,Fringilla_coelebs_V1998_15_short.flac,Animal Sound Archive,caption-common,The sound of a Chaffinch,505,998
+5151,90809c3f-33d3-4579-80c6-698a8313ef17,70014002.flac,Watkins,caption-common,"A Northern Right Whale moaning while feeding, with ship engine noise present.",65,116
+5169,4b17f9cf-5f1c-4881-a0de-b73706f1c147,97782006.flac,Watkins,family-classification,Delphinidae,129,250
+5180,4318866f-89c4-4372-8191-4d541f63fc59,7100201K.flac,Watkins,species-common-classification,Spinner Dolphin,17,25
+5240,e14a85c0-c5f1-4825-b3c7-81761702b692,6609000D.flac,Watkins,species-common-classification-context,Ross Seal,201,391
+5271,bfb4c658-60fe-4494-b8dd-27be5468a25f,75004003.flac,Watkins,genus-detection,None,81,148
+5275,9c17d34a-35fc-4429-8063-a3e45ffc103e,9420104R.flac,Watkins,species-sci-classification-context,Tursiops truncatus,73,135
+5277,7f96d0b2-790e-4b55-b0a3-54c556f61382,8600801I.flac,Watkins,species-common-classification-context,Humpback Whale,505,998
+5282,78062cd0-82e5-4d3f-8cd2-264d9cf7f181,8501206Q.flac,Watkins,species-common-classification-context,Striped Dolphin,97,186
+5432,ef7909ac-f653-4101-a5a8-6a91daf733c1,8700301I.flac,Watkins,caption-scientific-rich,"Five or more Delphinus delphiss bow riding and producing clicks, whistles, and ship background noise.",129,246
+5502,e8d393ca-93d8-43e8-9dfe-19a7a1e203b5,64042004.flac,Watkins,species-common-options-classification,Weddell Seal,505,998
+5592,027a7af8-a39a-4bb5-ad74-04f71a5f5c6f,Polyplectron_bicalcaratum_V2082_17_Spur1_short.flac,Animal Sound Archive,species-common-classification,Burmese Peacock-Pheasant,505,998
+5595,751cc542-ea67-4603-89ee-13334847d68f,Fringilla_coelebs_V2001_13_short.flac,Animal Sound Archive,species-sci-classification,Fringilla coelebs,505,998
+5604,2e99c343-a1d1-4b04-8889-41703e6fe3af,77008006.flac,Watkins,species-sci-detection-random,Balaenoptera physalus,65,121
+5616,d142e6cd-2898-4aeb-a8b0-f54714f1ff85,9420101W.flac,Watkins,species-common-classification-context,Grampus- Risso's Dolphin,41,67
+5641,459165a9-930b-44f1-a137-2b1f7d84fb45,68003001.flac,Watkins,species-taxonomic-classification-context,Chordata Mammalia Carnivora Phocidae Phoca hispida,145,282
+5676,b6612d75-5b6d-4715-a975-3761031d5c3e,Turdus_philomelos_Bru_DAT0011_94_short.flac,Animal Sound Archive,species-common-options-classification,Song Thrush,505,998
+5678,7bbb23b9-1081-4446-bc02-15e2b8d39773,Falco_subbuteo_PF04122_short.flac,Animal Sound Archive,family-classification,Falconidae,505,998
+5787,a01ddadd-e47a-46db-bc20-dd11802ba8d0,61040009.flac,Watkins,species-common-multiple-detection,Fin- Finback Whale,505,998
+5968,455cb9ae-3115-4cca-815f-3923ea00fbbb,Fringilla_coelebs_Tre_N0054_03_short.flac,Animal Sound Archive,species-sci-multiple-detection,Fringilla coelebs,505,998
+6040,ca5412b7-f91a-4648-8827-691e640f6fe4,6107500R.flac,Watkins,species-sci-detection-random,Lagenorhynchus acutus,49,83
+6047,2682a546-fb75-44f4-a8fc-c28ed5581873,6107200P.flac,Watkins,species-sci-detection-random,Lagenorhynchus acutus,97,181
+6052,80b85db8-3e8a-4983-a78b-7f324700cd07,Poecile_montanus_Tre_P0176_02_short.flac,Animal Sound Archive,species-sci-classification-context,Poecile montanus,289,562
+6075,9ed6905c-d8bd-4aa4-a063-32d93a697922,Tamias_sibiricus_S1118_03_short.flac,Animal Sound Archive,species-common-detection-hard,Ardilla listada de Siberia,505,998
+6140,dc8cc74a-2116-49ee-b32f-3629cff1f735,Sylvia_borin_CoMC0005_08_short.flac,Animal Sound Archive,genus-classification,Sylvia,505,998
+6169,e9d74aff-4677-4b88-af8a-f5b59297ef9c,Vulpes_corsac_K0009_03_short.flac,Animal Sound Archive,species-sci-options-classification,Vulpes corsac,505,998
+6245,ef3a448e-9c0e-4dac-86eb-f5dc9a3148c9,Carpodacus_erythrinus_DIG0177_09_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Aves Passeriformes Fringillidae Carpodacus erythrinus,505,998
+6837,ba830332-d4eb-4179-9d72-bbdc5df14ac8,Regulus_regulus_AuMC0283_04_short.flac,Animal Sound Archive,species-common-classification,Goldcrest,505,998
+6929,66229406-8dea-4200-bb06-93e6a063184a,Carpodacus_erythrinus_DIG0177_22_short.flac,Animal Sound Archive,family-classification,Fringillidae,505,998
+7055,ee0cee4f-ba26-4692-97ce-d761e9bd62b4,Acrocephalus_palustris_Bru_DAT0114_36A_short.flac,Animal Sound Archive,species-sci-detection-random,Acrocephalus palustris,505,998
+7228,014b4fb0-db7e-45b3-9c08-2f62590169de,Gracula_religiosa_Lue0100_16_short.flac,Animal Sound Archive,species-common-classification,Common Hill Myna,505,998
+7288,d5a1fc05-301b-482e-9ac9-1e88b8ab4e31,Erithacus_rubecula_Bru_DAT0026_10_short.flac,Animal Sound Archive,species-sci-classification-context,Erithacus rubecula,505,998
+7519,cf7fd664-0699-4561-8e3d-aba7e1e54b90,Zalophus_californianus_V2061_17_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Mammalia Carnivora Otariidae Zalophus californianus,505,998
+7678,cfc2dcde-0fb6-40d5-b3c4-ba7688c24f29,Hippolais_icterina_Co0042_07_short.flac,Animal Sound Archive,species-sci-detection-hard,None,505,998
+7811,2fb3653d-0cd3-4681-a93a-f223ea40c143,Erithacus_rubecula_Tre_N0081_04_short.flac,Animal Sound Archive,species-common-options-classification,European Robin,505,998
+7960,e1a87f3b-4426-4e80-8c16-e9831129d55f,Turdus_merula_Tre_N0044_06_short.flac,Animal Sound Archive,taxonomic-classification,Chordata Aves Passeriformes Turdidae Turdus merula,505,998
+7964,a3bc944e-cd9a-4596-8366-83e16b2c59eb,Puma_concolor_V2010_12_short.flac,Animal Sound Archive,genus-detection,None,505,998
+8258,19cd73ad-bc2c-401c-b204-ebb6ce1d31a9,Turdus_pilaris_Kr0032_06_short.flac,Animal Sound Archive,family-classification,Turdidae,505,998
+8297,74aff17e-1e25-4f7d-ab7a-94d182fd93f8,Acrocephalus_scirpaceus_DIG0135_04_short.flac,Animal Sound Archive,species-sci-classification,Acrocephalus scirpaceus,505,998
+8333,4bf05381-613c-47a2-8e5e-2283517c774f,Parus_major_DIG_0065_05_short.flac,Animal Sound Archive,family-classification,Paridae,505,998
+8439,ad569351-520d-4160-848e-22ad3e775faf,Turdus_merula_DIG0169_15_short.flac,Animal Sound Archive,species-sci-multiple-detection,Turdus merula,505,998
+8699,cb5a8fb8-26ab-4416-83a0-6bcea8798288,Turdus_philomelos_Tre_N0142_03_short.flac,Animal Sound Archive,species-common-options-classification,Song Thrush,505,998
+9312,81dfaead-b89f-4d89-b064-7a9a1ceb1a9e,Certhia_brachydactyla_Kr0030_10_short.flac,Animal Sound Archive,caption-common,The sound of a Short-toed Treecreeper,505,998
+10185,525384eb-a02b-4b97-918b-ff8ff1ec9515,Erithacus_rubecula_Tre_N0038_06_short.flac,Animal Sound Archive,species-common-multiple-detection,European Robin,505,998
+10767,3170a3a4-615e-452f-961b-01226f7947a3,Vulpes_corsac_S0845_09_short.flac,Animal Sound Archive,species-common-classification-context,Corsac,505,998
+10883,d0c5e9c0-8a5b-465f-a3b3-05854c22fefd,Anthus_trivialis_Co0107_01_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Aves Passeriformes Motacillidae Anthus trivialis,505,998
+11180,b38134d1-6007-4834-825b-feadc045c842,Zoothera_dauma_DIG0145_41_short.flac,Animal Sound Archive,genus-detection,Zoothera,345,680
+11221,6f0cbe83-5dc5-40e1-a299-b605bcb96575,Fringilla_coelebs_Tre_N0061_03_short.flac,Animal Sound Archive,species-sci-detection-random,Fringilla coelebs,505,998
+11290,3f8c3cdc-ed60-4385-894f-9c50f5530134,Leptopelis_aubryi_DIG0174_01_short.flac,Animal Sound Archive,species-sci-options-classification,Leptopelis aubryi,257,510
+11360,ce3aee03-a72c-4048-9c83-b4850e37817c,Erithacus_rubecula_Tre_N0147_04_short.flac,Animal Sound Archive,species-common-options-classification,European Robin,505,998
+11422,7a071e9e-762d-4048-9f47-5a8b04b2256f,Colobus_guereza_S0984_08_short.flac,Animal Sound Archive,species-sci-classification-context,Colobus guereza,505,998
+11648,4e291984-19a1-4930-b4fb-bde8fef53e86,Turdus_viscivorus_AuMC0183_28_short.flac,Animal Sound Archive,genus-classification,Turdus,457,907
+12260,8069d73d-dfec-47c4-bb76-72b803c79eae,Parus_major_DIG0003_30_short.flac,Animal Sound Archive,species-sci-multiple-detection,Parus major,505,998
+12435,4510e941-6d22-4c9e-b1b6-da9401692b5c,Picus_viridis_Tre_N0025_03_short.flac,Animal Sound Archive,family-detection,None,305,599
+12603,ed590401-687c-4716-a86c-d6efa0f636db,Cervus_elaphus_S1316_04_short.flac,Animal Sound Archive,species-sci-options-classification,Cervus elaphus,505,998
+13279,859b749f-3461-45e8-8fa7-3036ad79e1ca,Ptilinopus_pulchellus_V2082_06_short.flac,Animal Sound Archive,species-common-options-classification,Beautiful Fruit Dove,505,998
+13568,0c8237a6-ffcf-40f2-8a78-e054ac2d0feb,Erithacus_rubecula_Bru_DAT0026_04_short.flac,Animal Sound Archive,species-sci-multiple-detection,Erithacus rubecula,505,998
+14196,bc7066a6-0752-45e7-93b2-6b60d22a07ff,Fringilla_coelebs_Tre_N0060_02_short.flac,Animal Sound Archive,species-sci-classification,Fringilla coelebs,505,998
+14444,8afcf96d-c949-4449-8bdd-d28c57251208,Turdus_philomelos_AuMC0183_07_short.flac,Animal Sound Archive,species-common-detection-random,Song Thrush,505,998
+14554,4c8133b5-5da7-42d7-b6c5-114a1072d6ef,Sitta_europaea_Co0149_21_short.flac,Animal Sound Archive,taxonomic-classification,Chordata Aves Passeriformes Sittidae Sitta europaea,505,998
+15064,74df051c-9d73-445d-acfc-fe6e10310472,Spheniscus_humboldti_V2106_08_short.flac,Animal Sound Archive,species-sci-classification,Spheniscus humboldti,505,998
+15076,508f4e6b-fe79-4fe0-addc-fd2ae26c033f,Tringa_totanus_V0522_13_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Aves Charadriiformes Scolopacidae Tringa totanus,417,829
+15081,f787e5e8-fe60-4d0f-b3f7-4d712545a1c2,Canis_latrans_DIG0101_16_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Mammalia Carnivora Canidae Canis latrans,505,998
+15179,f6262b3c-18ba-489c-b8de-b8d1fb800224,Turdus_pilaris_DIG0056_10_short.flac,Animal Sound Archive,species-common-classification,Fieldfare,225,439
+15187,fb804c43-73ee-47fe-927b-60b1d3513150,Tyto_alba_V2095_11_short.flac,Animal Sound Archive,caption-common-simple,The sound of a Barn Owl,505,998
+15586,5b83a91b-962c-42bf-8117-27467395860e,Fulica_atra_V1542_17_short.flac,Animal Sound Archive,caption-common,The sound of a Coot,81,147
+15748,5b9f94ad-0b40-48e4-9678-451dbca6408c,Anthus_trivialis_Co0104_04_short.flac,Animal Sound Archive,caption-scientific-simple,The sound of a Anthus trivialis,505,998
+15821,d6424b36-824b-4dae-82bd-b76d3c2c0ab6,Uncia_uncia_S0747_01_short.flac,Animal Sound Archive,family-classification,Felidae,505,998
+15862,ae83334a-b8f8-4434-a290-2eab52738840,Parus_major_Tre_N0062_06_short.flac,Animal Sound Archive,species-sci-classification,Parus major,505,998
+15903,fb6ff418-4b29-4fd3-9165-7fb85d534815,Alauda_arvensis_DIG0054_13_short.flac,Animal Sound Archive,species-common-multiple-detection,Eurasian Skylark,505,998
+15928,51af16a8-a238-4ae9-8bb9-fed4813d9042,Sylvia_nisoria_Co0163_16_short.flac,Animal Sound Archive,species-common-detection-random,None,505,998
+16538,dd37da80-cf46-4309-ade6-7ac871535dc0,Strix_aluco_DIG0080_02_short.flac,Animal Sound Archive,caption-scientific,The sound of a Strix aluco,441,878
+16600,b7c7b37a-1e32-4ea4-868c-5ecc41f2b65e,Anthus_trivialis_Co0088_03_short.flac,Animal Sound Archive,species-common-options-classification,Brown Tree-Pipit,505,998
+16615,55cfa116-32aa-41e2-a25d-1c57634e3bb8,Pipistrellus_pipistrellus_DIG0141_29_short.flac,Animal Sound Archive,caption-scientific-simple,The sound of a Pipistrellus pipistrellus,409,810
+16643,7f3dfdb2-be02-4783-8c2a-c7cc337a4ef2,Emberiza_citrinella_AuMC0283_03_short.flac,Animal Sound Archive,species-common-classification,Eurasian Yellow Bunting,505,998
+16869,582d2768-f926-4b45-92dc-a7e50d7486ee,Spheniscus_humboldti_V2080_04_short.flac,Animal Sound Archive,genus-classification,Spheniscus,505,998
+16960,b587d813-d483-4978-bd9c-0d72b25e7f96,Fringilla_coelebs_DIG0160_03_short.flac,Animal Sound Archive,species-sci-multiple-detection,Fringilla coelebs,505,998
+17121,7d80ff34-a9d9-48e3-8941-cdac4ef9ff4d,Turdus_merula_Tre_N0087_03_short.flac,Animal Sound Archive,species-sci-classification,Turdus merula,505,998
+17349,23ac7c30-21ed-4ae6-996c-726a5f0294da,Parus_major_CoMC0001_25_short.flac,Animal Sound Archive,species-common-classification-context,Great Tit,505,998
+17560,22503022-c50a-4748-a52e-4e305b3ef32b,Coccothraustes_coccothraustes_PF00848_short.flac,Animal Sound Archive,species-common-classification-context,Hawfinch,505,998
+17845,8be4f6d7-ee20-4ab3-a774-639c460618d1,Emberiza_citrinella_DIG0060_04_short.flac,Animal Sound Archive,species-sci-options-classification,Emberiza citrinella,505,998
+18809,b6dd8de9-0f80-4331-b654-453e435bccb9,Porzana_parva_DIG0118_33_short.flac,Animal Sound Archive,species-sci-options-classification,Porzana parva,505,998
+19159,90429448-7441-4693-90b1-4796d9ac96ac,Sylvia_nisoria_DIG0169_27_short.flac,Animal Sound Archive,genus-detection,Sylvia,505,998
+19220,d98d86f8-c04b-49cc-8f88-33d220ee592e,Picus_canus_CoMC0001_17_short.flac,Animal Sound Archive,taxonomic-detection,Chordata Aves Piciformes Picidae Picus canus,97,181
+19307,eecf3af9-d33c-463c-b096-35e5948b8c7b,Luscinia_megarhynchos_DIG0178_04_short.flac,Animal Sound Archive,species-taxonomic-classification-context,Chordata Aves Passeriformes Muscicapidae Luscinia megarhynchos,505,998
+19953,39ed068b-a96d-40ee-baae-ea54742c441c,Parus_major_Tre_N0011_03_short.flac,Animal Sound Archive,species-common-detection-random,Great Tit,505,998
+19968,a40f19b2-83c4-48e2-9bfb-5dc7eadd29b1,Tringa_nebularia_Kr0005_12_short.flac,Animal Sound Archive,family-classification,Scolopacidae,505,998
+19985,e1d5391b-891b-4195-b991-97f690f75ded,Nucifraga_caryocatactes_CoMC0036_10_short.flac,Animal Sound Archive,species-sci-classification,Nucifraga caryocatactes,505,998
+19996,e264d864-405b-4617-8f83-0834ad28556d,Pseudeos_fuscata_V2010_03_short.flac,Animal Sound Archive,caption-scientific,The sound of a Pseudeos fuscata,505,998
+20059,2525ff9e-0a02-4843-a89c-f40ce0bdcece,Canis_lupus_f_familiaris_S1458_16_short.flac,Animal Sound Archive,species-common-classification,Arctic Wolf,505,998
