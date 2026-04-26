@@ -57,27 +57,24 @@ The dataset has 26.4M samples across multiple source datasets and task types. We
 
 ## 2. Which AVES models to compare?
 
-The roadmap mentions "the 4 transformer models." These are the 4 original AVES models, all HuBERT-base (12 layers, 768-dim, ~95M params), differing only in training data:
+### Decision (2026-04-26): scope is the ESP-AVES2 `eat` family only
 
-| Model | Training Data | Hours | Download |
-|-------|--------------|-------|----------|
-| aves-base-core | FSD50K + AudioSet core | 153 | `storage.googleapis.com/esp-public-files/ported_aves/aves-base-core.torchaudio.pt` |
-| aves-base-bio | core + animal-focused AudioSet/VGGSound | 360 | `storage.googleapis.com/esp-public-files/ported_aves/aves-base-bio.torchaudio.pt` |
-| aves-base-nonbio | core + non-animal AudioSet/VGGSound | 360 | `storage.googleapis.com/esp-public-files/ported_aves/aves-base-nonbio.torchaudio.pt` |
-| aves-base-all | core + all AudioSet/VGGSound | 5,054 | `storage.googleapis.com/esp-public-files/ported_aves/aves-base-all.torchaudio.pt` |
+The four target models for the roadmap pilot are all ESP-AVES2 (HuBERT-base architecture, 12 layers, 768-dim) on Hugging Face under `EarthSpeciesProject/`:
 
-Currently only `aves-base-all` is downloaded locally. Need to download the other 3 (~360MB each).
+| Model (HF repo) | Status as of 2026-04-26 |
+|---|---|
+| `esp-aves2-eat-all` | re-published 2026-04-20, ~370 MB safetensors (was zero-tensor placeholder on 2026-04-18) |
+| `esp-aves2-eat-bio` | re-published 2026-04-20, ~370 MB safetensors (was zero-tensor placeholder on 2026-04-18) |
+| `esp-aves2-sl-eat-all-ssl-all` | working since 2026-04-18, cached locally |
+| `esp-aves2-sl-eat-bio-ssl-all` | working since 2026-04-18, cached locally |
 
-Config files exist locally for `aves-base-all`. The same config should work for all 4 (identical architecture). Confirm with mentor.
+The placeholder issue is tracked by [earthspecies/avex#181](https://github.com/earthspecies/avex/issues/181) / fixed by [PR #183](https://github.com/earthspecies/avex/pull/183). The PR itself was still open as of 2026-04-22, but the corrected safetensors were re-uploaded to HF on 2026-04-20 ahead of the merge — no client-side patch is required.
 
-### Also available (not in roadmap scope)
-- **BirdAVES-biox-base** — 12 layers, 768-dim, trained on bio + Xeno-canto (2,570 hr)
-- **BirdAVES-biox-large** — 24 layers, 1024-dim, 316M params
-- **BirdAVES-bioxn-large** — 24 layers, 1024-dim, + iNaturalist data
+### Out of scope for this pilot
+- **Original AVES** (`aves-base-core/bio/nonbio/all`, the legacy torchaudio `.pt` checkpoints under `storage.googleapis.com/esp-public-files/ported_aves/`). `aves-base-all` and `aves-base-nonbio` happen to be on disk under `models/` from earlier exploratory work, but they are not part of the ESP-AVES2 comparison.
+- **BirdAVES** (`biox-base`, `biox-large`, `bioxn-large`).
 
-### Open questions
-- Do we include BirdAVES models or stick to the original 4?
-- Should we download all models to the A10 instance to save local disk?
+Revisit only if the ESP-AVES2 `eat` sweep raises a question that requires comparing against the legacy training recipes.
 
 ## 3. Storage for activations
 
@@ -95,8 +92,7 @@ The roadmap asks: "Where do we store activations?"
   - `samples`: manifest metadata plus extraction metadata (`row_index`, `source_dataset`, `valid_token_count`, etc.)
 - Keep raw activations private and out of git; only commit code, manifests if useful, and summaries
 
-### Current blocker on model coverage
+### Model coverage status
 
-- `EarthSpeciesProject/esp-aves2-sl-eat-bio-ssl-all` and `EarthSpeciesProject/esp-aves2-sl-eat-all-ssl-all` currently load and are usable for extraction
-- `EarthSpeciesProject/esp-aves2-eat-bio` and `EarthSpeciesProject/esp-aves2-eat-all` currently expose placeholder safetensors exports with zero tensors on Hugging Face as of 2026-04-18
-- So the practical pilot is `2` working models now, with code paths ready for all `4` once the upstream `eat_*` repos are fixed
+- `esp-aves2-sl-eat-bio-ssl-all` and `esp-aves2-sl-eat-all-ssl-all` — load and extract since 2026-04-18.
+- `esp-aves2-eat-bio` and `esp-aves2-eat-all` — re-uploaded to HF on 2026-04-20 with non-empty safetensors (~370 MB each). Pulling into local cache on 2026-04-26 to verify end-to-end. All four `eat`-family models are in scope; see Section 2 for the explicit decision.

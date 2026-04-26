@@ -1,0 +1,21 @@
+{
+  "run_dir": "artifacts/roadmap_part1/naturelm_by_source_100each_20260418T171459Z",
+  "model_a": "sl_eat_all_ssl_all",
+  "model_b": "sl_eat_bio_ssl_all",
+  "layer_names": [
+    "model.pos_drop",
+    "model.blocks.0",
+    "model.blocks.1",
+    "model.blocks.2",
+    "model.blocks.3",
+    "model.blocks.4",
+    "model.blocks.5",
+    "model.blocks.6",
+    "model.blocks.7",
+    "model.blocks.8",
+    "model.blocks.9",
+    "model.blocks.10",
+    "model.blocks.11"
+  ],
+  "pca_layer": 11
+}
