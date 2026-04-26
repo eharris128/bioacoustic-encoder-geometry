@@ -1,0 +1,417 @@
+model,layer_idx,source_dataset,n_samples,effective_rank
+eat_all,0,Animal Sound Archive,100,2.847936353437166
+eat_all,0,NatureLM,100,2.839832821416689
+eat_all,0,Watkins,100,3.950257017623417
+eat_all,0,WavCaps,100,2.5602318607791372
+eat_all,0,Xeno-canto,100,2.391871371274718
+eat_all,0,iNaturalist,100,1.9793825182313174
+eat_all,0,nature_only,400,3.003829793169438
+eat_all,0,nonnature_only,200,2.6325244829922503
+eat_all,1,Animal Sound Archive,100,14.044386416023773
+eat_all,1,NatureLM,100,8.050037458330197
+eat_all,1,Watkins,100,12.772183419751002
+eat_all,1,WavCaps,100,12.958957205528828
+eat_all,1,Xeno-canto,100,14.449343209259471
+eat_all,1,iNaturalist,100,10.57270578639126
+eat_all,1,nature_only,400,14.880017197929641
+eat_all,1,nonnature_only,200,10.701845951137074
+eat_all,2,Animal Sound Archive,100,17.926126484397667
+eat_all,2,NatureLM,100,9.230121017019925
+eat_all,2,Watkins,100,19.232654464861746
+eat_all,2,WavCaps,100,20.592044294661296
+eat_all,2,Xeno-canto,100,21.562294417324807
+eat_all,2,iNaturalist,100,18.205030118877552
+eat_all,2,nature_only,400,26.889141429353035
+eat_all,2,nonnature_only,200,15.356993023770276
+eat_all,3,Animal Sound Archive,100,23.784163211455255
+eat_all,3,NatureLM,100,12.169598184809697
+eat_all,3,Watkins,100,21.755358515450272
+eat_all,3,WavCaps,100,25.45196720825999
+eat_all,3,Xeno-canto,100,29.69931161697293
+eat_all,3,iNaturalist,100,26.49681996101276
+eat_all,3,nature_only,400,32.46718781999621
+eat_all,3,nonnature_only,200,21.425916802543636
+eat_all,4,Animal Sound Archive,100,30.19698471657637
+eat_all,4,NatureLM,100,15.366564434334814
+eat_all,4,Watkins,100,25.297340519958848
+eat_all,4,WavCaps,100,31.962836691040277
+eat_all,4,Xeno-canto,100,36.327203308544966
+eat_all,4,iNaturalist,100,33.33780289243826
+eat_all,4,nature_only,400,42.11728080700603
+eat_all,4,nonnature_only,200,27.842167451775307
+eat_all,5,Animal Sound Archive,100,36.701707893114154
+eat_all,5,NatureLM,100,17.902111988975943
+eat_all,5,Watkins,100,28.784913661166772
+eat_all,5,WavCaps,100,37.71418654331838
+eat_all,5,Xeno-canto,100,41.61579452027052
+eat_all,5,iNaturalist,100,39.33684671837064
+eat_all,5,nature_only,400,55.17042627676051
+eat_all,5,nonnature_only,200,34.33690534925537
+eat_all,6,Animal Sound Archive,100,42.22454148639584
+eat_all,6,NatureLM,100,20.070800618293397
+eat_all,6,Watkins,100,30.798347077479264
+eat_all,6,WavCaps,100,41.583518656075306
+eat_all,6,Xeno-canto,100,47.42479236925369
+eat_all,6,iNaturalist,100,47.73479255456741
+eat_all,6,nature_only,400,69.03842534923105
+eat_all,6,nonnature_only,200,39.55970598926289
+eat_all,7,Animal Sound Archive,100,44.87863570655711
+eat_all,7,NatureLM,100,21.829838474850142
+eat_all,7,Watkins,100,32.88426239362665
+eat_all,7,WavCaps,100,43.96942061442978
+eat_all,7,Xeno-canto,100,51.80124563138513
+eat_all,7,iNaturalist,100,52.63178025655497
+eat_all,7,nature_only,400,78.55894890105054
+eat_all,7,nonnature_only,200,43.4965556718324
+eat_all,8,Animal Sound Archive,100,37.266518716861256
+eat_all,8,NatureLM,100,17.798921480676544
+eat_all,8,Watkins,100,31.162196628612666
+eat_all,8,WavCaps,100,36.24639507872379
+eat_all,8,Xeno-canto,100,45.312828414638005
+eat_all,8,iNaturalist,100,45.29082736239692
+eat_all,8,nature_only,400,60.80790387859256
+eat_all,8,nonnature_only,200,33.76738074393584
+eat_all,9,Animal Sound Archive,100,39.29964884943699
+eat_all,9,NatureLM,100,17.83464915233672
+eat_all,9,Watkins,100,29.79555438469492
+eat_all,9,WavCaps,100,38.22838807022008
+eat_all,9,Xeno-canto,100,50.24536259718232
+eat_all,9,iNaturalist,100,49.064093695925926
+eat_all,9,nature_only,400,64.24260450408985
+eat_all,9,nonnature_only,200,35.463477703198286
+eat_all,10,Animal Sound Archive,100,36.75886771169003
+eat_all,10,NatureLM,100,16.493082945622906
+eat_all,10,Watkins,100,28.802881361196558
+eat_all,10,WavCaps,100,34.5700967345299
+eat_all,10,Xeno-canto,100,48.04145806393504
+eat_all,10,iNaturalist,100,44.362937298838816
+eat_all,10,nature_only,400,53.02144622223604
+eat_all,10,nonnature_only,200,32.09655399907664
+eat_all,11,Animal Sound Archive,100,31.395478685321983
+eat_all,11,NatureLM,100,12.929106449131174
+eat_all,11,Watkins,100,26.541325322877025
+eat_all,11,WavCaps,100,25.24140593066663
+eat_all,11,Xeno-canto,100,40.19857181240177
+eat_all,11,iNaturalist,100,33.36365043296674
+eat_all,11,nature_only,400,34.30142480445936
+eat_all,11,nonnature_only,200,23.45031767634547
+eat_all,12,Animal Sound Archive,100,15.598671246691767
+eat_all,12,NatureLM,100,9.08265309623554
+eat_all,12,Watkins,100,18.045113484386654
+eat_all,12,WavCaps,100,13.970183509401643
+eat_all,12,Xeno-canto,100,17.527027501876596
+eat_all,12,iNaturalist,100,15.217856111459428
+eat_all,12,nature_only,400,12.868072047312195
+eat_all,12,nonnature_only,200,13.617982469909878
+eat_bio,0,Animal Sound Archive,100,2.6772655650786477
+eat_bio,0,NatureLM,100,2.896990270383395
+eat_bio,0,Watkins,100,4.006867831004606
+eat_bio,0,WavCaps,100,2.4943802182814943
+eat_bio,0,Xeno-canto,100,2.2587471739174996
+eat_bio,0,iNaturalist,100,1.836555902711582
+eat_bio,0,nature_only,400,2.937502250842348
+eat_bio,0,nonnature_only,200,2.605958927744548
+eat_bio,1,Animal Sound Archive,100,9.662650137163759
+eat_bio,1,NatureLM,100,4.984219991054166
+eat_bio,1,Watkins,100,10.448753668121972
+eat_bio,1,WavCaps,100,8.902981897753168
+eat_bio,1,Xeno-canto,100,10.90695916326341
+eat_bio,1,iNaturalist,100,7.364317032890644
+eat_bio,1,nature_only,400,9.88398672355837
+eat_bio,1,nonnature_only,200,6.5780722071638955
+eat_bio,2,Animal Sound Archive,100,13.431737250297868
+eat_bio,2,NatureLM,100,6.8577922462158805
+eat_bio,2,Watkins,100,14.735116592558851
+eat_bio,2,WavCaps,100,14.070234034961175
+eat_bio,2,Xeno-canto,100,16.28650263676124
+eat_bio,2,iNaturalist,100,12.692182447636837
+eat_bio,2,nature_only,400,17.00437287446925
+eat_bio,2,nonnature_only,200,10.129581681617111
+eat_bio,3,Animal Sound Archive,100,13.411292938062944
+eat_bio,3,NatureLM,100,8.5217348029076
+eat_bio,3,Watkins,100,16.796855807385842
+eat_bio,3,WavCaps,100,15.654217384352087
+eat_bio,3,Xeno-canto,100,17.718678329474628
+eat_bio,3,iNaturalist,100,13.900214191147011
+eat_bio,3,nature_only,400,19.172739754147955
+eat_bio,3,nonnature_only,200,12.876751086091296
+eat_bio,4,Animal Sound Archive,100,19.693161329442606
+eat_bio,4,NatureLM,100,10.702506577490668
+eat_bio,4,Watkins,100,18.8896405639014
+eat_bio,4,WavCaps,100,19.90085718369567
+eat_bio,4,Xeno-canto,100,24.352305886073086
+eat_bio,4,iNaturalist,100,20.58700882688305
+eat_bio,4,nature_only,400,24.377066115764126
+eat_bio,4,nonnature_only,200,16.93685678773931
+eat_bio,5,Animal Sound Archive,100,26.287756021613067
+eat_bio,5,NatureLM,100,12.452328892537642
+eat_bio,5,Watkins,100,21.952971553854155
+eat_bio,5,WavCaps,100,23.31261324209617
+eat_bio,5,Xeno-canto,100,30.71060022714207
+eat_bio,5,iNaturalist,100,27.286052462796782
+eat_bio,5,nature_only,400,31.407970961602356
+eat_bio,5,nonnature_only,200,20.505725375123014
+eat_bio,6,Animal Sound Archive,100,30.815475533331504
+eat_bio,6,NatureLM,100,13.556750832315341
+eat_bio,6,Watkins,100,24.88390050985055
+eat_bio,6,WavCaps,100,27.081340890991
+eat_bio,6,Xeno-canto,100,35.49804346208149
+eat_bio,6,iNaturalist,100,32.061814404744744
+eat_bio,6,nature_only,400,41.84278764010746
+eat_bio,6,nonnature_only,200,23.615699378832442
+eat_bio,7,Animal Sound Archive,100,34.78568904696812
+eat_bio,7,NatureLM,100,14.907797315953644
+eat_bio,7,Watkins,100,27.060100338059794
+eat_bio,7,WavCaps,100,30.766627473965308
+eat_bio,7,Xeno-canto,100,42.372170881641686
+eat_bio,7,iNaturalist,100,39.48549099066102
+eat_bio,7,nature_only,400,52.64615419868781
+eat_bio,7,nonnature_only,200,27.07893692203925
+eat_bio,8,Animal Sound Archive,100,32.52210996518502
+eat_bio,8,NatureLM,100,13.21485010882501
+eat_bio,8,Watkins,100,23.36208766646445
+eat_bio,8,WavCaps,100,27.059847171005302
+eat_bio,8,Xeno-canto,100,40.48194396215717
+eat_bio,8,iNaturalist,100,35.84672140114477
+eat_bio,8,nature_only,400,42.829811381888334
+eat_bio,8,nonnature_only,200,23.478399244901194
+eat_bio,9,Animal Sound Archive,100,30.62783197122793
+eat_bio,9,NatureLM,100,12.221360977840463
+eat_bio,9,Watkins,100,21.042953410387298
+eat_bio,9,WavCaps,100,25.672099918165692
+eat_bio,9,Xeno-canto,100,40.531349901404184
+eat_bio,9,iNaturalist,100,35.02976921940923
+eat_bio,9,nature_only,400,39.786475852930366
+eat_bio,9,nonnature_only,200,21.954373144171377
+eat_bio,10,Animal Sound Archive,100,29.36336486878844
+eat_bio,10,NatureLM,100,10.818131322475164
+eat_bio,10,Watkins,100,18.896133274240896
+eat_bio,10,WavCaps,100,22.629672867657753
+eat_bio,10,Xeno-canto,100,37.975739758309075
+eat_bio,10,iNaturalist,100,30.600011047925257
+eat_bio,10,nature_only,400,28.860326479195013
+eat_bio,10,nonnature_only,200,19.109090336721223
+eat_bio,11,Animal Sound Archive,100,23.37020598364138
+eat_bio,11,NatureLM,100,8.820493576804498
+eat_bio,11,Watkins,100,18.289795400639072
+eat_bio,11,WavCaps,100,16.325928975592458
+eat_bio,11,Xeno-canto,100,30.017453384819916
+eat_bio,11,iNaturalist,100,23.151602696210382
+eat_bio,11,nature_only,400,20.966181102756806
+eat_bio,11,nonnature_only,200,14.13678919996521
+eat_bio,12,Animal Sound Archive,100,13.747115688747762
+eat_bio,12,NatureLM,100,7.7303957379577835
+eat_bio,12,Watkins,100,19.592056510612178
+eat_bio,12,WavCaps,100,14.603659363867525
+eat_bio,12,Xeno-canto,100,24.050063381048595
+eat_bio,12,iNaturalist,100,21.060084341153082
+eat_bio,12,nature_only,400,22.428340071095082
+eat_bio,12,nonnature_only,200,12.275184238963082
+sl_eat_all_ssl_all,0,Animal Sound Archive,100,3.1591366419874407
+sl_eat_all_ssl_all,0,NatureLM,100,3.8731908771674854
+sl_eat_all_ssl_all,0,Watkins,100,5.906578336044271
+sl_eat_all_ssl_all,0,WavCaps,100,3.105523982123161
+sl_eat_all_ssl_all,0,Xeno-canto,100,2.7170246950140458
+sl_eat_all_ssl_all,0,iNaturalist,100,2.154538870137869
+sl_eat_all_ssl_all,0,nature_only,400,3.740851739375519
+sl_eat_all_ssl_all,0,nonnature_only,200,3.368255654966506
+sl_eat_all_ssl_all,1,Animal Sound Archive,100,10.72711650761241
+sl_eat_all_ssl_all,1,NatureLM,100,6.149322795875126
+sl_eat_all_ssl_all,1,Watkins,100,12.032270815745427
+sl_eat_all_ssl_all,1,WavCaps,100,7.84980085891137
+sl_eat_all_ssl_all,1,Xeno-canto,100,10.418077865697969
+sl_eat_all_ssl_all,1,iNaturalist,100,6.341040538863017
+sl_eat_all_ssl_all,1,nature_only,400,10.495115986065102
+sl_eat_all_ssl_all,1,nonnature_only,200,7.333477409104882
+sl_eat_all_ssl_all,2,Animal Sound Archive,100,14.956888203946718
+sl_eat_all_ssl_all,2,NatureLM,100,7.368354282777849
+sl_eat_all_ssl_all,2,Watkins,100,14.355213865093644
+sl_eat_all_ssl_all,2,WavCaps,100,11.586975802101708
+sl_eat_all_ssl_all,2,Xeno-canto,100,14.979719710651587
+sl_eat_all_ssl_all,2,iNaturalist,100,9.619958103516439
+sl_eat_all_ssl_all,2,nature_only,400,13.197122417879191
+sl_eat_all_ssl_all,2,nonnature_only,200,9.867387113707478
+sl_eat_all_ssl_all,3,Animal Sound Archive,100,16.849452782576748
+sl_eat_all_ssl_all,3,NatureLM,100,8.239722101004382
+sl_eat_all_ssl_all,3,Watkins,100,16.793214088579845
+sl_eat_all_ssl_all,3,WavCaps,100,14.21954382985993
+sl_eat_all_ssl_all,3,Xeno-canto,100,19.43553219151902
+sl_eat_all_ssl_all,3,iNaturalist,100,12.82720236976427
+sl_eat_all_ssl_all,3,nature_only,400,14.348937161191339
+sl_eat_all_ssl_all,3,nonnature_only,200,12.11777712212795
+sl_eat_all_ssl_all,4,Animal Sound Archive,100,20.146578433274904
+sl_eat_all_ssl_all,4,NatureLM,100,8.919049346629624
+sl_eat_all_ssl_all,4,Watkins,100,19.03958035458691
+sl_eat_all_ssl_all,4,WavCaps,100,16.810530694552483
+sl_eat_all_ssl_all,4,Xeno-canto,100,23.061240038848016
+sl_eat_all_ssl_all,4,iNaturalist,100,15.18235939585759
+sl_eat_all_ssl_all,4,nature_only,400,16.732791847232743
+sl_eat_all_ssl_all,4,nonnature_only,200,13.981020396766201
+sl_eat_all_ssl_all,5,Animal Sound Archive,100,27.879955264352933
+sl_eat_all_ssl_all,5,NatureLM,100,11.566886358473596
+sl_eat_all_ssl_all,5,Watkins,100,23.728495354437076
+sl_eat_all_ssl_all,5,WavCaps,100,23.173022787941388
+sl_eat_all_ssl_all,5,Xeno-canto,100,30.749381793276818
+sl_eat_all_ssl_all,5,iNaturalist,100,22.631079829715233
+sl_eat_all_ssl_all,5,nature_only,400,23.27880861309353
+sl_eat_all_ssl_all,5,nonnature_only,200,19.60554831686111
+sl_eat_all_ssl_all,6,Animal Sound Archive,100,35.724659189433346
+sl_eat_all_ssl_all,6,NatureLM,100,15.69345854883233
+sl_eat_all_ssl_all,6,Watkins,100,27.35806556981065
+sl_eat_all_ssl_all,6,WavCaps,100,31.306410871638047
+sl_eat_all_ssl_all,6,Xeno-canto,100,39.221113924211956
+sl_eat_all_ssl_all,6,iNaturalist,100,30.10498653560803
+sl_eat_all_ssl_all,6,nature_only,400,32.981908765864155
+sl_eat_all_ssl_all,6,nonnature_only,200,28.027110135198978
+sl_eat_all_ssl_all,7,Animal Sound Archive,100,40.77520678058722
+sl_eat_all_ssl_all,7,NatureLM,100,20.80052606213741
+sl_eat_all_ssl_all,7,Watkins,100,31.530485337518932
+sl_eat_all_ssl_all,7,WavCaps,100,38.986822885968195
+sl_eat_all_ssl_all,7,Xeno-canto,100,45.84548840030822
+sl_eat_all_ssl_all,7,iNaturalist,100,38.45646722947265
+sl_eat_all_ssl_all,7,nature_only,400,46.246367097720054
+sl_eat_all_ssl_all,7,nonnature_only,200,38.296609417250956
+sl_eat_all_ssl_all,8,Animal Sound Archive,100,38.019919211965785
+sl_eat_all_ssl_all,8,NatureLM,100,17.061896783087903
+sl_eat_all_ssl_all,8,Watkins,100,29.77681487892154
+sl_eat_all_ssl_all,8,WavCaps,100,34.82795414744378
+sl_eat_all_ssl_all,8,Xeno-canto,100,43.611319390008646
+sl_eat_all_ssl_all,8,iNaturalist,100,35.0579631496371
+sl_eat_all_ssl_all,8,nature_only,400,38.43792154196022
+sl_eat_all_ssl_all,8,nonnature_only,200,31.763118666697157
+sl_eat_all_ssl_all,9,Animal Sound Archive,100,44.69403166381743
+sl_eat_all_ssl_all,9,NatureLM,100,23.867737494410683
+sl_eat_all_ssl_all,9,Watkins,100,35.1977650272593
+sl_eat_all_ssl_all,9,WavCaps,100,41.09199013678276
+sl_eat_all_ssl_all,9,Xeno-canto,100,54.19529445870529
+sl_eat_all_ssl_all,9,iNaturalist,100,47.72892192280444
+sl_eat_all_ssl_all,9,nature_only,400,57.145112806974375
+sl_eat_all_ssl_all,9,nonnature_only,200,43.70571528249586
+sl_eat_all_ssl_all,10,Animal Sound Archive,100,46.290081241897475
+sl_eat_all_ssl_all,10,NatureLM,100,24.96813506982442
+sl_eat_all_ssl_all,10,Watkins,100,37.14977888308128
+sl_eat_all_ssl_all,10,WavCaps,100,44.91725252802738
+sl_eat_all_ssl_all,10,Xeno-canto,100,55.84172804401202
+sl_eat_all_ssl_all,10,iNaturalist,100,50.02958822630353
+sl_eat_all_ssl_all,10,nature_only,400,60.24217673612711
+sl_eat_all_ssl_all,10,nonnature_only,200,48.32812771627038
+sl_eat_all_ssl_all,11,Animal Sound Archive,100,29.21813635620818
+sl_eat_all_ssl_all,11,NatureLM,100,18.766738874884037
+sl_eat_all_ssl_all,11,Watkins,100,31.717318149698052
+sl_eat_all_ssl_all,11,WavCaps,100,35.26710104230441
+sl_eat_all_ssl_all,11,Xeno-canto,100,37.45596289052495
+sl_eat_all_ssl_all,11,iNaturalist,100,35.663201419426066
+sl_eat_all_ssl_all,11,nature_only,400,27.502189697645417
+sl_eat_all_ssl_all,11,nonnature_only,200,35.96229322865323
+sl_eat_all_ssl_all,12,Animal Sound Archive,100,16.597274070500628
+sl_eat_all_ssl_all,12,NatureLM,100,10.182464377340875
+sl_eat_all_ssl_all,12,Watkins,100,25.129288924627893
+sl_eat_all_ssl_all,12,WavCaps,100,19.99798411664764
+sl_eat_all_ssl_all,12,Xeno-canto,100,22.407167571082994
+sl_eat_all_ssl_all,12,iNaturalist,100,22.360768816791268
+sl_eat_all_ssl_all,12,nature_only,400,14.2909362769287
+sl_eat_all_ssl_all,12,nonnature_only,200,18.240748198209925
+sl_eat_bio_ssl_all,0,Animal Sound Archive,100,2.6136035757275877
+sl_eat_bio_ssl_all,0,NatureLM,100,2.732999724001276
+sl_eat_bio_ssl_all,0,Watkins,100,3.721677843637064
+sl_eat_bio_ssl_all,0,WavCaps,100,2.36765192291329
+sl_eat_bio_ssl_all,0,Xeno-canto,100,2.202581783820708
+sl_eat_bio_ssl_all,0,iNaturalist,100,1.865531560443039
+sl_eat_bio_ssl_all,0,nature_only,400,2.83999496067939
+sl_eat_bio_ssl_all,0,nonnature_only,200,2.478358595685102
+sl_eat_bio_ssl_all,1,Animal Sound Archive,100,12.16375559141544
+sl_eat_bio_ssl_all,1,NatureLM,100,6.36104356301545
+sl_eat_bio_ssl_all,1,Watkins,100,12.41616214424683
+sl_eat_bio_ssl_all,1,WavCaps,100,10.246986918269833
+sl_eat_bio_ssl_all,1,Xeno-canto,100,12.867029575738771
+sl_eat_bio_ssl_all,1,iNaturalist,100,8.502166416236426
+sl_eat_bio_ssl_all,1,nature_only,400,11.915662369967713
+sl_eat_bio_ssl_all,1,nonnature_only,200,8.26253894318069
+sl_eat_bio_ssl_all,2,Animal Sound Archive,100,18.761622124708975
+sl_eat_bio_ssl_all,2,NatureLM,100,7.925956428651767
+sl_eat_bio_ssl_all,2,Watkins,100,18.276655423058127
+sl_eat_bio_ssl_all,2,WavCaps,100,17.240825356252376
+sl_eat_bio_ssl_all,2,Xeno-canto,100,21.495154297825593
+sl_eat_bio_ssl_all,2,iNaturalist,100,16.738859996870406
+sl_eat_bio_ssl_all,2,nature_only,400,22.942140169469347
+sl_eat_bio_ssl_all,2,nonnature_only,200,12.557946079627898
+sl_eat_bio_ssl_all,3,Animal Sound Archive,100,24.559047801103084
+sl_eat_bio_ssl_all,3,NatureLM,100,11.299241283189385
+sl_eat_bio_ssl_all,3,Watkins,100,23.000982368943365
+sl_eat_bio_ssl_all,3,WavCaps,100,24.229437685245365
+sl_eat_bio_ssl_all,3,Xeno-canto,100,30.341935415083846
+sl_eat_bio_ssl_all,3,iNaturalist,100,25.791870427055738
+sl_eat_bio_ssl_all,3,nature_only,400,31.59783115925016
+sl_eat_bio_ssl_all,3,nonnature_only,200,19.494214778360433
+sl_eat_bio_ssl_all,4,Animal Sound Archive,100,33.87446034676883
+sl_eat_bio_ssl_all,4,NatureLM,100,14.580710179498189
+sl_eat_bio_ssl_all,4,Watkins,100,27.346843067006354
+sl_eat_bio_ssl_all,4,WavCaps,100,33.18060525975533
+sl_eat_bio_ssl_all,4,Xeno-canto,100,39.658627161986566
+sl_eat_bio_ssl_all,4,iNaturalist,100,36.104351251433144
+sl_eat_bio_ssl_all,4,nature_only,400,47.49903640817857
+sl_eat_bio_ssl_all,4,nonnature_only,200,27.624780819874157
+sl_eat_bio_ssl_all,5,Animal Sound Archive,100,44.58756762582295
+sl_eat_bio_ssl_all,5,NatureLM,100,20.591180102197832
+sl_eat_bio_ssl_all,5,Watkins,100,33.44089086813492
+sl_eat_bio_ssl_all,5,WavCaps,100,44.6524210498744
+sl_eat_bio_ssl_all,5,Xeno-canto,100,51.696133279123686
+sl_eat_bio_ssl_all,5,iNaturalist,100,47.11987742071225
+sl_eat_bio_ssl_all,5,nature_only,400,71.53290709334061
+sl_eat_bio_ssl_all,5,nonnature_only,200,41.91719179514337
+sl_eat_bio_ssl_all,6,Animal Sound Archive,100,50.41921449364824
+sl_eat_bio_ssl_all,6,NatureLM,100,27.13110939528692
+sl_eat_bio_ssl_all,6,Watkins,100,35.57686597383499
+sl_eat_bio_ssl_all,6,WavCaps,100,52.56752147104628
+sl_eat_bio_ssl_all,6,Xeno-canto,100,61.622411996948614
+sl_eat_bio_ssl_all,6,iNaturalist,100,58.36178252509078
+sl_eat_bio_ssl_all,6,nature_only,400,92.82489383885799
+sl_eat_bio_ssl_all,6,nonnature_only,200,55.75986322715593
+sl_eat_bio_ssl_all,7,Animal Sound Archive,100,53.401873552335765
+sl_eat_bio_ssl_all,7,NatureLM,100,31.69051947969971
+sl_eat_bio_ssl_all,7,Watkins,100,37.450720354709695
+sl_eat_bio_ssl_all,7,WavCaps,100,57.49459079979566
+sl_eat_bio_ssl_all,7,Xeno-canto,100,68.0612114759683
+sl_eat_bio_ssl_all,7,iNaturalist,100,64.88688182003601
+sl_eat_bio_ssl_all,7,nature_only,400,113.94164217747851
+sl_eat_bio_ssl_all,7,nonnature_only,200,66.12750960382425
+sl_eat_bio_ssl_all,8,Animal Sound Archive,100,52.53143823057128
+sl_eat_bio_ssl_all,8,NatureLM,100,32.24158824948529
+sl_eat_bio_ssl_all,8,Watkins,100,40.521113376911984
+sl_eat_bio_ssl_all,8,WavCaps,100,58.0256720217221
+sl_eat_bio_ssl_all,8,Xeno-canto,100,69.55772096400405
+sl_eat_bio_ssl_all,8,iNaturalist,100,67.2945619812362
+sl_eat_bio_ssl_all,8,nature_only,400,119.12650252551396
+sl_eat_bio_ssl_all,8,nonnature_only,200,66.60739985718651
+sl_eat_bio_ssl_all,9,Animal Sound Archive,100,56.03695202815038
+sl_eat_bio_ssl_all,9,NatureLM,100,36.697114175866496
+sl_eat_bio_ssl_all,9,Watkins,100,40.25214874452311
+sl_eat_bio_ssl_all,9,WavCaps,100,62.25881911476099
+sl_eat_bio_ssl_all,9,Xeno-canto,100,72.02220263035888
+sl_eat_bio_ssl_all,9,iNaturalist,100,71.86065199330412
+sl_eat_bio_ssl_all,9,nature_only,400,127.09400240515511
+sl_eat_bio_ssl_all,9,nonnature_only,200,76.44744186823515
+sl_eat_bio_ssl_all,10,Animal Sound Archive,100,54.83603555762947
+sl_eat_bio_ssl_all,10,NatureLM,100,37.29227455111352
+sl_eat_bio_ssl_all,10,Watkins,100,42.0531098699187
+sl_eat_bio_ssl_all,10,WavCaps,100,61.409774790811824
+sl_eat_bio_ssl_all,10,Xeno-canto,100,73.63036952542497
+sl_eat_bio_ssl_all,10,iNaturalist,100,74.14555443456241
+sl_eat_bio_ssl_all,10,nature_only,400,126.62962021968848
+sl_eat_bio_ssl_all,10,nonnature_only,200,76.19388009066623
+sl_eat_bio_ssl_all,11,Animal Sound Archive,100,56.65747748041268
+sl_eat_bio_ssl_all,11,NatureLM,100,36.83908592527084
+sl_eat_bio_ssl_all,11,Watkins,100,43.6359822127009
+sl_eat_bio_ssl_all,11,WavCaps,100,61.612090103003915
+sl_eat_bio_ssl_all,11,Xeno-canto,100,75.85727783427117
+sl_eat_bio_ssl_all,11,iNaturalist,100,74.11298104286878
+sl_eat_bio_ssl_all,11,nature_only,400,102.9289517307949
+sl_eat_bio_ssl_all,11,nonnature_only,200,76.04504409366936
+sl_eat_bio_ssl_all,12,Animal Sound Archive,100,53.19768265555715
+sl_eat_bio_ssl_all,12,NatureLM,100,37.531094284081426
+sl_eat_bio_ssl_all,12,Watkins,100,39.77740771647467
+sl_eat_bio_ssl_all,12,WavCaps,100,55.536415874146485
+sl_eat_bio_ssl_all,12,Xeno-canto,100,65.73431357104698
+sl_eat_bio_ssl_all,12,iNaturalist,100,63.30668324695345
+sl_eat_bio_ssl_all,12,nature_only,400,92.78673339937481
+sl_eat_bio_ssl_all,12,nonnature_only,200,68.89007662967613
