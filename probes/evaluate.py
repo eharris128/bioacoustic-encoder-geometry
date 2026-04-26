@@ -41,7 +41,7 @@ def _layer_label(layer: int) -> str:
     """Human-readable x-axis tick: 'emb' for index 0, 'T0'..'T11' for 1-12."""
     if layer == 0:
         return "emb"
-    return f"T{layer - 1}"
+    return f"T{layer - 1}"  
 
 
 # ---------------------------------------------------------------------------

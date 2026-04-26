@@ -11,10 +11,19 @@ Two interfaces:
 
 Both return the same {layer: (X, y)} format consumed by probes/train.py.
 
+Models
+------
+All four supported models use the EAT (Environmental Audio Transformer) architecture
+loaded via the avex library. Load with load_model(name):
+    "esp_aves2_eat_all"           — SSL pretrained, all data
+    "esp_aves2_eat_bio"           — SSL pretrained, bio-only data
+    "esp_aves2_sl_eat_all_ssl_all" — supervised fine-tune, all data
+    "esp_aves2_sl_eat_bio_ssl_all" — supervised fine-tune, bio data
+
 Activation layout
 -----------------
-13 layers total: index 0 = CNN feature_projection output (embedding),
-                 indices 1–12 = transformer layers 0–11.
+13 layers total: index 0 = local_encoder output (patch embeddings, 512 patches),
+                 indices 1–12 = transformer blocks 0–11 (CLS token stripped, 512 patches).
 Raw mode   : (13, n_frames, 768) per item
 Mean-pooled: (13, 768) per item — frame dim collapsed
 
@@ -36,7 +45,7 @@ import soundfile as sf
 from scipy import signal as scipy_signal
 
 NUM_LAYERS_TRANSFORMER = 12
-NUM_LAYERS_TOTAL = 13          # embedding (index 0) + transformer layers 1–12
+NUM_LAYERS_TOTAL = 13          # local_encoder (index 0) + transformer blocks 1–12
 DEFAULT_MAX_FRAMES = 513       # per item for NatureLM (≈10s at 50fps)
 DEFAULT_MAX_FRAMES_LOCAL = 3000
 MIN_SAMPLES_DEFAULT = 500
@@ -46,35 +55,28 @@ DATASET_REPO = "EarthSpeciesProject/NatureLM-audio-training"
 RecordingsDict = dict[str, tuple[str, int]]
 
 # ---------------------------------------------------------------------------
-# Model registry
+# EAT model registry
 # ---------------------------------------------------------------------------
-# Maps short model names to (config_path, model_path).
-# All 4 ESP models share the same HuBERT-base architecture and config.
-# Download checkpoints to ./models/ before use:
-#   curl -L -o models/<filename> <HuggingFace URL>
-#
-# HuggingFace repos:
-#   EarthSpeciesProject/esp-aves2-eat-all
-#   EarthSpeciesProject/esp-aves2-eat-bio
-#   EarthSpeciesProject/esp-aves2-effnetb0-all
-#   EarthSpeciesProject/esp-aves2-effnetb0-all  (alias: effnetb0-all)
+# All four models share the same HuBERT-like EAT architecture (12 transformer
+# blocks, 768-dim) and hook paths. Checkpoints are auto-downloaded from
+# HuggingFace on first use by avex — no local download needed.
 
-_DEFAULT_CONFIG = "./aves/config/default_cfg_aves-base-all.json"
-
-MODEL_REGISTRY: dict[str, tuple[str, str]] = {
-    # Original AVES base models
-    "aves-base-all":    (_DEFAULT_CONFIG, "./models/aves-base-all.torchaudio.pt"),
-    "aves-base-bio":    (_DEFAULT_CONFIG, "./models/aves-base-bio.torchaudio.pt"),
-    "aves-base-nonbio": (_DEFAULT_CONFIG, "./models/aves-base-nonbio.torchaudio.pt"),
-    "aves-base-core":   (_DEFAULT_CONFIG, "./models/aves-base-core.torchaudio.pt"),
-    # ESP AVES2 models
-    "esp-aves2-eat-all":      (_DEFAULT_CONFIG, "./models/esp-aves2-eat-all.torchaudio.pt"),
-    "esp-aves2-eat-bio":      (_DEFAULT_CONFIG, "./models/esp-aves2-eat-bio.torchaudio.pt"),
-    "esp-aves2-effnetb0-all": (_DEFAULT_CONFIG, "./models/esp-aves2-effnetb0-all.torchaudio.pt"),
-    "effnetb0-all":           (_DEFAULT_CONFIG, "./models/esp-aves2-effnetb0-all.torchaudio.pt"),
+EAT_MODELS: set[str] = {
+    "esp_aves2_eat_all",
+    "esp_aves2_eat_bio",
+    "esp_aves2_sl_eat_all_ssl_all",
+    "esp_aves2_sl_eat_bio_ssl_all",
 }
 
-DEFAULT_MODEL = "aves-base-all"
+DEFAULT_MODEL = "esp_aves2_eat_all"
+
+# Hook paths registered on every EAT model (13 layers, indices 0–12):
+#   index 0  = backbone.model.local_encoder (patch projection / embedding)
+#   index 1+ = backbone.model.blocks.{i}   (transformer block i, 0-indexed)
+_EAT_LAYER_NAMES: list[str] = (
+    ["backbone.model.local_encoder"]
+    + [f"backbone.model.blocks.{i}" for i in range(NUM_LAYERS_TRANSFORMER)]
+)
 
 
 # ---------------------------------------------------------------------------
@@ -83,60 +85,38 @@ DEFAULT_MODEL = "aves-base-all"
 
 def load_model(
     model_name: str = DEFAULT_MODEL,
-    config_path: str | None = None,
-    model_path: str | None = None,
     device: str = "cpu",
-):
+) -> object:
     """
-    Load and return an ESP AVES feature extractor (for_inference=True).
+    Load an EAT model from the avex registry and register forward hooks.
 
-    Resolves config and checkpoint paths from MODEL_REGISTRY using model_name.
-    config_path and model_path override the registry if provided explicitly.
+    Hooks are registered on all 13 layers (local_encoder + 12 transformer
+    blocks) so that extract_all_layers can capture intermediate activations.
+    The model is set to eval mode before return.
 
     Parameters
     ----------
-    model_name  : short model name, one of MODEL_REGISTRY keys.
-                  Default "aves-base-all".
-                  Supported:
-                    "aves-base-all", "aves-base-bio", "aves-base-nonbio", "aves-base-core"
-                    "esp-aves2-eat-all", "esp-aves2-eat-bio",
-                    "esp-aves2-effnetb0-all", "effnetb0-all"
-    config_path : override config JSON path (optional — uses registry default if None)
-    model_path  : override checkpoint path (optional — uses registry default if None)
-    device      : "cpu" or "cuda"
+    model_name : one of EAT_MODELS. Default "esp_aves2_eat_all".
+    device     : "cpu" or "cuda"
 
     Returns
     -------
-    model : AVES feature extractor
+    model : avex EATHFModel with hooks registered
 
     Raises
     ------
-    KeyError  if model_name is not in MODEL_REGISTRY
-    FileNotFoundError  if the resolved checkpoint does not exist locally
+    ValueError  if model_name is not in EAT_MODELS
     """
-    if model_name not in MODEL_REGISTRY:
-        raise KeyError(
+    if model_name not in EAT_MODELS:
+        raise ValueError(
             f"Unknown model '{model_name}'. "
-            f"Available: {sorted(MODEL_REGISTRY.keys())}"
+            f"Supported EAT models: {sorted(EAT_MODELS)}"
         )
-
-    reg_config, reg_model = MODEL_REGISTRY[model_name]
-    resolved_config = config_path or reg_config
-    resolved_model  = model_path  or reg_model
-
-    if not Path(resolved_model).exists():
-        raise FileNotFoundError(
-            f"Checkpoint not found: {resolved_model}\n"
-            f"Download from HuggingFace: EarthSpeciesProject/{model_name}"
-        )
-
-    from aves import load_feature_extractor
-    return load_feature_extractor(
-        config_path=resolved_config,
-        model_path=resolved_model,
-        device=device,
-        for_inference=True,
-    )
+    from avex import load_model as avex_load_model
+    model = avex_load_model(model_name, device=device, return_features_only=True)
+    model.eval()
+    model.register_hooks_for_layers(_EAT_LAYER_NAMES)
+    return model
 
 
 # ---------------------------------------------------------------------------
@@ -148,11 +128,6 @@ def load_audio_file(path: str, target_sr: int = 16000) -> torch.Tensor:
     Load a local audio file (WAV or MP3) as a mono float32 tensor at target_sr.
 
     Tries soundfile first (WAV/FLAC); falls back to torchaudio for MP3.
-
-    Parameters
-    ----------
-    path      : absolute or relative path to audio file
-    target_sr : target sample rate in Hz (default 16000)
 
     Returns
     -------
@@ -168,7 +143,7 @@ def load_audio_file(path: str, target_sr: int = 16000) -> torch.Tensor:
     except Exception:
         import torchaudio
         waveform, sr = torchaudio.load(path)
-        waveform = waveform.mean(dim=0, keepdim=True)  # mono (1, n_samples)
+        waveform = waveform.mean(dim=0, keepdim=True)
         if sr != target_sr:
             waveform = torchaudio.functional.resample(waveform, sr, target_sr)
         return waveform.float()
@@ -176,92 +151,99 @@ def load_audio_file(path: str, target_sr: int = 16000) -> torch.Tensor:
 
 def _audio_from_hf_item(item: dict, target_sr: int = 16000) -> torch.Tensor:
     """
-    Convert a HuggingFace audio item dict to a (1, n_samples) float32 tensor.
+    Convert a HuggingFace audio item (decode=False) to a (1, n_samples) float32 tensor.
 
-    Parameters
-    ----------
-    item      : dataset item with item["audio"]["array"] and ["sampling_rate"]
-    target_sr : target sample rate
-
-    Returns
-    -------
-    waveform : (1, n_samples) float32 tensor
+    Expects item["audio"] = {"bytes": bytes, "path": str} — the raw encoded file.
+    Decodes via soundfile (BytesIO) to avoid torchcodec / FFmpeg version issues.
+    Falls back to torchaudio for formats soundfile can't handle (e.g. MP3).
     """
-    array = item["audio"]["array"]
-    sr = item["audio"]["sampling_rate"]
-    waveform = torch.tensor(array, dtype=torch.float32)
-    if waveform.dim() == 1:
-        waveform = waveform.unsqueeze(0)               # (1, n_samples)
-    if sr != target_sr:
+    import io
+    audio_field = item["audio"]
+    raw_bytes = audio_field.get("bytes") or b""
+    path = audio_field.get("path") or ""
+
+    buf = io.BytesIO(raw_bytes) if raw_bytes else None
+
+    try:
+        src = buf if buf is not None else path
+        data, sr = sf.read(src, always_2d=True)
+        data = data.mean(axis=1)
+        if sr != target_sr:
+            n_out = int(round(len(data) * target_sr / sr))
+            data = scipy_signal.resample(data, n_out)
+        return torch.from_numpy(data.astype(np.float32)).unsqueeze(0)
+    except Exception:
         import torchaudio
-        waveform = torchaudio.functional.resample(waveform, sr, target_sr)
-    return waveform
+        if buf is not None:
+            buf.seek(0)
+            waveform, sr = torchaudio.load(buf)
+        else:
+            waveform, sr = torchaudio.load(path)
+        waveform = waveform.mean(dim=0, keepdim=True)
+        if sr != target_sr:
+            waveform = torchaudio.functional.resample(waveform, sr, target_sr)
+        return waveform.float()
 
 
 # ---------------------------------------------------------------------------
-# Core activation 
-# extraction (13 layers)
+# Core activation extraction (13 layers)
 # ---------------------------------------------------------------------------
 
 def extract_all_layers(
     model,
-    audio: torch.Tensor,  
+    audio: torch.Tensor,
     max_frames: int = DEFAULT_MAX_FRAMES_LOCAL,
     rng: np.random.Generator | None = None,
     mode: str = "raw",
 ) -> np.ndarray:
     """
-    Extract activations for all 13 layers from a single audio tensor.
+    Extract activations for all 13 EAT layers from a single audio tensor.
 
-    Registers a forward hook on model.model.encoder.feature_projection to
-    capture the CNN embedding output (layer index 0), then collects the 12
-    transformer layer outputs (indices 1–12) via model.extract_features.
+    avex handles mel spectrogram conversion internally. The local_encoder
+    (index 0) produces 512 patch embeddings; each transformer block (indices
+    1–12) produces 513 tokens. The CLS token (position 0) is stripped from
+    transformer block outputs so all 13 layers yield the same (512, 768) shape.
 
     Parameters
     ----------
-    model      : loaded AVES model
+    model      : avex EATHFModel loaded via load_model
     audio      : (1, n_samples) float32 tensor at 16kHz
-    max_frames : if the audio produces more frames than this, subsample randomly
+    max_frames : patch cap per audio; subsampled randomly if exceeded
     rng        : numpy Generator for reproducible subsampling (seed 42 default)
-    mode       : "raw"  → returns (13, n_frames, 768)
-                 "mean" → returns (13, 768), frame dimension collapsed
+    mode       : "raw"  → returns (13, n_patches, 768)
+                 "mean" → returns (13, 768), patches mean-pooled
 
     Returns
     -------
-    activations : float32 ndarray, shape (13, n_frames, 768) or (13, 768)
+    activations : float32 ndarray, shape (13, n_patches, 768) or (13, 768)
     """
     if rng is None:
         rng = np.random.default_rng(42)
 
-    # Hook the CNN feature projection to capture the embedding layer
-    embedding_buf: list[torch.Tensor] = []
+    # avex expects (B, T); audio is already (1, T)
+    with torch.no_grad():
+        layer_tensors = model.extract_embeddings(audio, aggregation="none")
+    # layer_tensors: list of 13 tensors
+    #   index 0  : (1, 512, 768) — local_encoder patches
+    #   index 1+ : (1, 513, 768) — transformer block, position 0 is CLS token
 
-    def _hook(module, inp, out):
-        embedding_buf.append(out.detach().cpu())
+    layers: list[np.ndarray] = []
+    for i, t in enumerate(layer_tensors):
+        arr = t.squeeze(0).cpu().float().numpy()  # (512 or 513, 768)
+        if i > 0:
+            arr = arr[1:]                         # strip CLS → (512, 768)
+        layers.append(arr)
 
-    handle = model.model.encoder.feature_projection.register_forward_hook(_hook)
-    try:
-        with torch.no_grad():
-            layer_outputs = model.extract_features(audio, layers=None)  # list of 12
-    finally:
-        handle.remove()
+    stacked = np.stack(layers, axis=0)            # (13, 512, 768)
 
-    # embedding_buf[0]: (1, n_frames, 768) → (n_frames, 768)
-    embedding = embedding_buf[0].squeeze(0)                      # (n_frames, 768)
-    transformer_layers = [lo.squeeze(0).cpu() for lo in layer_outputs]  # 12 x (n_frames, 768)
-
-    # Stack: (13, n_frames, 768)
-    stacked = torch.stack([embedding] + transformer_layers, dim=0).numpy().astype(np.float32)
-
-    # Subsample frames if needed
-    n_frames = stacked.shape[1]
-    if n_frames > max_frames:
-        idx = np.sort(rng.choice(n_frames, max_frames, replace=False))
+    n_patches = stacked.shape[1]
+    if n_patches > max_frames:
+        idx = np.sort(rng.choice(n_patches, max_frames, replace=False))
         stacked = stacked[:, idx, :]
 
     if mode == "mean":
         return stacked.mean(axis=1)   # (13, 768)
-    return stacked                    # (13, n_frames, 768)
+    return stacked                    # (13, n_patches, 768)
 
 
 # ---------------------------------------------------------------------------
@@ -272,17 +254,7 @@ def parse_metadata(raw) -> dict:
     """
     Parse the NatureLM metadata field into a flat dict.
 
-    The field is a JSON-encoded string containing taxonomic info
-    (class, order, family, genus, species) and other attributes.
     Returns an empty dict on any parse failure.
-
-    Parameters
-    ----------
-    raw : str | dict | None — raw metadata value from the dataset item
-
-    Returns
-    -------
-    meta : dict with keys such as "class", "order", "species", "genus", "family"
     """
     if not raw:
         return {}
@@ -295,22 +267,7 @@ def parse_metadata(raw) -> dict:
 
 
 def _item_to_meta(item: dict) -> dict:
-    """
-    Extract and flatten all relevant metadata from a NatureLM dataset item.
-
-    Merges top-level fields (file_name, source_dataset, id, output, task)
-    with flattened taxonomy from the JSON metadata string.
-
-    Parameters
-    ----------
-    item : single HuggingFace dataset item
-
-    Returns
-    -------
-    meta : flat dict with keys:
-           file_name, source_dataset, id, output, task,
-           class, order, family, genus, species
-    """
+    """Extract and flatten all relevant metadata from a NatureLM dataset item."""
     parsed = parse_metadata(item.get("metadata"))
     return {
         "file_name":      item.get("file_name") or "",
@@ -318,7 +275,6 @@ def _item_to_meta(item: dict) -> dict:
         "id":             item.get("id") or "",
         "output":         item.get("output") or "",
         "task":           item.get("task") or "",
-        # Taxonomic fields from metadata JSON
         "class":          parsed.get("class") or "",
         "order":          parsed.get("order") or "",
         "family":         parsed.get("family") or "",
@@ -338,23 +294,7 @@ def _matches_filters(
     order_filter: list[str] | None,
     species_pair: tuple[str, str] | None,
 ) -> bool:
-    """
-    Return True if a metadata dict passes all active filters.
-
-    Filters are ANDed together; None means no constraint on that field.
-
-    Parameters
-    ----------
-    meta           : flat metadata dict from _item_to_meta
-    source_dataset : whitelist of source_dataset values (e.g. ["xeno-canto"])
-    class_filter   : whitelist of class values (e.g. ["Aves", "Mammalia"])
-    order_filter   : whitelist of order values (e.g. ["Passeriformes"])
-    species_pair   : (species_a, species_b) — keep only items matching either name
-
-    Returns
-    -------
-    bool
-    """
+    """Return True if a metadata dict passes all active filters (ANDed)."""
     if source_dataset is not None and meta["source_dataset"] not in source_dataset:
         return False
     if class_filter is not None and meta["class"] not in class_filter:
@@ -367,24 +307,7 @@ def _matches_filters(
 
 
 def _species_label(meta: dict, species_pair: tuple[str, str] | None, class_filter: list[str] | None) -> int:
-    """
-    Derive an integer class label from metadata.
-
-    For binary species probes: label = index of species in species_pair (0 or 1).
-    For class-level probes: label = index of class in class_filter.
-    Falls back to 0 if no explicit mapping applies (should not occur if filters
-    are applied before calling this function).
-
-    Parameters
-    ----------
-    meta         : flat metadata dict
-    species_pair : (species_a, species_b) or None
-    class_filter : ordered list of class names, or None
-
-    Returns
-    -------
-    label : int
-    """
+    """Derive an integer class label from metadata."""
     if species_pair is not None:
         return list(species_pair).index(meta["species"])
     if class_filter is not None:
@@ -404,15 +327,7 @@ def _check_sample_counts(
     label_names: list[str],
     min_samples: int,
 ) -> None:
-    """
-    Raise an informative ValueError if any class has fewer than min_samples.
-
-    Parameters
-    ----------
-    label_counts : { label_int: count } collected so far
-    label_names  : human-readable names matching label ints (for error message)
-    min_samples  : minimum required samples per class
-    """
+    """Raise ValueError if any class has fewer than min_samples."""
     for label, count in label_counts.items():
         name = label_names[label] if label < len(label_names) else str(label)
         if count < min_samples:
@@ -435,22 +350,18 @@ def build_dataset(
     """
     Build a per-layer probe dataset from local audio files.
 
-    Iterates over the RECORDINGS dict (from experiment configs), extracts
-    13-layer activations for each file, and assembles stacked (X, y) arrays.
-
     Parameters
     ----------
-    model                    : loaded AVES model
+    model                    : EAT model loaded via load_model
     recordings               : { rec_id: (audio_path, label_int) }
-    max_frames_per_recording : frame cap per recording (subsampled if exceeded)
+    max_frames_per_recording : patch cap per recording (subsampled if exceeded)
 
     Returns
     -------
-    dataset            : { layer_index: (X, y) }
-                         X shape : (total_frames, 768)
-                         y shape : (total_frames,) — integer class labels
+    dataset              : { layer_index: (X, y) }
+                           X shape : (total_frames, 768)
+                           y shape : (total_frames,) — integer class labels
     frames_per_recording : { rec_id: n_frames } — needed by LORO cross-validation
-                           in probes/train.py to reconstruct fold boundaries
     """
     rng = np.random.default_rng(42)
     layer_X: dict[int, list[np.ndarray]] = {i: [] for i in range(NUM_LAYERS_TOTAL)}
@@ -471,7 +382,7 @@ def build_dataset(
         frames_per_recording[rec_id] = n_frames
 
         for layer in range(NUM_LAYERS_TOTAL):
-            layer_X[layer].append(acts[layer])                           # (n_frames, 768)
+            layer_X[layer].append(acts[layer])
             layer_y[layer].append(np.full(n_frames, label, dtype=np.int32))
 
     dataset: dict[int, tuple[np.ndarray, np.ndarray]] = {
@@ -503,45 +414,28 @@ def build_naturelm_dataset(
     """
     Build a per-layer probe dataset by streaming NatureLM-audio-training.
 
-    Filters the stream by source_dataset, taxonomic class, order, or species
-    pair; extracts AVES activations; and assembles (X, y) arrays per layer.
-    Raises a ValueError if any class falls below min_samples_per_class.
-
     Parameters
     ----------
-    model                 : loaded AVES model
-    source_dataset        : whitelist of source_dataset values, 
-    class_filter          : ordered list of taxonomic class names for multiclass probes,
-                            e.g. ["Aves", "Mammalia", "Amphibia"]. Label = list index.
-                            None = no filter.
-    order_filter          : whitelist of taxonomic order names, e.g. ["Passeriformes"].
-                            None = no filter.
-    species_pair          : (species_a, species_b) for binary species probes.
-                            Items matching species_a get label 0, species_b get label 1.
-                            None = no filter.
-    label_names           : human-readable class names for error messages and evaluation.
-                            Inferred from class_filter or species_pair if not provided.
-    min_samples_per_class : raise ValueError if any class has fewer samples after streaming.
-                            Default 500.
-    max_samples_per_class : stop collecting for a class once it reaches this count.
-                            None = no cap (collect everything that passes filters).
-    max_frames            : maximum frames to keep per audio item (default 513 ≈ 10s).
-    mode                  : "mean" → X shape (n_items, 768) per layer (mean-pooled).
+    model                 : EAT model loaded via load_model
+    source_dataset        : whitelist of source_dataset values
+    class_filter          : ordered list of taxonomic class names (label = list index)
+    order_filter          : whitelist of taxonomic order names
+    species_pair          : (species_a, species_b) for binary probes
+    label_names           : human-readable class names; inferred from class_filter
+                            or species_pair if not provided
+    min_samples_per_class : raise ValueError if any class falls below this
+    max_samples_per_class : stop collecting for a class once it hits this count
+    max_frames            : patch cap per audio item (default 513 ≈ 10s)
+    mode                  : "mean" → X shape (n_items, 768) per layer
                             "raw"  → X shape (n_frames_total, 768) per layer
-                                     (all frames concatenated, labels repeated per frame).
 
     Returns
     -------
     dataset       : { layer_index: (X, y) }
-                    X shape: (n_items, 768)    if mode="mean"
-                             (n_frames, 768)   if mode="raw"
-                    y shape: (n_items,) or (n_frames,) — integer class labels
-    metadata_list : list of flat metadata dicts (one per collected item),
-                    in the same order as the rows in X/y.
+    metadata_list : list of flat metadata dicts (one per collected item)
     """
-    from datasets import load_dataset
+    from datasets import load_dataset, Audio
 
-    # Infer label_names if not provided
     if label_names is None:
         if species_pair is not None:
             label_names = list(species_pair)
@@ -552,7 +446,6 @@ def build_naturelm_dataset(
 
     rng = np.random.default_rng(42)
 
-    # Accumulators: one list per layer
     layer_X: dict[int, list[np.ndarray]] = {i: [] for i in range(NUM_LAYERS_TOTAL)}
     layer_y: dict[int, list[np.ndarray]] = {i: [] for i in range(NUM_LAYERS_TOTAL)}
     metadata_list: list[dict] = []
@@ -565,7 +458,9 @@ def build_naturelm_dataset(
         flush=True,
     )
 
+    # decode=False avoids torchcodec/FFmpeg version issues — we decode bytes manually
     ds = load_dataset(DATASET_REPO, split="train", streaming=True)
+    ds = ds.cast_column("audio", Audio(decode=False))
 
     for item in ds:
         meta = _item_to_meta(item)
@@ -575,24 +470,21 @@ def build_naturelm_dataset(
 
         label = _species_label(meta, species_pair, class_filter)
 
-        # Enforce per-class cap
         if max_samples_per_class is not None:
             if label_counts.get(label, 0) >= max_samples_per_class:
                 continue
 
-        # Extract activations
         audio = _audio_from_hf_item(item)
         acts = extract_all_layers(model, audio, max_frames=max_frames, rng=rng, mode=mode)
-        # mode="mean": (13, 768)   mode="raw": (13, n_frames, 768)
 
         if mode == "mean":
             for layer in range(NUM_LAYERS_TOTAL):
-                layer_X[layer].append(acts[layer])                            # (768,)
+                layer_X[layer].append(acts[layer])
                 layer_y[layer].append(np.array([label], dtype=np.int32))
         else:
             n_frames = acts.shape[1]
             for layer in range(NUM_LAYERS_TOTAL):
-                layer_X[layer].append(acts[layer])                            # (n_frames, 768)
+                layer_X[layer].append(acts[layer])
                 layer_y[layer].append(np.full(n_frames, label, dtype=np.int32))
 
         label_counts[label] = label_counts.get(label, 0) + 1
@@ -606,7 +498,6 @@ def build_naturelm_dataset(
             )
             print(f"  Collected {total} items ({counts_str})", flush=True)
 
-        # Stop early if all classes have hit the cap
         if max_samples_per_class is not None:
             if all(label_counts.get(l, 0) >= max_samples_per_class for l in range(len(label_names))):
                 print(f"  All classes reached cap of {max_samples_per_class}. Stopping.", flush=True)
@@ -618,23 +509,21 @@ def build_naturelm_dataset(
         flush=True,
     )
 
-    # Sample count check — raise before building arrays so error is clear
     _check_sample_counts(label_counts, label_names, min_samples_per_class)
 
-    # Stack into arrays
     if mode == "mean":
         dataset: dict[int, tuple[np.ndarray, np.ndarray]] = {
             layer: (
-                np.stack(layer_X[layer], axis=0),            # (n_items, 768)
-                np.concatenate(layer_y[layer], axis=0),       # (n_items,)
+                np.stack(layer_X[layer], axis=0),
+                np.concatenate(layer_y[layer], axis=0),
             )
             for layer in range(NUM_LAYERS_TOTAL)
         }
     else:
         dataset = {
             layer: (
-                np.concatenate(layer_X[layer], axis=0),       # (n_frames_total, 768)
-                np.concatenate(layer_y[layer], axis=0),        # (n_frames_total,)
+                np.concatenate(layer_X[layer], axis=0),
+                np.concatenate(layer_y[layer], axis=0),
             )
             for layer in range(NUM_LAYERS_TOTAL)
         }

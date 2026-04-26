@@ -74,7 +74,7 @@ def run() -> None:
 
     # 1. Load model
     print("Loading model...")
-    model = load_model("esp-aves2-eat-all")
+    model = load_model("esp_aves2_eat_all")
 
     # 2. Stream animal samples from NatureLM
     print(f"\nStreaming {N_SAMPLES} animal samples from NatureLM...")
@@ -116,7 +116,7 @@ def run() -> None:
     all_ids    = animal_ids + music_ids
     frames_per_recording = {
         **{aid: 1 for aid in animal_ids},   # already mean-pooled
-        **frames_music,
+        **{mid: 1 for mid in music_ids},    # also mean-pooled above
     }
 
     # 6. Train LORO probes across all layers
