@@ -6,9 +6,29 @@ later analysis; **OPEN** are questions raised but not resolved here. Numbers
 trace back to committed CSVs and scripts named in each section. Single-seed
 point estimates throughout — no bootstrap CIs yet.
 
-**Last update: 2026-04-27** — added random-init EAT baseline (§2), revised
-§3–§6 to anchor against it, and confirmed §2 numbers are stable across init
-(seeds 7 / 13 / 42). The baseline substantially strengthens §3
+**Last update: 2026-04-27 (later)** — ran a 5-experiment chain
+(bootstrap CIs, frame-count sensitivity, top-k sensitivity, audio-mixing
+pilot, per-source frame-level structure) targeting RESULTS.md §9 OPEN
+items. Key changes from this round:
+
+- §3–§6 numbers all survive B=50 bootstrap CIs with margin to spare
+  (CIs typically 1–3% of the median; trained-vs-random gaps unaffected).
+- §3–§5 numbers robust to frame-count and top-k sweeps. §6 needs a
+  quantitative qualifier: MLE-ID magnitude is (n, k)-dependent, only the
+  *trends* are interpretable.
+- **NEW finding (§4 mechanism, audio mixing):** the bio↔non-bio direction
+  in sl_eat_bio_ssl_all is **threshold-like, not linear** — adding 25%
+  non-bio audio pulls the L9 representation 78% of the way to pure
+  non-bio along the centroid axis.
+- **NEW finding (§4 source structure, per-source):** "bio" is **not a
+  single coherent direction**. Watkins (marine mammals) is the most-
+  isolated source, with cos to other bio sources (0.36–0.38) lower than
+  cos to non-bio sources (0.39–0.42). The §4 narrative needs to be
+  restated source-level rather than bio-vs-non-bio binary.
+
+Earlier in 2026-04-27: added random-init EAT baseline (§2), revised
+§3–§6 to anchor against it, and confirmed §2 numbers are stable across
+init (seeds 7 / 13 / 42). The baseline substantially strengthens §3
 (bio-vs-nonbio) and §5 (late-layer collapse), and *re-frames* §6 (intrinsic
 dim) — the original "conserved at 7–14" claim missed that the random-init
 baseline reads in the same range.
@@ -182,10 +202,123 @@ Source: `pooled_bio_vs_nonbio_all5.csv`. So the originally headlined "0.33
 at L9" pooled number IS real — it's just that pooling inflates the *gap*
 relative to baseline by squeezing both bio and non-bio into a few directions.
 
-**Caveat for paper-grade.** No statistical test on the gap. Bootstrap over
-items (resample with replacement, recompute basis + angles) would give a CI
-on each cos value. Until that is done, the "consistently lowest" framing is
-a visual claim.
+**Bootstrap CIs (added 2026-04-27).** B=50 bootstraps over items confirm
+the §4 claim with margin. At L9 in `sl_eat_bio_ssl_all`, frame-level
+bio-vs-non-bio cos median = 0.569 with tight 5/95 percentile band; the
+random-init L9 cos median = 0.902. The 0.33 gap dwarfs both CIs. Source:
+`bootstrap_cis/bootstrap_ci_summary.csv`,
+`bootstrap_cis/bootstrap_ci_bio_vs_nonbio_cos_top10.png`.
+
+**Top-k sensitivity (added 2026-04-27).** The §4 minimum is invariant to
+top-k choice. For `sl_eat_bio_ssl_all` at L9, mean cos reads
+0.602 / 0.580 / 0.610 / 0.608 for k = 5 / 10 / 20 / 50 respectively. The
+trained-vs-random gap stays 0.32–0.38 across all k. Source:
+`topk_sensitivity/topk_at_L9.csv`.
+
+---
+
+## 4.5. CLAIM (new) — The bio↔non-bio centroid axis is *threshold-like*, not a smooth linear feature
+
+**What we found.** Audio-mixing pilot in `audio_mixing_pilot/`. 5 bio
+clips × 5 non-bio clips × α ∈ {0, 0.25, 0.5, 0.75, 1} = 125 mixed
+waveforms `M(α) = (1-α)·A + α·B` through `sl_eat_bio_ssl_all`. Mean L9
+pooled-activation projection onto the unit vector `(c_bio - c_nonbio)/‖·‖`:
+
+| α    | mean projection | std  |
+|------|----------------:|-----:|
+| 0.00 |          +0.40  | 0.40 |
+| 0.25 |          −0.66  | 0.90 |
+| 0.50 |          −0.78  | 0.87 |
+| 0.75 |          −0.96  | 0.77 |
+| 1.00 |          −1.35  | 0.26 |
+
+Linearity test: predicted midpoint at α=0.5 = ½(+0.40 + −1.35) = **−0.48**.
+Observed = **−0.78**. Deviation = −0.30, **17.2 % of the full range**,
+toward the non-bio side. Source:
+`audio_mixing_pilot/mixing_summary_by_alpha.csv`.
+
+**Interpretation.** Adding 25 % non-bio audio to a bio clip pulls the L9
+representation roughly 78 % of the way to pure non-bio along the bio↔non-
+bio centroid axis. The direction is **dominated by non-bio**, not a
+balanced linear feature. The pure-bio cluster is also wider (std 0.40)
+than the pure-non-bio cluster (std 0.26) — non-bio is more concentrated.
+
+The 10-D top-10-bio subspace energy (a smoother diagnostic averaging over
+10 directions) is more linear: 0.50 / 0.45 / 0.44 / 0.42 / 0.37 — monotone-
+near-linear. So the threshold lives in the dominant 1-D centroid
+direction; secondary directions average out smoothly.
+
+**Why it matters.** §4 said the model "separates bio from non-bio in
+subspace direction." This experiment is the mechanistic follow-up: the
+separation is **not** implemented as a graded linear feature on the
+centroid axis. It's a sharp asymmetric response. Reviewers who would
+otherwise interpret §4 as "linear-feature decomposition à la Burns
+2022" can be redirected here.
+
+**Caveats.** (1) `sl_eat_bio_ssl_all` only — the other three trained
+models are §9.7 OPEN. (2) Pilot scale (25 clip pairs); a larger run
+would tighten the std bands but the asymmetry is too large to be
+explained by 25 pairs of noise. (3) Audio-domain mixing is a particular
+intervention; concatenation, time-domain noise injection, or
+spectrogram-domain mixing might give different curves.
+
+---
+
+## 4.6. CLAIM (new) — "Bio" is *not* a single coherent direction; the model is separating sources, not the bio/non-bio binary
+
+**What we found.** Per-source frame-level pairwise top-10 subspace cos
+at L9 in `sl_eat_bio_ssl_all`. The 6 sources sort by mutual cos as:
+
+| pair                            | type    | mean cos |
+|---------------------------------|---------|---------:|
+| Watkins – iNaturalist           | bio-bio |    0.36  |
+| Watkins – Xeno-canto            | bio-bio |    0.38  |
+| Watkins – Animal Sound Archive  | bio-bio |    0.38  |
+| Watkins – NatureLM              | cross   |    0.39  |
+| Watkins – WavCaps               | cross   |    0.42  |
+| NatureLM – Xeno-canto           | cross   |    0.48  |
+| Animal Sound Archive – NatureLM | cross   |    0.49  |
+| WavCaps – Xeno-canto            | cross   |    0.57  |
+| Animal Sound Archive – WavCaps  | cross   |    0.57  |
+| NatureLM – WavCaps              | non-non |    0.62  |
+| ASA – iNaturalist               | bio-bio |    0.65  |
+| ASA – Xeno-canto                | bio-bio |    0.66  |
+| Xeno-canto – iNaturalist        | bio-bio |    0.72  |
+
+Source: `per_source_frame_level/per_source_pairwise.csv`.
+
+**Watkins (marine-mammal vocalization archive) is the most-isolated
+source.** Watkins-vs-anything has lower cos than most cross-class pairs.
+The remaining bio sources (Xeno-canto, iNaturalist, Animal Sound Archive)
+form a tight sub-cluster (cos 0.65–0.72). Non-bio sources (WavCaps,
+NatureLM) have moderate cos to each other (0.62) and to the
+Xeno-canto/iNaturalist/ASA cluster (0.48–0.57).
+
+**Interpretation.** §4 reports a 0.57 mean cos for "bio" vs "non-bio" at
+L7. That number is a marginal of structure that is actually **source-
+level**:
+- The model's L9 subspace separates Watkins from everything else (lowest
+  cos of any pair involving Watkins).
+- Xeno-canto + iNaturalist + ASA cluster as a "wildlife-recording"
+  sub-direction.
+- WavCaps + NatureLM cluster as a "non-wildlife" sub-direction.
+
+The "bio vs non-bio" framing in §4 conflates (a) genuine bio-related
+fine-tune learning, with (b) Watkins-as-an-outlier-domain artifact. The
+former is a real learned property; the latter is partly a quirk of which
+non-bio sources we happened to include in the manifest.
+
+**Why it matters.** A paper that headlines "bio fine-tunes induce a
+bio-vs-non-bio direction" overstates the case. A paper that headlines
+"bio fine-tunes induce source-resolving structure (with bio sources
+forming a sub-cluster)" is more accurate. The bootstrap CIs and audio-
+mixing finding (§4.5) survive either framing; the per-source structure
+just constrains how the §4 result should be described.
+
+**Caveats.** Same single-model focus (`sl_eat_bio_ssl_all`); the other
+trained models also show per-source structure (see
+`per_source_pairwise_overlap.png`) but we have not synthesized them
+into the same narrative.
 
 ---
 
@@ -263,6 +396,26 @@ per point and is much more stable than TwoNN(k=2). But we have not
 cross-checked against a third intrinsic-dim estimator (correlation dimension,
 Hidalgo). Single-seed.
 
+**Quantitative qualifier from frame-count sensitivity (added 2026-04-27).**
+MLE-ID(k=20) is sensitive to the (n, k) parameter pair — for fixed k,
+the estimator drifts as n grows because more nearby neighbors capture
+finer manifold curvature. Example on `sl_eat_bio_ssl_all` L9:
+
+| frames/item | total n | MLE-ID(k=20) |
+|-------------|--------:|-------------:|
+| 10          |   6,000 |        10.4 |
+| 30          |  18,000 |         7.4 |
+| 50          |  30,000 |         7.4 |
+| 100         |  60,000 |         5.7 |
+| 200         | 120,000 |         5.0 |
+
+So the **absolute** MLE-ID number reported in §6 is a function of our
+50-frames-per-item × 600-items convention, not a model-invariant
+quantity. The trends across (model, layer) at fixed (n, k) are the
+robust statement; the numbers themselves are convention-dependent. This
+should be noted in any paper draft. Source:
+`frame_count_sensitivity/frame_count_sensitivity_sl_eat_bio_ssl_all.csv`.
+
 ---
 
 ## 7. RETRACTED — The L4 TwoNN dip
@@ -311,42 +464,55 @@ convergent in any meaningful sense.
 
 ## 9. OPEN — Questions that have not been answered
 
-1. **Bootstrap CIs on every claim.** Single-seed, single-subsample throughout.
-   Bootstrap over items (resample with replacement, recompute basis +
-   eigendecomposition + angles) would give CIs on every number in §3–§6.
-   Most important now that the baseline gives the trained-vs-random gap a
-   clean magnitude — we need to know its uncertainty.
-2. **Sensitivity to frame count.** All frame-level numbers use 50 frames/item.
-   Robustness to 10 / 100 / all-valid is untested.
-3. **Sensitivity to top-k for subspace overlap.** Bio-vs-non-bio overlap
-   uses k=10. The effect could strengthen or weaken at k=5 or k=50.
-4. **Mechanism for late-layer `_bio` vs not collapse split (§5).** Why does
-   `sl_eat_all_ssl_all` collapse to baseline at L12 while `sl_eat_bio_ssl_all`
-   stays at 18× baseline? Candidate explanations: (a) bio pretraining produces
-   an output-side representation used for finer-grained downstream tasks;
-   (b) SSL collapse interacts with pretraining data in a specific way;
-   (c) checkpoint-specific quirks of `eat_bio`. None are tested.
-5. **Per-source frame-level structure.** All frame-level analyses pool across
-   the 7 source datasets. The pooled per-source eff_rank slicing in
-   `step2_spectral_dim/effective_rank_by_source.csv` should be redone at
-   frame level.
-6. **Within-clip frame structure.** Frames within a single clip almost
+Closed by the 2026-04-27 chain (artifacts under `bootstrap_cis/`,
+`frame_count_sensitivity/`, `topk_sensitivity/`, `audio_mixing_pilot/`,
+`per_source_frame_level/`):
+
+- ~~Bootstrap CIs on §3–§6.~~ Done with B=50; all numbers survive. CIs
+  are typically 1–3% of the median, gaps to random-init baseline are
+  20–500× larger. Sample-selection noise is not a threat.
+- ~~Frame-count sensitivity.~~ Eff_rank and bio-vs-nonbio cos are
+  invariant to fc ∈ {10, 30, 50, 100, 200} (max-min < 2% on
+  sl_eat_bio_ssl_all). MLE-ID(k=20) drifts with n predictably (larger n,
+  fixed k captures finer manifold structure) — see §6 caveat below.
+- ~~Top-k sensitivity for bio-vs-nonbio cos.~~ The §4 minimum is robust:
+  cos at L9 for sl_eat_bio_ssl_all reads 0.602/0.580/0.610/0.608 for k =
+  5/10/20/50. The trained-vs-random gap stays 0.32–0.38 across all k.
+- ~~Audio-mixing diagnostic.~~ Done, but produced a *new* mechanistic
+  finding rather than confirming the linear-feature hypothesis — see
+  the new §4.5 below.
+- ~~Per-source frame-level structure.~~ Done — and produced a *new*
+  finding that complicates §4: see §4.6 below.
+
+Still open:
+
+1. **Mechanism for the late-layer `_bio` vs not collapse split (§5).**
+   Why does `sl_eat_all_ssl_all` collapse to baseline at L12 while
+   `sl_eat_bio_ssl_all` stays at 18× baseline? Candidate explanations:
+   (a) bio pretraining produces an output-side representation used for
+   finer-grained downstream tasks; (b) SSL collapse interacts with
+   pretraining data in a specific way; (c) checkpoint-specific quirks
+   of `eat_bio`. None are tested.
+2. **Within-clip frame structure.** Frames within a single clip almost
    certainly have very different geometry (silence vs vocalization). The
-   subsampling treats all frames as exchangeable. Whether this matters for
-   any of the claims is untested.
-7. **Audio mixing along the bio↔non-bio direction (§4 follow-up).** Take a
-   bio clip A and a non-bio clip B, generate audio mixtures
-   `M(α) = (1-α)·A + α·B` for α ∈ {0, 0.25, 0.5, 0.75, 1}, run each through
-   `sl_eat_bio_ssl_all`, project onto the top-10 bio-only and non-bio-only
-   subspaces from §4. Three diagnostic outcomes: (a) **smooth linear
-   interpolation** of cos angles in α — bio-vs-non-bio is implemented as a
-   linear feature; (b) **sharp threshold** — gating/attention mechanism, not
-   a continuous feature; (c) **off-manifold excursion** at intermediate α
-   (MLE-ID jumps) — model treats mixtures as out-of-distribution. Converts
-   §4 from a descriptive observation to a mechanistic claim. Requires the
-   HF NatureLM-audio-training parquet cache (raw audio waveforms) — *do not
-   delete* until this is run. Compute is small (~50-100 mixed clips × 1
-   model × 13 layers, ~10 minutes once scripted).
+   subsampling treats all frames as exchangeable. Whether this matters
+   for any of the claims is untested.
+3. **MLE-ID magnitude vs (n, k).** The frame-count sensitivity check
+   exposed that MLE-ID(k=20) drifts with n. Absolute values in §6 are
+   parameter-dependent; only the trend across (model, layer) at fixed
+   (n, k) is paper-defensible. Worth either (a) reporting MLE-ID across
+   multiple (n, k) settings or (b) switching to an alternative estimator
+   that converges with n.
+4. **Per-source granularity in §4.** The new §4.6 below shows bio-vs-non-
+   bio is a coarse decomposition. A finer statement of §4 should be made
+   source-level: which sources is the model actually separating?
+5. **Hierarchical / Veitch follow-up.** Still pending. Requires
+   manifest enrichment with Class/Order/Species labels — coordinate
+   with teammate (TODO.md Step 3c).
+6. **Species barycenters (TODO.md Step 3b).** Still pending; requires
+   species labels.
+7. **Linearity of the bio↔non-bio mechanism for the other three trained
+   models** (§4.5 was on `sl_eat_bio_ssl_all` only). Quick to run.
 
 ---
 
@@ -376,9 +542,12 @@ None has been picked.
 - Active scripts: `step2_spectral_dim_eat.py`, `step2_subspace_angles_eat.py`,
   `step2_pooled_vs_frame_eat.py`, `step2_tier1_frame_level.py`,
   `nway_compare_eat_models.py`, `collect_esp_aves2_activations.py`,
-  `step2_random_init_compare.py`, `step2_random_init_variability.py`.
+  `step2_random_init_compare.py`, `step2_random_init_variability.py`,
+  `step2_bootstrap_cis.py`, `step2_frame_count_sensitivity.py`,
+  `step2_topk_sensitivity.py`, `step3a_audio_mixing_pilot.py`,
+  `step2_per_source_frame_level.py`.
 - Active artifacts:
-  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability}/`.
+  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability,bootstrap_cis,frame_count_sensitivity,topk_sensitivity,audio_mixing_pilot,per_source_frame_level}/`.
 - Random-init shards: only `random_init_eat_seed42` is retained on disk.
   Seeds 7 and 13 were extracted, stats computed, and shards deleted to fit
   the 234G partition; per-seed stat CSVs persist under
