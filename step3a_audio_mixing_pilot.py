@@ -73,6 +73,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n_nonbio", type=int, default=N_NONBIO)
     p.add_argument("--top_k", type=int, default=TOP_K)
     p.add_argument("--frames_per_item", type=int, default=FRAMES_PER_ITEM)
+    p.add_argument("--device", type=str, default="cpu",
+                   help="torch device for the model + forward passes (e.g. cuda).")
     return p.parse_args()
 
 
@@ -186,8 +188,8 @@ def main() -> None:
         print(f"    non:  {r.get('source_dataset')}/{r.get('file_name')}", flush=True)
 
     # Step C: load the focal model + register the layer hook
-    print(f"\nLoading {args.model}...", flush=True)
-    model = load_eat_model(args.model, device="cpu")
+    print(f"\nLoading {args.model} on device={args.device!r}...", flush=True)
+    model = load_eat_model(args.model, device=args.device)
     layer_name = DEFAULT_LAYER_NAMES[args.layer_idx]
     hooks, hook_outputs = register_hooks(model, [layer_name])
 
@@ -214,6 +216,7 @@ def main() -> None:
                 eat_input, n_frames = waveform_to_eat_input(
                     mixed, norm_mean=spec.norm_mean, norm_std=spec.norm_std
                 )
+                eat_input = eat_input.to(args.device)
                 hook_outputs.clear()
                 with torch.no_grad():
                     _ = model.extract_features(eat_input)
