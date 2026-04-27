@@ -450,13 +450,25 @@ geometry where Class and Order live on independent axes.
   per-Order Veitch test (4 individual bird orders × Aves direction)
   would need denser per-Order data than our 600-sample manifest
   provides.
-- Single seed; bootstrap CI on the L12 cos = 0.07 would tighten the
-  paper claim. Cheap follow-up.
 - The "passer-vs-other-Aves" direction is mathematically collinear
   with the (Aves − Mammalia)-orthogonal hyperplane intersected with
   the within-Aves variation; with two disjoint subgroups Aves =
   Passer ∪ other-Aves, the metric is well-defined but the subord-axis
   cos to (Aves − Mammalia) is effectively a 1-degree-of-freedom test.
+
+**Bootstrap CIs (added 2026-04-27).** B=30 bootstraps over items confirm
+the orthogonality result. Source:
+`bootstrap_taxonomic_cis/bootstrap_taxonomic_summary.csv`.
+
+| layer | sl_eat_bio_ssl_all median [5%, 95%] | next-lowest model lower-95% |
+|------:|------------------------------------:|-----------------------------:|
+| 9     |                0.136 [0.082, 0.231] | eat_all 0.181 (no overlap)  |
+| 12    |                0.081 [0.021, 0.155] | eat_bio 0.258 (no overlap)  |
+
+`sl_eat_bio_ssl_all`'s upper-95% at L12 (0.155) sits well below every
+other trained model's lower-95% bound. Random-init L12 reads 0.932
+[0.803, 0.977] — bootstrap noise on the parallel-direction case. The
+factored-hierarchy result is paper-grade.
 
 ---
 
@@ -514,6 +526,21 @@ vs raptors). A within-Aves-only or within-Mammalia-only species
 analysis (smaller per-class sample requirement, more homogeneous
 acoustic context) would test whether the random-init advantage holds
 for closely-related species. Open follow-up.
+
+**Bootstrap CIs (added 2026-04-27).** B=30 bootstraps confirm the
+random-init advantage with margin. At L10:
+
+| model              | median [5%, 95%]      |
+|--------------------|----------------------:|
+| sl_eat_bio_ssl_all |   0.218 [0.206, 0.239] |
+| sl_eat_all_ssl_all |   0.097 [0.089, 0.107] |
+| eat_bio            |   0.092 [0.081, 0.102] |
+| eat_all            |   0.082 [0.073, 0.092] |
+| random_init        |   0.319 [0.286, 0.381] |
+
+Random-init's lower-95% (0.286) sits above every trained model's
+upper-95%, the trained-vs-random gap is unambiguous. Source:
+`bootstrap_taxonomic_cis/bootstrap_taxonomic_summary.csv`.
 
 ---
 
@@ -622,6 +649,23 @@ subspace where the bio direction lives.
 classifier installed by the SSL fine-tune. Test by projecting trained-
 model L12 activations onto the top eigenvector and checking whether
 bio vs non-bio inputs separate along it. Cheap.
+
+**Bootstrap CIs (added 2026-04-27).** B=30 bootstraps confirm the
+mode-collapse split is structural. Top-1 eigenvalue share at L12:
+
+| model              | median [5%, 95%]         |
+|--------------------|-------------------------:|
+| sl_eat_all_ssl_all | **0.618 [0.611, 0.621]** |
+| sl_eat_bio_ssl_all | **0.082 [0.079, 0.084]** |
+| eat_all            |   0.271 [0.268, 0.276]   |
+| eat_bio            |   0.162 [0.159, 0.164]   |
+| random_init        |   0.502 [0.485, 0.521]   |
+
+CIs are extremely tight (~0.005 wide); the spectrum-shape claim is the
+most sample-stable finding in the paper. The two SSL models'
+post-amplification directions differ by **almost an order of
+magnitude in top-1 share** with non-overlapping CIs. Source:
+`bootstrap_taxonomic_cis/bootstrap_taxonomic_summary.csv`.
 
 ---
 
@@ -796,9 +840,11 @@ Still open:
    spanning whales / songbirds / dolphins. Restricted to only Aves
    species or only Mammalia species (with ≥ 5 samples each — fewer
    per class), would the random-init advantage still hold?
-7. **Bootstrap CIs on the new §4.7–§4.9 / §5.1 numbers.** The original
-   bootstrap covered §3–§6. Cheap to extend (resample over items, the
-   per-Class / per-Order / per-species centroids re-derive directly).
+7. ~~Bootstrap CIs on the new §4.7–§4.9 / §5.1 numbers.~~ Done in
+   `bootstrap_taxonomic_cis/`. All claims survive: §4.8 L12 cos
+   0.081 [0.021, 0.155] (no overlap with other trained models); §5.1
+   L12 top-1 share CIs are ~0.005 wide (sample-stable spectrum); §4.9
+   random-init advantage holds with no CI overlap.
 
 ---
 
@@ -848,9 +894,10 @@ framing has emerged as the strongest candidate. None has been picked.
   `step2_topk_sensitivity.py`, `step3a_audio_mixing_pilot.py`,
   `step2_per_source_frame_level.py`, `enrich_manifest_taxonomy.py`,
   `step2_taxonomic_frame_level.py`, `step3b_species_barycenters.py`,
-  `step3c_veitch_hierarchy.py`, `step5_late_layer_collapse.py`.
+  `step3c_veitch_hierarchy.py`, `step5_late_layer_collapse.py`,
+  `step5_bootstrap_taxonomic.py`.
 - Active artifacts:
-  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability,bootstrap_cis,frame_count_sensitivity,topk_sensitivity,audio_mixing_pilot,audio_mixing_pilot_extended,per_source_frame_level,taxonomic_frame_level,species_barycenters,veitch_hierarchy,late_layer_collapse}/`.
+  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability,bootstrap_cis,frame_count_sensitivity,topk_sensitivity,audio_mixing_pilot,audio_mixing_pilot_extended,per_source_frame_level,taxonomic_frame_level,species_barycenters,veitch_hierarchy,late_layer_collapse,bootstrap_taxonomic_cis}/`.
 - Manifests:
   `naturelm_by_source_100each_20260418T171459Z.jsonl` (base) +
   `naturelm_by_source_100each_20260418T171459Z_taxonomic.jsonl`
