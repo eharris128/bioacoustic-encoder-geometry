@@ -29,17 +29,22 @@ Done (all four models, mean-pooled, in `artifacts/comparisons/.../nway_eat_all4/
 
 Outstanding:
 
-- [ ] **Within-model L2-norm distributions** per `(model, layer)`. We have `norm_by_layer_source.csv` (cross-model deltas) but no within-model histograms, so the deltas are still uninterpretable on their own.
-- [ ] **PCA / subspace alignment** across layers (within a model) and across models (within a layer). CKA covers cross-model similarity but not subspace angles or top-k overlap. Doubles as the natural test for the bio-vs-non-bio subspace question (see Step 2 follow-ups below).
-- [ ] **Pooled vs frame-level** sanity check on one model. Everything so far is mean-pooled; the TwoNN-vs-effective-rank gap suggests pooling understates manifold curvature. Worth a quick comparison on a few hundred items before deciding whether to commit to frame-level for any later step.
+- [x] **Within-model L2-norm distributions** per `(model, layer)` — done in `10601b9` (`step2_subspace_angles_eat.py`); histograms in `step2_subspace_angles/l2_norm_histograms.png`, percentiles in `l2_norm_per_layer.csv`.
+- [x] **PCA / subspace alignment** across layers (within a model) and across models (within a layer) — done in `10601b9`; across-layer heatmaps + across-model curves in `step2_subspace_angles/`.
+- [x] **Pooled vs frame-level** sanity check on `sl_eat_bio_ssl_all` — done in `11f9920` (`step2_pooled_vs_frame_eat.py`). **Pooling materially distorts geometry**: frame-level eff. rank is 2–6× larger than pooled at every layer, while frame-level TwoNN drops to ~3–5 vs ~9–11 pooled. Both directions matter — pooling overstates intrinsic dim and understates linear spread.
 
 ### Step 2 follow-ups motivated by current findings
 
 From the `dd24541` Step 2 results:
 
-- [ ] **`sl_eat_bio_ssl_all` uses a 2–3× wider linear subspace** (eff. rank ~148 at L9 vs ~75 next-best) **and shows the largest nature-vs-non-nature gap.** Test directly with subspace angles between the bio-only and non-bio-only embedding subspaces, per layer. This is the same script as the missing PCA-alignment item above — bundle them.
-- [ ] **TwoNN ID stays ~8–12 everywhere** while linear effective rank swings 3–148. Curved low-dim manifold inside a wide linear subspace; motivates the pooled-vs-frame comparison above on `sl_eat_bio_ssl_all` specifically.
-- [ ] **L0 effective rank ≈ 3 across all four models.** Likely shared input tokenizer; confirm with a subspace-angle check at L0 specifically (cheap once the subspace-angle script exists).
+- [x] **`sl_eat_bio_ssl_all` uses a 2–3× wider linear subspace** — confirmed in `10601b9`. Bio-vs-non-bio subspace cos drops to **0.33 at L9** (same layer as eff. rank ~148), vs 0.55–0.70 for the other three models. The bio fine-tune is genuinely separating bio from non-bio in subspace direction, not just expanding both.
+- [x] **TwoNN ID stays ~8–12 everywhere** while linear effective rank swings 3–148 — addressed via the pooled-vs-frame comparison in `11f9920`. Frame-level TwoNN is ~3–5 (much lower), confirming the curved low-dim manifold story; the pooled-level TwoNN was a measurement artifact of mean-pooling.
+- [x] **L0 effective rank ≈ 3 across all four models** — **rejected as a "shared tokenizer" story** in `10601b9`. Three models share L0 subspace at cos 0.91–0.98, but `eat_bio` is ~orthogonal to all of them (cos 0.28–0.32). Each model independently learned a low-dim L0 subspace; they happen to land at similar dimensionality but not the same direction.
+
+### Step 2 outstanding (new, from this round of findings)
+
+- [ ] **TwoNN sanity check at frame level**. The frame-level TwoNN curve in `step2_pooled_vs_frame/` shows an unstable point at L4 (drops to ~2.6 sandwiched between 10.1 and 7.4). With k=2 NN over 10k subsampled rows the estimator can be jumpy. Worth re-running with a larger neighbor count or MLE-ID as a cross-check before any claim about layerwise TwoNN trends.
+- [ ] **Generalize the pooled-vs-frame check to the other three models**. The story above is currently sl_eat_bio_ssl_all only. If pooling distorts geometry on the other three the same way, the original spectral-dim conclusions need to be re-stated against frame-level numbers. If only sl_eat_bio is distorted, that itself is a finding.
 
 ## Roadmap Section 2 — Probes + attribution (next)
 
