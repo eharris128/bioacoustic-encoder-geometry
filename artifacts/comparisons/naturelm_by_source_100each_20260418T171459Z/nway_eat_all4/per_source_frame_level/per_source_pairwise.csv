@@ -1,0 +1,976 @@
+model,layer_idx,source_a,source_b,is_bio_a,is_bio_b,same_bio_class,mean_cos_principal_angles,k
+eat_all,0,Animal Sound Archive,NatureLM,True,False,False,0.8810674149077942,10
+eat_all,0,Animal Sound Archive,Watkins,True,True,True,0.8032941342137304,10
+eat_all,0,Animal Sound Archive,WavCaps,True,False,False,0.9104827506548647,10
+eat_all,0,Animal Sound Archive,Xeno-canto,True,True,True,0.9664914594544414,10
+eat_all,0,Animal Sound Archive,iNaturalist,True,True,True,0.8883327515329296,10
+eat_all,0,NatureLM,Watkins,False,True,False,0.8066482046335294,10
+eat_all,0,NatureLM,WavCaps,False,False,True,0.9563008333470722,10
+eat_all,0,NatureLM,Xeno-canto,False,True,False,0.8695463840714753,10
+eat_all,0,NatureLM,iNaturalist,False,True,False,0.8941282697406375,10
+eat_all,0,Watkins,WavCaps,True,False,False,0.8416710735608701,10
+eat_all,0,Watkins,Xeno-canto,True,True,True,0.7940668921471065,10
+eat_all,0,Watkins,iNaturalist,True,True,True,0.836624744266701,10
+eat_all,0,WavCaps,Xeno-canto,False,True,False,0.8840129434023458,10
+eat_all,0,WavCaps,iNaturalist,False,True,False,0.9270842570615307,10
+eat_all,0,Xeno-canto,iNaturalist,True,True,True,0.8859079253150591,10
+eat_all,1,Animal Sound Archive,NatureLM,True,False,False,0.9146745232312847,10
+eat_all,1,Animal Sound Archive,Watkins,True,True,True,0.6840256018522186,10
+eat_all,1,Animal Sound Archive,WavCaps,True,False,False,0.962418266093394,10
+eat_all,1,Animal Sound Archive,Xeno-canto,True,True,True,0.927026957256294,10
+eat_all,1,Animal Sound Archive,iNaturalist,True,True,True,0.8983226009040763,10
+eat_all,1,NatureLM,Watkins,False,True,False,0.6850293720544723,10
+eat_all,1,NatureLM,WavCaps,False,False,True,0.9148432821434985,10
+eat_all,1,NatureLM,Xeno-canto,False,True,False,0.8500940646795725,10
+eat_all,1,NatureLM,iNaturalist,False,True,False,0.8514008891125405,10
+eat_all,1,Watkins,WavCaps,True,False,False,0.7295080823758593,10
+eat_all,1,Watkins,Xeno-canto,True,True,True,0.7008568611036862,10
+eat_all,1,Watkins,iNaturalist,True,True,True,0.7185835768470414,10
+eat_all,1,WavCaps,Xeno-canto,False,True,False,0.9327026083264013,10
+eat_all,1,WavCaps,iNaturalist,False,True,False,0.898185312680245,10
+eat_all,1,Xeno-canto,iNaturalist,True,True,True,0.9338819744263264,10
+eat_all,2,Animal Sound Archive,NatureLM,True,False,False,0.747735520178338,10
+eat_all,2,Animal Sound Archive,Watkins,True,True,True,0.6813285219648518,10
+eat_all,2,Animal Sound Archive,WavCaps,True,False,False,0.8196992139573505,10
+eat_all,2,Animal Sound Archive,Xeno-canto,True,True,True,0.8308956581482615,10
+eat_all,2,Animal Sound Archive,iNaturalist,True,True,True,0.8264294809023773,10
+eat_all,2,NatureLM,Watkins,False,True,False,0.7454224928042361,10
+eat_all,2,NatureLM,WavCaps,False,False,True,0.7808755150300218,10
+eat_all,2,NatureLM,Xeno-canto,False,True,False,0.7068833145070417,10
+eat_all,2,NatureLM,iNaturalist,False,True,False,0.7427912310296874,10
+eat_all,2,Watkins,WavCaps,True,False,False,0.7143737745091912,10
+eat_all,2,Watkins,Xeno-canto,True,True,True,0.7005391713102809,10
+eat_all,2,Watkins,iNaturalist,True,True,True,0.7243694154379652,10
+eat_all,2,WavCaps,Xeno-canto,False,True,False,0.8598234027635041,10
+eat_all,2,WavCaps,iNaturalist,False,True,False,0.858779831840981,10
+eat_all,2,Xeno-canto,iNaturalist,True,True,True,0.9258295434836084,10
+eat_all,3,Animal Sound Archive,NatureLM,True,False,False,0.751449063120442,10
+eat_all,3,Animal Sound Archive,Watkins,True,True,True,0.7026763010227851,10
+eat_all,3,Animal Sound Archive,WavCaps,True,False,False,0.8349341348729908,10
+eat_all,3,Animal Sound Archive,Xeno-canto,True,True,True,0.88236507138294,10
+eat_all,3,Animal Sound Archive,iNaturalist,True,True,True,0.8689248062370085,10
+eat_all,3,NatureLM,Watkins,False,True,False,0.7548065884425217,10
+eat_all,3,NatureLM,WavCaps,False,False,True,0.8258318630608518,10
+eat_all,3,NatureLM,Xeno-canto,False,True,False,0.7144589952963825,10
+eat_all,3,NatureLM,iNaturalist,False,True,False,0.717035049813085,10
+eat_all,3,Watkins,WavCaps,True,False,False,0.7593438289657539,10
+eat_all,3,Watkins,Xeno-canto,True,True,True,0.6881604472340123,10
+eat_all,3,Watkins,iNaturalist,True,True,True,0.6792812479149224,10
+eat_all,3,WavCaps,Xeno-canto,False,True,False,0.8198107852548635,10
+eat_all,3,WavCaps,iNaturalist,False,True,False,0.8189107440200418,10
+eat_all,3,Xeno-canto,iNaturalist,True,True,True,0.8968992274578879,10
+eat_all,4,Animal Sound Archive,NatureLM,True,False,False,0.7256964402329464,10
+eat_all,4,Animal Sound Archive,Watkins,True,True,True,0.6294738164370648,10
+eat_all,4,Animal Sound Archive,WavCaps,True,False,False,0.8267768950883252,10
+eat_all,4,Animal Sound Archive,Xeno-canto,True,True,True,0.8075129390347213,10
+eat_all,4,Animal Sound Archive,iNaturalist,True,True,True,0.8320015110978053,10
+eat_all,4,NatureLM,Watkins,False,True,False,0.6639728648165041,10
+eat_all,4,NatureLM,WavCaps,False,False,True,0.8203850377098686,10
+eat_all,4,NatureLM,Xeno-canto,False,True,False,0.6716239926864807,10
+eat_all,4,NatureLM,iNaturalist,False,True,False,0.6741321911181346,10
+eat_all,4,Watkins,WavCaps,True,False,False,0.7104171157259358,10
+eat_all,4,Watkins,Xeno-canto,True,True,True,0.6594866952145154,10
+eat_all,4,Watkins,iNaturalist,True,True,True,0.6342671348421972,10
+eat_all,4,WavCaps,Xeno-canto,False,True,False,0.7730342454380572,10
+eat_all,4,WavCaps,iNaturalist,False,True,False,0.7692681904078681,10
+eat_all,4,Xeno-canto,iNaturalist,True,True,True,0.866655173465972,10
+eat_all,5,Animal Sound Archive,NatureLM,True,False,False,0.7322030356403093,10
+eat_all,5,Animal Sound Archive,Watkins,True,True,True,0.5763045841776918,10
+eat_all,5,Animal Sound Archive,WavCaps,True,False,False,0.7982350226778767,10
+eat_all,5,Animal Sound Archive,Xeno-canto,True,True,True,0.8770589652474738,10
+eat_all,5,Animal Sound Archive,iNaturalist,True,True,True,0.8750441936571534,10
+eat_all,5,NatureLM,Watkins,False,True,False,0.6043059780574285,10
+eat_all,5,NatureLM,WavCaps,False,False,True,0.8077771065049898,10
+eat_all,5,NatureLM,Xeno-canto,False,True,False,0.7027484224301319,10
+eat_all,5,NatureLM,iNaturalist,False,True,False,0.7091605682925518,10
+eat_all,5,Watkins,WavCaps,True,False,False,0.6510553874662588,10
+eat_all,5,Watkins,Xeno-canto,True,True,True,0.5969466017137386,10
+eat_all,5,Watkins,iNaturalist,True,True,True,0.5957417009277206,10
+eat_all,5,WavCaps,Xeno-canto,False,True,False,0.820390097718699,10
+eat_all,5,WavCaps,iNaturalist,False,True,False,0.7997391359192159,10
+eat_all,5,Xeno-canto,iNaturalist,True,True,True,0.9100599952855107,10
+eat_all,6,Animal Sound Archive,NatureLM,True,False,False,0.640582504665484,10
+eat_all,6,Animal Sound Archive,Watkins,True,True,True,0.4725188639950183,10
+eat_all,6,Animal Sound Archive,WavCaps,True,False,False,0.7769634251889371,10
+eat_all,6,Animal Sound Archive,Xeno-canto,True,True,True,0.8012521596444131,10
+eat_all,6,Animal Sound Archive,iNaturalist,True,True,True,0.823934510175586,10
+eat_all,6,NatureLM,Watkins,False,True,False,0.49419574604272015,10
+eat_all,6,NatureLM,WavCaps,False,False,True,0.7329149779984708,10
+eat_all,6,NatureLM,Xeno-canto,False,True,False,0.6495566960349131,10
+eat_all,6,NatureLM,iNaturalist,False,True,False,0.6670594339201028,10
+eat_all,6,Watkins,WavCaps,True,False,False,0.5417659376125663,10
+eat_all,6,Watkins,Xeno-canto,True,True,True,0.4907807700771364,10
+eat_all,6,Watkins,iNaturalist,True,True,True,0.462154379609469,10
+eat_all,6,WavCaps,Xeno-canto,False,True,False,0.7738073261959995,10
+eat_all,6,WavCaps,iNaturalist,False,True,False,0.7870169633838495,10
+eat_all,6,Xeno-canto,iNaturalist,True,True,True,0.8445218998964779,10
+eat_all,7,Animal Sound Archive,NatureLM,True,False,False,0.6424427061428685,10
+eat_all,7,Animal Sound Archive,Watkins,True,True,True,0.46461993325195694,10
+eat_all,7,Animal Sound Archive,WavCaps,True,False,False,0.7603108645495659,10
+eat_all,7,Animal Sound Archive,Xeno-canto,True,True,True,0.7916739997685491,10
+eat_all,7,Animal Sound Archive,iNaturalist,True,True,True,0.79352163490457,10
+eat_all,7,NatureLM,Watkins,False,True,False,0.5081580303439504,10
+eat_all,7,NatureLM,WavCaps,False,False,True,0.7484509086604041,10
+eat_all,7,NatureLM,Xeno-canto,False,True,False,0.602184777567071,10
+eat_all,7,NatureLM,iNaturalist,False,True,False,0.5994826673135831,10
+eat_all,7,Watkins,WavCaps,True,False,False,0.5467389686756001,10
+eat_all,7,Watkins,Xeno-canto,True,True,True,0.48445032534461346,10
+eat_all,7,Watkins,iNaturalist,True,True,True,0.4885550663734269,10
+eat_all,7,WavCaps,Xeno-canto,False,True,False,0.740196320442398,10
+eat_all,7,WavCaps,iNaturalist,False,True,False,0.7421221972749575,10
+eat_all,7,Xeno-canto,iNaturalist,True,True,True,0.8273026061580053,10
+eat_all,8,Animal Sound Archive,NatureLM,True,False,False,0.714854393059667,10
+eat_all,8,Animal Sound Archive,Watkins,True,True,True,0.5489446647834528,10
+eat_all,8,Animal Sound Archive,WavCaps,True,False,False,0.7666487947547955,10
+eat_all,8,Animal Sound Archive,Xeno-canto,True,True,True,0.826696352658499,10
+eat_all,8,Animal Sound Archive,iNaturalist,True,True,True,0.8408263589761807,10
+eat_all,8,NatureLM,Watkins,False,True,False,0.5689679042374622,10
+eat_all,8,NatureLM,WavCaps,False,False,True,0.7761400715979239,10
+eat_all,8,NatureLM,Xeno-canto,False,True,False,0.6795125373055899,10
+eat_all,8,NatureLM,iNaturalist,False,True,False,0.7202547257242948,10
+eat_all,8,Watkins,WavCaps,True,False,False,0.6407855572561058,10
+eat_all,8,Watkins,Xeno-canto,True,True,True,0.574970059919484,10
+eat_all,8,Watkins,iNaturalist,True,True,True,0.5918057837585133,10
+eat_all,8,WavCaps,Xeno-canto,False,True,False,0.7463156734761391,10
+eat_all,8,WavCaps,iNaturalist,False,True,False,0.7727058266331959,10
+eat_all,8,Xeno-canto,iNaturalist,True,True,True,0.8361540607712531,10
+eat_all,9,Animal Sound Archive,NatureLM,True,False,False,0.691011857519584,10
+eat_all,9,Animal Sound Archive,Watkins,True,True,True,0.5710017982230788,10
+eat_all,9,Animal Sound Archive,WavCaps,True,False,False,0.7528582135448316,10
+eat_all,9,Animal Sound Archive,Xeno-canto,True,True,True,0.7852301094927892,10
+eat_all,9,Animal Sound Archive,iNaturalist,True,True,True,0.8187949715826836,10
+eat_all,9,NatureLM,Watkins,False,True,False,0.5679483243162202,10
+eat_all,9,NatureLM,WavCaps,False,False,True,0.8201958354015885,10
+eat_all,9,NatureLM,Xeno-canto,False,True,False,0.6670867337404311,10
+eat_all,9,NatureLM,iNaturalist,False,True,False,0.6752661810870356,10
+eat_all,9,Watkins,WavCaps,True,False,False,0.6303815704662045,10
+eat_all,9,Watkins,Xeno-canto,True,True,True,0.5890103154584849,10
+eat_all,9,Watkins,iNaturalist,True,True,True,0.5890057732414811,10
+eat_all,9,WavCaps,Xeno-canto,False,True,False,0.800479850012031,10
+eat_all,9,WavCaps,iNaturalist,False,True,False,0.7932318709020423,10
+eat_all,9,Xeno-canto,iNaturalist,True,True,True,0.8787173946780266,10
+eat_all,10,Animal Sound Archive,NatureLM,True,False,False,0.7033493467059222,10
+eat_all,10,Animal Sound Archive,Watkins,True,True,True,0.5488882679112831,10
+eat_all,10,Animal Sound Archive,WavCaps,True,False,False,0.7699853760586325,10
+eat_all,10,Animal Sound Archive,Xeno-canto,True,True,True,0.8381311862624695,10
+eat_all,10,Animal Sound Archive,iNaturalist,True,True,True,0.8451454309867694,10
+eat_all,10,NatureLM,Watkins,False,True,False,0.5817683288983886,10
+eat_all,10,NatureLM,WavCaps,False,False,True,0.8421501631472983,10
+eat_all,10,NatureLM,Xeno-canto,False,True,False,0.6877387333902154,10
+eat_all,10,NatureLM,iNaturalist,False,True,False,0.7067377876921175,10
+eat_all,10,Watkins,WavCaps,True,False,False,0.6253667241088039,10
+eat_all,10,Watkins,Xeno-canto,True,True,True,0.5739388372459608,10
+eat_all,10,Watkins,iNaturalist,True,True,True,0.5550932686114072,10
+eat_all,10,WavCaps,Xeno-canto,False,True,False,0.7930272987330355,10
+eat_all,10,WavCaps,iNaturalist,False,True,False,0.7893639509836771,10
+eat_all,10,Xeno-canto,iNaturalist,True,True,True,0.8908611327708421,10
+eat_all,11,Animal Sound Archive,NatureLM,True,False,False,0.7045446676459342,10
+eat_all,11,Animal Sound Archive,Watkins,True,True,True,0.5492885370702087,10
+eat_all,11,Animal Sound Archive,WavCaps,True,False,False,0.7774913850477952,10
+eat_all,11,Animal Sound Archive,Xeno-canto,True,True,True,0.7925183407753464,10
+eat_all,11,Animal Sound Archive,iNaturalist,True,True,True,0.8054558398687407,10
+eat_all,11,NatureLM,Watkins,False,True,False,0.5912196351745562,10
+eat_all,11,NatureLM,WavCaps,False,False,True,0.8143085679795166,10
+eat_all,11,NatureLM,Xeno-canto,False,True,False,0.6963898385991053,10
+eat_all,11,NatureLM,iNaturalist,False,True,False,0.7093192062752964,10
+eat_all,11,Watkins,WavCaps,True,False,False,0.6444480332426779,10
+eat_all,11,Watkins,Xeno-canto,True,True,True,0.5703703941357114,10
+eat_all,11,Watkins,iNaturalist,True,True,True,0.5680273854036593,10
+eat_all,11,WavCaps,Xeno-canto,False,True,False,0.8053334250143438,10
+eat_all,11,WavCaps,iNaturalist,False,True,False,0.7993981850429429,10
+eat_all,11,Xeno-canto,iNaturalist,True,True,True,0.8622006657683048,10
+eat_all,12,Animal Sound Archive,NatureLM,True,False,False,0.7360556604352959,10
+eat_all,12,Animal Sound Archive,Watkins,True,True,True,0.7283347371558592,10
+eat_all,12,Animal Sound Archive,WavCaps,True,False,False,0.8036298418208473,10
+eat_all,12,Animal Sound Archive,Xeno-canto,True,True,True,0.8371869677326182,10
+eat_all,12,Animal Sound Archive,iNaturalist,True,True,True,0.8755170749099792,10
+eat_all,12,NatureLM,Watkins,False,True,False,0.7476652051840605,10
+eat_all,12,NatureLM,WavCaps,False,False,True,0.834384165727454,10
+eat_all,12,NatureLM,Xeno-canto,False,True,False,0.7306044956423261,10
+eat_all,12,NatureLM,iNaturalist,False,True,False,0.7532229342598649,10
+eat_all,12,Watkins,WavCaps,True,False,False,0.8123453101738687,10
+eat_all,12,Watkins,Xeno-canto,True,True,True,0.713644666256768,10
+eat_all,12,Watkins,iNaturalist,True,True,True,0.7692404416116968,10
+eat_all,12,WavCaps,Xeno-canto,False,True,False,0.8238674844968175,10
+eat_all,12,WavCaps,iNaturalist,False,True,False,0.8650563269726103,10
+eat_all,12,Xeno-canto,iNaturalist,True,True,True,0.844077846265437,10
+eat_bio,0,Animal Sound Archive,NatureLM,True,False,False,0.8383375279405424,10
+eat_bio,0,Animal Sound Archive,Watkins,True,True,True,0.9302595841296732,10
+eat_bio,0,Animal Sound Archive,WavCaps,True,False,False,0.9488060520429894,10
+eat_bio,0,Animal Sound Archive,Xeno-canto,True,True,True,0.8934246234897436,10
+eat_bio,0,Animal Sound Archive,iNaturalist,True,True,True,0.8863838412784737,10
+eat_bio,0,NatureLM,Watkins,False,True,False,0.8370732309847708,10
+eat_bio,0,NatureLM,WavCaps,False,False,True,0.8383683889017387,10
+eat_bio,0,NatureLM,Xeno-canto,False,True,False,0.8025422464578117,10
+eat_bio,0,NatureLM,iNaturalist,False,True,False,0.7990523673948923,10
+eat_bio,0,Watkins,WavCaps,True,False,False,0.9002343980637434,10
+eat_bio,0,Watkins,Xeno-canto,True,True,True,0.8630547226281793,10
+eat_bio,0,Watkins,iNaturalist,True,True,True,0.8674406069448972,10
+eat_bio,0,WavCaps,Xeno-canto,False,True,False,0.9031160143244307,10
+eat_bio,0,WavCaps,iNaturalist,False,True,False,0.8955294891695911,10
+eat_bio,0,Xeno-canto,iNaturalist,True,True,True,0.9781308810512946,10
+eat_bio,1,Animal Sound Archive,NatureLM,True,False,False,0.8203100848650736,10
+eat_bio,1,Animal Sound Archive,Watkins,True,True,True,0.817126423997294,10
+eat_bio,1,Animal Sound Archive,WavCaps,True,False,False,0.8811544308020325,10
+eat_bio,1,Animal Sound Archive,Xeno-canto,True,True,True,0.8785020088568334,10
+eat_bio,1,Animal Sound Archive,iNaturalist,True,True,True,0.9487681571958613,10
+eat_bio,1,NatureLM,Watkins,False,True,False,0.8086289524832211,10
+eat_bio,1,NatureLM,WavCaps,False,False,True,0.9154036963241527,10
+eat_bio,1,NatureLM,Xeno-canto,False,True,False,0.7602064515205733,10
+eat_bio,1,NatureLM,iNaturalist,False,True,False,0.8313567141995598,10
+eat_bio,1,Watkins,WavCaps,True,False,False,0.8155539259603003,10
+eat_bio,1,Watkins,Xeno-canto,True,True,True,0.7797426913134233,10
+eat_bio,1,Watkins,iNaturalist,True,True,True,0.8189234817603364,10
+eat_bio,1,WavCaps,Xeno-canto,False,True,False,0.8160794280278834,10
+eat_bio,1,WavCaps,iNaturalist,False,True,False,0.886329721802389,10
+eat_bio,1,Xeno-canto,iNaturalist,True,True,True,0.8833182499986562,10
+eat_bio,2,Animal Sound Archive,NatureLM,True,False,False,0.7496482728637928,10
+eat_bio,2,Animal Sound Archive,Watkins,True,True,True,0.703364171298196,10
+eat_bio,2,Animal Sound Archive,WavCaps,True,False,False,0.8712930568410213,10
+eat_bio,2,Animal Sound Archive,Xeno-canto,True,True,True,0.9391725673273953,10
+eat_bio,2,Animal Sound Archive,iNaturalist,True,True,True,0.9137316688932933,10
+eat_bio,2,NatureLM,Watkins,False,True,False,0.7592619837280556,10
+eat_bio,2,NatureLM,WavCaps,False,False,True,0.8395126721365956,10
+eat_bio,2,NatureLM,Xeno-canto,False,True,False,0.726755282137563,10
+eat_bio,2,NatureLM,iNaturalist,False,True,False,0.7669239424444471,10
+eat_bio,2,Watkins,WavCaps,True,False,False,0.7703189916969692,10
+eat_bio,2,Watkins,Xeno-canto,True,True,True,0.7000808893328797,10
+eat_bio,2,Watkins,iNaturalist,True,True,True,0.740067885308218,10
+eat_bio,2,WavCaps,Xeno-canto,False,True,False,0.8651906524628987,10
+eat_bio,2,WavCaps,iNaturalist,False,True,False,0.9298126403635237,10
+eat_bio,2,Xeno-canto,iNaturalist,True,True,True,0.9162280837868104,10
+eat_bio,3,Animal Sound Archive,NatureLM,True,False,False,0.739120082191452,10
+eat_bio,3,Animal Sound Archive,Watkins,True,True,True,0.6684718721076516,10
+eat_bio,3,Animal Sound Archive,WavCaps,True,False,False,0.9108603235224791,10
+eat_bio,3,Animal Sound Archive,Xeno-canto,True,True,True,0.9159316662647854,10
+eat_bio,3,Animal Sound Archive,iNaturalist,True,True,True,0.8880741434136288,10
+eat_bio,3,NatureLM,Watkins,False,True,False,0.7542205765811798,10
+eat_bio,3,NatureLM,WavCaps,False,False,True,0.797666639901399,10
+eat_bio,3,NatureLM,Xeno-canto,False,True,False,0.6872121643895854,10
+eat_bio,3,NatureLM,iNaturalist,False,True,False,0.7200250915168891,10
+eat_bio,3,Watkins,WavCaps,True,False,False,0.7252509861454072,10
+eat_bio,3,Watkins,Xeno-canto,True,True,True,0.6759517068751211,10
+eat_bio,3,Watkins,iNaturalist,True,True,True,0.6960169265902418,10
+eat_bio,3,WavCaps,Xeno-canto,False,True,False,0.8445173725374397,10
+eat_bio,3,WavCaps,iNaturalist,False,True,False,0.8604218989804779,10
+eat_bio,3,Xeno-canto,iNaturalist,True,True,True,0.9439352641486044,10
+eat_bio,4,Animal Sound Archive,NatureLM,True,False,False,0.7015249720714702,10
+eat_bio,4,Animal Sound Archive,Watkins,True,True,True,0.6112436267341689,10
+eat_bio,4,Animal Sound Archive,WavCaps,True,False,False,0.8231275640283353,10
+eat_bio,4,Animal Sound Archive,Xeno-canto,True,True,True,0.836647653586262,10
+eat_bio,4,Animal Sound Archive,iNaturalist,True,True,True,0.8791047309793246,10
+eat_bio,4,NatureLM,Watkins,False,True,False,0.6948468445105702,10
+eat_bio,4,NatureLM,WavCaps,False,False,True,0.8151756808157901,10
+eat_bio,4,NatureLM,Xeno-canto,False,True,False,0.6314274596942259,10
+eat_bio,4,NatureLM,iNaturalist,False,True,False,0.700470738259367,10
+eat_bio,4,Watkins,WavCaps,True,False,False,0.7380256498368423,10
+eat_bio,4,Watkins,Xeno-canto,True,True,True,0.6201679100749249,10
+eat_bio,4,Watkins,iNaturalist,True,True,True,0.6345018378335701,10
+eat_bio,4,WavCaps,Xeno-canto,False,True,False,0.7886336801600492,10
+eat_bio,4,WavCaps,iNaturalist,False,True,False,0.8109695825087643,10
+eat_bio,4,Xeno-canto,iNaturalist,True,True,True,0.8905883798919397,10
+eat_bio,5,Animal Sound Archive,NatureLM,True,False,False,0.7840017991941363,10
+eat_bio,5,Animal Sound Archive,Watkins,True,True,True,0.6757680502117078,10
+eat_bio,5,Animal Sound Archive,WavCaps,True,False,False,0.8973372919030307,10
+eat_bio,5,Animal Sound Archive,Xeno-canto,True,True,True,0.8761787464071137,10
+eat_bio,5,Animal Sound Archive,iNaturalist,True,True,True,0.8965961943838268,10
+eat_bio,5,NatureLM,Watkins,False,True,False,0.7403865564748787,10
+eat_bio,5,NatureLM,WavCaps,False,False,True,0.8451292882165753,10
+eat_bio,5,NatureLM,Xeno-canto,False,True,False,0.7448490557454568,10
+eat_bio,5,NatureLM,iNaturalist,False,True,False,0.7878795503074298,10
+eat_bio,5,Watkins,WavCaps,True,False,False,0.7547146344591551,10
+eat_bio,5,Watkins,Xeno-canto,True,True,True,0.6840079328445304,10
+eat_bio,5,Watkins,iNaturalist,True,True,True,0.6864312770819541,10
+eat_bio,5,WavCaps,Xeno-canto,False,True,False,0.8419741492418652,10
+eat_bio,5,WavCaps,iNaturalist,False,True,False,0.8924135247266956,10
+eat_bio,5,Xeno-canto,iNaturalist,True,True,True,0.8820431807272133,10
+eat_bio,6,Animal Sound Archive,NatureLM,True,False,False,0.6484283299225236,10
+eat_bio,6,Animal Sound Archive,Watkins,True,True,True,0.5948699142414655,10
+eat_bio,6,Animal Sound Archive,WavCaps,True,False,False,0.7512618303380971,10
+eat_bio,6,Animal Sound Archive,Xeno-canto,True,True,True,0.7944242822883202,10
+eat_bio,6,Animal Sound Archive,iNaturalist,True,True,True,0.7626311247552156,10
+eat_bio,6,NatureLM,Watkins,False,True,False,0.6318683350484298,10
+eat_bio,6,NatureLM,WavCaps,False,False,True,0.7466824961364209,10
+eat_bio,6,NatureLM,Xeno-canto,False,True,False,0.6095747236933755,10
+eat_bio,6,NatureLM,iNaturalist,False,True,False,0.6569917582328353,10
+eat_bio,6,Watkins,WavCaps,True,False,False,0.6640505307941943,10
+eat_bio,6,Watkins,Xeno-canto,True,True,True,0.5854223949409723,10
+eat_bio,6,Watkins,iNaturalist,True,True,True,0.6026928702257633,10
+eat_bio,6,WavCaps,Xeno-canto,False,True,False,0.6972663624206927,10
+eat_bio,6,WavCaps,iNaturalist,False,True,False,0.7320988694866795,10
+eat_bio,6,Xeno-canto,iNaturalist,True,True,True,0.805955784724312,10
+eat_bio,7,Animal Sound Archive,NatureLM,True,False,False,0.6339086188031324,10
+eat_bio,7,Animal Sound Archive,Watkins,True,True,True,0.5509467697778333,10
+eat_bio,7,Animal Sound Archive,WavCaps,True,False,False,0.729867754820778,10
+eat_bio,7,Animal Sound Archive,Xeno-canto,True,True,True,0.7691560740774033,10
+eat_bio,7,Animal Sound Archive,iNaturalist,True,True,True,0.777238146824457,10
+eat_bio,7,NatureLM,Watkins,False,True,False,0.6154883143867113,10
+eat_bio,7,NatureLM,WavCaps,False,False,True,0.7495890644563329,10
+eat_bio,7,NatureLM,Xeno-canto,False,True,False,0.6196514295482582,10
+eat_bio,7,NatureLM,iNaturalist,False,True,False,0.6602076217466053,10
+eat_bio,7,Watkins,WavCaps,True,False,False,0.662990732622356,10
+eat_bio,7,Watkins,Xeno-canto,True,True,True,0.547439335823689,10
+eat_bio,7,Watkins,iNaturalist,True,True,True,0.5559783752330122,10
+eat_bio,7,WavCaps,Xeno-canto,False,True,False,0.6970554767435404,10
+eat_bio,7,WavCaps,iNaturalist,False,True,False,0.7131987149865633,10
+eat_bio,7,Xeno-canto,iNaturalist,True,True,True,0.8763189598949743,10
+eat_bio,8,Animal Sound Archive,NatureLM,True,False,False,0.6828681897620126,10
+eat_bio,8,Animal Sound Archive,Watkins,True,True,True,0.5846596261033391,10
+eat_bio,8,Animal Sound Archive,WavCaps,True,False,False,0.7407632474142737,10
+eat_bio,8,Animal Sound Archive,Xeno-canto,True,True,True,0.7910540528633222,10
+eat_bio,8,Animal Sound Archive,iNaturalist,True,True,True,0.8215241895358452,10
+eat_bio,8,NatureLM,Watkins,False,True,False,0.6618510001680219,10
+eat_bio,8,NatureLM,WavCaps,False,False,True,0.7914312457530707,10
+eat_bio,8,NatureLM,Xeno-canto,False,True,False,0.6739896887363137,10
+eat_bio,8,NatureLM,iNaturalist,False,True,False,0.7136745695527464,10
+eat_bio,8,Watkins,WavCaps,True,False,False,0.6747049154910443,10
+eat_bio,8,Watkins,Xeno-canto,True,True,True,0.5778279017587905,10
+eat_bio,8,Watkins,iNaturalist,True,True,True,0.5946243368688637,10
+eat_bio,8,WavCaps,Xeno-canto,False,True,False,0.7312076022519062,10
+eat_bio,8,WavCaps,iNaturalist,False,True,False,0.7339824649474849,10
+eat_bio,8,Xeno-canto,iNaturalist,True,True,True,0.8928301946514916,10
+eat_bio,9,Animal Sound Archive,NatureLM,True,False,False,0.6488629366033569,10
+eat_bio,9,Animal Sound Archive,Watkins,True,True,True,0.5643658081517781,10
+eat_bio,9,Animal Sound Archive,WavCaps,True,False,False,0.7838592177700511,10
+eat_bio,9,Animal Sound Archive,Xeno-canto,True,True,True,0.8292252734236755,10
+eat_bio,9,Animal Sound Archive,iNaturalist,True,True,True,0.8083538419810962,10
+eat_bio,9,NatureLM,Watkins,False,True,False,0.6978769149104025,10
+eat_bio,9,NatureLM,WavCaps,False,False,True,0.7901377454419529,10
+eat_bio,9,NatureLM,Xeno-canto,False,True,False,0.634721792793346,10
+eat_bio,9,NatureLM,iNaturalist,False,True,False,0.6738714453014605,10
+eat_bio,9,Watkins,WavCaps,True,False,False,0.6881414055071631,10
+eat_bio,9,Watkins,Xeno-canto,True,True,True,0.5757133587414096,10
+eat_bio,9,Watkins,iNaturalist,True,True,True,0.5765984163400268,10
+eat_bio,9,WavCaps,Xeno-canto,False,True,False,0.7849961144465329,10
+eat_bio,9,WavCaps,iNaturalist,False,True,False,0.7809604563187215,10
+eat_bio,9,Xeno-canto,iNaturalist,True,True,True,0.8367358438920455,10
+eat_bio,10,Animal Sound Archive,NatureLM,True,False,False,0.670598687906579,10
+eat_bio,10,Animal Sound Archive,Watkins,True,True,True,0.5476248232750562,10
+eat_bio,10,Animal Sound Archive,WavCaps,True,False,False,0.7814868080514259,10
+eat_bio,10,Animal Sound Archive,Xeno-canto,True,True,True,0.8377366827638492,10
+eat_bio,10,Animal Sound Archive,iNaturalist,True,True,True,0.8327793002494074,10
+eat_bio,10,NatureLM,Watkins,False,True,False,0.6941768467849944,10
+eat_bio,10,NatureLM,WavCaps,False,False,True,0.7989536078628581,10
+eat_bio,10,NatureLM,Xeno-canto,False,True,False,0.6589334187696791,10
+eat_bio,10,NatureLM,iNaturalist,False,True,False,0.7181786419808599,10
+eat_bio,10,Watkins,WavCaps,True,False,False,0.630000450475508,10
+eat_bio,10,Watkins,Xeno-canto,True,True,True,0.5482039456663427,10
+eat_bio,10,Watkins,iNaturalist,True,True,True,0.580133444200293,10
+eat_bio,10,WavCaps,Xeno-canto,False,True,False,0.8231546243633504,10
+eat_bio,10,WavCaps,iNaturalist,False,True,False,0.848252534025384,10
+eat_bio,10,Xeno-canto,iNaturalist,True,True,True,0.906458023731511,10
+eat_bio,11,Animal Sound Archive,NatureLM,True,False,False,0.7504761822775151,10
+eat_bio,11,Animal Sound Archive,Watkins,True,True,True,0.6164962193125543,10
+eat_bio,11,Animal Sound Archive,WavCaps,True,False,False,0.7907408775684304,10
+eat_bio,11,Animal Sound Archive,Xeno-canto,True,True,True,0.8485691104891501,10
+eat_bio,11,Animal Sound Archive,iNaturalist,True,True,True,0.8422491712287645,10
+eat_bio,11,NatureLM,Watkins,False,True,False,0.6576941282838108,10
+eat_bio,11,NatureLM,WavCaps,False,False,True,0.781010986547037,10
+eat_bio,11,NatureLM,Xeno-canto,False,True,False,0.7017465047872962,10
+eat_bio,11,NatureLM,iNaturalist,False,True,False,0.7285261005607444,10
+eat_bio,11,Watkins,WavCaps,True,False,False,0.6296879859099931,10
+eat_bio,11,Watkins,Xeno-canto,True,True,True,0.5870669537847462,10
+eat_bio,11,Watkins,iNaturalist,True,True,True,0.6090678204620175,10
+eat_bio,11,WavCaps,Xeno-canto,False,True,False,0.8255660609963547,10
+eat_bio,11,WavCaps,iNaturalist,False,True,False,0.8475384797956564,10
+eat_bio,11,Xeno-canto,iNaturalist,True,True,True,0.9204328028821877,10
+eat_bio,12,Animal Sound Archive,NatureLM,True,False,False,0.5259984567724352,10
+eat_bio,12,Animal Sound Archive,Watkins,True,True,True,0.4945170440825345,10
+eat_bio,12,Animal Sound Archive,WavCaps,True,False,False,0.6555463982497329,10
+eat_bio,12,Animal Sound Archive,Xeno-canto,True,True,True,0.6417448973436926,10
+eat_bio,12,Animal Sound Archive,iNaturalist,True,True,True,0.6617852901907069,10
+eat_bio,12,NatureLM,Watkins,False,True,False,0.5536311069843048,10
+eat_bio,12,NatureLM,WavCaps,False,False,True,0.6498104419974133,10
+eat_bio,12,NatureLM,Xeno-canto,False,True,False,0.5136163799547103,10
+eat_bio,12,NatureLM,iNaturalist,False,True,False,0.5568574656973417,10
+eat_bio,12,Watkins,WavCaps,True,False,False,0.6137165805470285,10
+eat_bio,12,Watkins,Xeno-canto,True,True,True,0.5350218332928546,10
+eat_bio,12,Watkins,iNaturalist,True,True,True,0.5510797788458914,10
+eat_bio,12,WavCaps,Xeno-canto,False,True,False,0.6150827992045883,10
+eat_bio,12,WavCaps,iNaturalist,False,True,False,0.6424651547401393,10
+eat_bio,12,Xeno-canto,iNaturalist,True,True,True,0.8243488764558838,10
+sl_eat_all_ssl_all,0,Animal Sound Archive,NatureLM,True,False,False,0.8324996739251812,10
+sl_eat_all_ssl_all,0,Animal Sound Archive,Watkins,True,True,True,0.8426363568604653,10
+sl_eat_all_ssl_all,0,Animal Sound Archive,WavCaps,True,False,False,0.8577154612114699,10
+sl_eat_all_ssl_all,0,Animal Sound Archive,Xeno-canto,True,True,True,0.8782577124587722,10
+sl_eat_all_ssl_all,0,Animal Sound Archive,iNaturalist,True,True,True,0.9282416306508976,10
+sl_eat_all_ssl_all,0,NatureLM,Watkins,False,True,False,0.7675701231088421,10
+sl_eat_all_ssl_all,0,NatureLM,WavCaps,False,False,True,0.9573718533509978,10
+sl_eat_all_ssl_all,0,NatureLM,Xeno-canto,False,True,False,0.7950871819463642,10
+sl_eat_all_ssl_all,0,NatureLM,iNaturalist,False,True,False,0.744769536996887,10
+sl_eat_all_ssl_all,0,Watkins,WavCaps,True,False,False,0.7788609315750616,10
+sl_eat_all_ssl_all,0,Watkins,Xeno-canto,True,True,True,0.7969764101216276,10
+sl_eat_all_ssl_all,0,Watkins,iNaturalist,True,True,True,0.8486108200205493,10
+sl_eat_all_ssl_all,0,WavCaps,Xeno-canto,False,True,False,0.8210054231184453,10
+sl_eat_all_ssl_all,0,WavCaps,iNaturalist,False,True,False,0.7647313813880909,10
+sl_eat_all_ssl_all,0,Xeno-canto,iNaturalist,True,True,True,0.9168158901116576,10
+sl_eat_all_ssl_all,1,Animal Sound Archive,NatureLM,True,False,False,0.8211756044841181,10
+sl_eat_all_ssl_all,1,Animal Sound Archive,Watkins,True,True,True,0.7295061483723437,10
+sl_eat_all_ssl_all,1,Animal Sound Archive,WavCaps,True,False,False,0.905330990992649,10
+sl_eat_all_ssl_all,1,Animal Sound Archive,Xeno-canto,True,True,True,0.938159083115351,10
+sl_eat_all_ssl_all,1,Animal Sound Archive,iNaturalist,True,True,True,0.9532363734150863,10
+sl_eat_all_ssl_all,1,NatureLM,Watkins,False,True,False,0.7810274318261773,10
+sl_eat_all_ssl_all,1,NatureLM,WavCaps,False,False,True,0.8402447955924968,10
+sl_eat_all_ssl_all,1,NatureLM,Xeno-canto,False,True,False,0.8133331924315274,10
+sl_eat_all_ssl_all,1,NatureLM,iNaturalist,False,True,False,0.8249929299690519,10
+sl_eat_all_ssl_all,1,Watkins,WavCaps,True,False,False,0.7879116697084998,10
+sl_eat_all_ssl_all,1,Watkins,Xeno-canto,True,True,True,0.7194093987683852,10
+sl_eat_all_ssl_all,1,Watkins,iNaturalist,True,True,True,0.7346816009446155,10
+sl_eat_all_ssl_all,1,WavCaps,Xeno-canto,False,True,False,0.8866872809649194,10
+sl_eat_all_ssl_all,1,WavCaps,iNaturalist,False,True,False,0.8895203109666993,10
+sl_eat_all_ssl_all,1,Xeno-canto,iNaturalist,True,True,True,0.9620779260725772,10
+sl_eat_all_ssl_all,2,Animal Sound Archive,NatureLM,True,False,False,0.7268021624215706,10
+sl_eat_all_ssl_all,2,Animal Sound Archive,Watkins,True,True,True,0.7165517257583558,10
+sl_eat_all_ssl_all,2,Animal Sound Archive,WavCaps,True,False,False,0.824912859335751,10
+sl_eat_all_ssl_all,2,Animal Sound Archive,Xeno-canto,True,True,True,0.8952517958287846,10
+sl_eat_all_ssl_all,2,Animal Sound Archive,iNaturalist,True,True,True,0.8990228117603539,10
+sl_eat_all_ssl_all,2,NatureLM,Watkins,False,True,False,0.754803318523393,10
+sl_eat_all_ssl_all,2,NatureLM,WavCaps,False,False,True,0.7995290740086727,10
+sl_eat_all_ssl_all,2,NatureLM,Xeno-canto,False,True,False,0.6859489556325427,10
+sl_eat_all_ssl_all,2,NatureLM,iNaturalist,False,True,False,0.7207744129453927,10
+sl_eat_all_ssl_all,2,Watkins,WavCaps,True,False,False,0.7535893809714118,10
+sl_eat_all_ssl_all,2,Watkins,Xeno-canto,True,True,True,0.6779098936909536,10
+sl_eat_all_ssl_all,2,Watkins,iNaturalist,True,True,True,0.7194950304673801,10
+sl_eat_all_ssl_all,2,WavCaps,Xeno-canto,False,True,False,0.7893669753822733,10
+sl_eat_all_ssl_all,2,WavCaps,iNaturalist,False,True,False,0.8213357010785547,10
+sl_eat_all_ssl_all,2,Xeno-canto,iNaturalist,True,True,True,0.9221785255940551,10
+sl_eat_all_ssl_all,3,Animal Sound Archive,NatureLM,True,False,False,0.7630401453675428,10
+sl_eat_all_ssl_all,3,Animal Sound Archive,Watkins,True,True,True,0.7102506971277263,10
+sl_eat_all_ssl_all,3,Animal Sound Archive,WavCaps,True,False,False,0.7776168310293912,10
+sl_eat_all_ssl_all,3,Animal Sound Archive,Xeno-canto,True,True,True,0.8686245987884224,10
+sl_eat_all_ssl_all,3,Animal Sound Archive,iNaturalist,True,True,True,0.8485411891273541,10
+sl_eat_all_ssl_all,3,NatureLM,Watkins,False,True,False,0.746598608834383,10
+sl_eat_all_ssl_all,3,NatureLM,WavCaps,False,False,True,0.7671928731452494,10
+sl_eat_all_ssl_all,3,NatureLM,Xeno-canto,False,True,False,0.735486243164954,10
+sl_eat_all_ssl_all,3,NatureLM,iNaturalist,False,True,False,0.7423540385352962,10
+sl_eat_all_ssl_all,3,Watkins,WavCaps,True,False,False,0.766316623625012,10
+sl_eat_all_ssl_all,3,Watkins,Xeno-canto,True,True,True,0.6835285986117227,10
+sl_eat_all_ssl_all,3,Watkins,iNaturalist,True,True,True,0.7067345031161038,10
+sl_eat_all_ssl_all,3,WavCaps,Xeno-canto,False,True,False,0.771833814196041,10
+sl_eat_all_ssl_all,3,WavCaps,iNaturalist,False,True,False,0.8346960441730047,10
+sl_eat_all_ssl_all,3,Xeno-canto,iNaturalist,True,True,True,0.9010646909457727,10
+sl_eat_all_ssl_all,4,Animal Sound Archive,NatureLM,True,False,False,0.6834972976557077,10
+sl_eat_all_ssl_all,4,Animal Sound Archive,Watkins,True,True,True,0.5991073923187612,10
+sl_eat_all_ssl_all,4,Animal Sound Archive,WavCaps,True,False,False,0.7717425489481354,10
+sl_eat_all_ssl_all,4,Animal Sound Archive,Xeno-canto,True,True,True,0.8197089179404463,10
+sl_eat_all_ssl_all,4,Animal Sound Archive,iNaturalist,True,True,True,0.795121151648248,10
+sl_eat_all_ssl_all,4,NatureLM,Watkins,False,True,False,0.6698452766851389,10
+sl_eat_all_ssl_all,4,NatureLM,WavCaps,False,False,True,0.7408072775079564,10
+sl_eat_all_ssl_all,4,NatureLM,Xeno-canto,False,True,False,0.6717123950039673,10
+sl_eat_all_ssl_all,4,NatureLM,iNaturalist,False,True,False,0.6767970741532253,10
+sl_eat_all_ssl_all,4,Watkins,WavCaps,True,False,False,0.7477821741415637,10
+sl_eat_all_ssl_all,4,Watkins,Xeno-canto,True,True,True,0.6013026413077361,10
+sl_eat_all_ssl_all,4,Watkins,iNaturalist,True,True,True,0.6431400741395773,10
+sl_eat_all_ssl_all,4,WavCaps,Xeno-canto,False,True,False,0.7270692098141922,10
+sl_eat_all_ssl_all,4,WavCaps,iNaturalist,False,True,False,0.7501377126931487,10
+sl_eat_all_ssl_all,4,Xeno-canto,iNaturalist,True,True,True,0.8067400008081298,10
+sl_eat_all_ssl_all,5,Animal Sound Archive,NatureLM,True,False,False,0.6581296379766609,10
+sl_eat_all_ssl_all,5,Animal Sound Archive,Watkins,True,True,True,0.5169809413310037,10
+sl_eat_all_ssl_all,5,Animal Sound Archive,WavCaps,True,False,False,0.7184478858306642,10
+sl_eat_all_ssl_all,5,Animal Sound Archive,Xeno-canto,True,True,True,0.8118999018941692,10
+sl_eat_all_ssl_all,5,Animal Sound Archive,iNaturalist,True,True,True,0.7572215972921945,10
+sl_eat_all_ssl_all,5,NatureLM,Watkins,False,True,False,0.59257062899821,10
+sl_eat_all_ssl_all,5,NatureLM,WavCaps,False,False,True,0.7533544185932857,10
+sl_eat_all_ssl_all,5,NatureLM,Xeno-canto,False,True,False,0.6417196911416577,10
+sl_eat_all_ssl_all,5,NatureLM,iNaturalist,False,True,False,0.652783447250539,10
+sl_eat_all_ssl_all,5,Watkins,WavCaps,True,False,False,0.6926742503562419,10
+sl_eat_all_ssl_all,5,Watkins,Xeno-canto,True,True,True,0.5437090139968734,10
+sl_eat_all_ssl_all,5,Watkins,iNaturalist,True,True,True,0.6083571894526425,10
+sl_eat_all_ssl_all,5,WavCaps,Xeno-canto,False,True,False,0.7137870450489208,10
+sl_eat_all_ssl_all,5,WavCaps,iNaturalist,False,True,False,0.7343814739489016,10
+sl_eat_all_ssl_all,5,Xeno-canto,iNaturalist,True,True,True,0.8153296967399271,10
+sl_eat_all_ssl_all,6,Animal Sound Archive,NatureLM,True,False,False,0.612315313237596,10
+sl_eat_all_ssl_all,6,Animal Sound Archive,Watkins,True,True,True,0.5296178483433357,10
+sl_eat_all_ssl_all,6,Animal Sound Archive,WavCaps,True,False,False,0.7096589486069868,10
+sl_eat_all_ssl_all,6,Animal Sound Archive,Xeno-canto,True,True,True,0.79133807689253,10
+sl_eat_all_ssl_all,6,Animal Sound Archive,iNaturalist,True,True,True,0.7708972082430667,10
+sl_eat_all_ssl_all,6,NatureLM,Watkins,False,True,False,0.5993845874453175,10
+sl_eat_all_ssl_all,6,NatureLM,WavCaps,False,False,True,0.7267779725413851,10
+sl_eat_all_ssl_all,6,NatureLM,Xeno-canto,False,True,False,0.5575394798352481,10
+sl_eat_all_ssl_all,6,NatureLM,iNaturalist,False,True,False,0.5865716872024489,10
+sl_eat_all_ssl_all,6,Watkins,WavCaps,True,False,False,0.7146796919917522,10
+sl_eat_all_ssl_all,6,Watkins,Xeno-canto,True,True,True,0.514886550820697,10
+sl_eat_all_ssl_all,6,Watkins,iNaturalist,True,True,True,0.5717990387053221,10
+sl_eat_all_ssl_all,6,WavCaps,Xeno-canto,False,True,False,0.6716888207402677,10
+sl_eat_all_ssl_all,6,WavCaps,iNaturalist,False,True,False,0.7109925844904671,10
+sl_eat_all_ssl_all,6,Xeno-canto,iNaturalist,True,True,True,0.8097451913343894,10
+sl_eat_all_ssl_all,7,Animal Sound Archive,NatureLM,True,False,False,0.5985380893827157,10
+sl_eat_all_ssl_all,7,Animal Sound Archive,Watkins,True,True,True,0.508810620177101,10
+sl_eat_all_ssl_all,7,Animal Sound Archive,WavCaps,True,False,False,0.6551184623340718,10
+sl_eat_all_ssl_all,7,Animal Sound Archive,Xeno-canto,True,True,True,0.7379627037990582,10
+sl_eat_all_ssl_all,7,Animal Sound Archive,iNaturalist,True,True,True,0.7339832497887858,10
+sl_eat_all_ssl_all,7,NatureLM,Watkins,False,True,False,0.5731544858973445,10
+sl_eat_all_ssl_all,7,NatureLM,WavCaps,False,False,True,0.7188638923489457,10
+sl_eat_all_ssl_all,7,NatureLM,Xeno-canto,False,True,False,0.5262278823992153,10
+sl_eat_all_ssl_all,7,NatureLM,iNaturalist,False,True,False,0.5830354891847218,10
+sl_eat_all_ssl_all,7,Watkins,WavCaps,True,False,False,0.675163399733719,10
+sl_eat_all_ssl_all,7,Watkins,Xeno-canto,True,True,True,0.5006352638501188,10
+sl_eat_all_ssl_all,7,Watkins,iNaturalist,True,True,True,0.5361522482935829,10
+sl_eat_all_ssl_all,7,WavCaps,Xeno-canto,False,True,False,0.6489241783154348,10
+sl_eat_all_ssl_all,7,WavCaps,iNaturalist,False,True,False,0.7130734508532776,10
+sl_eat_all_ssl_all,7,Xeno-canto,iNaturalist,True,True,True,0.8119347167234773,10
+sl_eat_all_ssl_all,8,Animal Sound Archive,NatureLM,True,False,False,0.627883525781434,10
+sl_eat_all_ssl_all,8,Animal Sound Archive,Watkins,True,True,True,0.5956618707887789,10
+sl_eat_all_ssl_all,8,Animal Sound Archive,WavCaps,True,False,False,0.7504820647456202,10
+sl_eat_all_ssl_all,8,Animal Sound Archive,Xeno-canto,True,True,True,0.808562242566952,10
+sl_eat_all_ssl_all,8,Animal Sound Archive,iNaturalist,True,True,True,0.7926693858852056,10
+sl_eat_all_ssl_all,8,NatureLM,Watkins,False,True,False,0.6205521797820247,10
+sl_eat_all_ssl_all,8,NatureLM,WavCaps,False,False,True,0.730083854893663,10
+sl_eat_all_ssl_all,8,NatureLM,Xeno-canto,False,True,False,0.5807967153515732,10
+sl_eat_all_ssl_all,8,NatureLM,iNaturalist,False,True,False,0.6509856809325393,10
+sl_eat_all_ssl_all,8,Watkins,WavCaps,True,False,False,0.7225054706818625,10
+sl_eat_all_ssl_all,8,Watkins,Xeno-canto,True,True,True,0.56877392715254,10
+sl_eat_all_ssl_all,8,Watkins,iNaturalist,True,True,True,0.6060016202363727,10
+sl_eat_all_ssl_all,8,WavCaps,Xeno-canto,False,True,False,0.718067592533747,10
+sl_eat_all_ssl_all,8,WavCaps,iNaturalist,False,True,False,0.7600016615024292,10
+sl_eat_all_ssl_all,8,Xeno-canto,iNaturalist,True,True,True,0.8051928222869661,10
+sl_eat_all_ssl_all,9,Animal Sound Archive,NatureLM,True,False,False,0.5694925497407936,10
+sl_eat_all_ssl_all,9,Animal Sound Archive,Watkins,True,True,True,0.42242009729880214,10
+sl_eat_all_ssl_all,9,Animal Sound Archive,WavCaps,True,False,False,0.6304250912656651,10
+sl_eat_all_ssl_all,9,Animal Sound Archive,Xeno-canto,True,True,True,0.7466622865014657,10
+sl_eat_all_ssl_all,9,Animal Sound Archive,iNaturalist,True,True,True,0.6987781560489225,10
+sl_eat_all_ssl_all,9,NatureLM,Watkins,False,True,False,0.465479392347785,10
+sl_eat_all_ssl_all,9,NatureLM,WavCaps,False,False,True,0.6996933139891244,10
+sl_eat_all_ssl_all,9,NatureLM,Xeno-canto,False,True,False,0.5410374266759694,10
+sl_eat_all_ssl_all,9,NatureLM,iNaturalist,False,True,False,0.5714354101233201,10
+sl_eat_all_ssl_all,9,Watkins,WavCaps,True,False,False,0.5739493879540465,10
+sl_eat_all_ssl_all,9,Watkins,Xeno-canto,True,True,True,0.4103218169237991,10
+sl_eat_all_ssl_all,9,Watkins,iNaturalist,True,True,True,0.43011487438833457,10
+sl_eat_all_ssl_all,9,WavCaps,Xeno-canto,False,True,False,0.6334029996144417,10
+sl_eat_all_ssl_all,9,WavCaps,iNaturalist,False,True,False,0.65878759815322,10
+sl_eat_all_ssl_all,9,Xeno-canto,iNaturalist,True,True,True,0.7853727881894528,10
+sl_eat_all_ssl_all,10,Animal Sound Archive,NatureLM,True,False,False,0.5743024987159066,10
+sl_eat_all_ssl_all,10,Animal Sound Archive,Watkins,True,True,True,0.49417410759871894,10
+sl_eat_all_ssl_all,10,Animal Sound Archive,WavCaps,True,False,False,0.7149720198714647,10
+sl_eat_all_ssl_all,10,Animal Sound Archive,Xeno-canto,True,True,True,0.7892797236927537,10
+sl_eat_all_ssl_all,10,Animal Sound Archive,iNaturalist,True,True,True,0.7745014948039869,10
+sl_eat_all_ssl_all,10,NatureLM,Watkins,False,True,False,0.5561799143274615,10
+sl_eat_all_ssl_all,10,NatureLM,WavCaps,False,False,True,0.7277946095668695,10
+sl_eat_all_ssl_all,10,NatureLM,Xeno-canto,False,True,False,0.5716484023525834,10
+sl_eat_all_ssl_all,10,NatureLM,iNaturalist,False,True,False,0.5927443650447078,10
+sl_eat_all_ssl_all,10,Watkins,WavCaps,True,False,False,0.6316934790334698,10
+sl_eat_all_ssl_all,10,Watkins,Xeno-canto,True,True,True,0.47853493576182415,10
+sl_eat_all_ssl_all,10,Watkins,iNaturalist,True,True,True,0.4856850678102572,10
+sl_eat_all_ssl_all,10,WavCaps,Xeno-canto,False,True,False,0.68607183133287,10
+sl_eat_all_ssl_all,10,WavCaps,iNaturalist,False,True,False,0.7114323273473058,10
+sl_eat_all_ssl_all,10,Xeno-canto,iNaturalist,True,True,True,0.8328522903621922,10
+sl_eat_all_ssl_all,11,Animal Sound Archive,NatureLM,True,False,False,0.6630318673164939,10
+sl_eat_all_ssl_all,11,Animal Sound Archive,Watkins,True,True,True,0.5668101728551777,10
+sl_eat_all_ssl_all,11,Animal Sound Archive,WavCaps,True,False,False,0.8086558631196441,10
+sl_eat_all_ssl_all,11,Animal Sound Archive,Xeno-canto,True,True,True,0.8827473099116883,10
+sl_eat_all_ssl_all,11,Animal Sound Archive,iNaturalist,True,True,True,0.9180632884155221,10
+sl_eat_all_ssl_all,11,NatureLM,Watkins,False,True,False,0.6010744584377713,10
+sl_eat_all_ssl_all,11,NatureLM,WavCaps,False,False,True,0.791224549154309,10
+sl_eat_all_ssl_all,11,NatureLM,Xeno-canto,False,True,False,0.6266089100623005,10
+sl_eat_all_ssl_all,11,NatureLM,iNaturalist,False,True,False,0.6710164692378944,10
+sl_eat_all_ssl_all,11,Watkins,WavCaps,True,False,False,0.6824711954178871,10
+sl_eat_all_ssl_all,11,Watkins,Xeno-canto,True,True,True,0.5427027036251151,10
+sl_eat_all_ssl_all,11,Watkins,iNaturalist,True,True,True,0.5607320928539429,10
+sl_eat_all_ssl_all,11,WavCaps,Xeno-canto,False,True,False,0.7790987668215567,10
+sl_eat_all_ssl_all,11,WavCaps,iNaturalist,False,True,False,0.817645950381058,10
+sl_eat_all_ssl_all,11,Xeno-canto,iNaturalist,True,True,True,0.8630348917802555,10
+sl_eat_all_ssl_all,12,Animal Sound Archive,NatureLM,True,False,False,0.6030732460034878,10
+sl_eat_all_ssl_all,12,Animal Sound Archive,Watkins,True,True,True,0.6060528133759874,10
+sl_eat_all_ssl_all,12,Animal Sound Archive,WavCaps,True,False,False,0.686197537734485,10
+sl_eat_all_ssl_all,12,Animal Sound Archive,Xeno-canto,True,True,True,0.7049188112268673,10
+sl_eat_all_ssl_all,12,Animal Sound Archive,iNaturalist,True,True,True,0.7386000604680569,10
+sl_eat_all_ssl_all,12,NatureLM,Watkins,False,True,False,0.653363847045017,10
+sl_eat_all_ssl_all,12,NatureLM,WavCaps,False,False,True,0.7509659001344723,10
+sl_eat_all_ssl_all,12,NatureLM,Xeno-canto,False,True,False,0.5907490051895617,10
+sl_eat_all_ssl_all,12,NatureLM,iNaturalist,False,True,False,0.6496569462870923,10
+sl_eat_all_ssl_all,12,Watkins,WavCaps,True,False,False,0.7169917390711325,10
+sl_eat_all_ssl_all,12,Watkins,Xeno-canto,True,True,True,0.620032637126116,10
+sl_eat_all_ssl_all,12,Watkins,iNaturalist,True,True,True,0.6262829667722319,10
+sl_eat_all_ssl_all,12,WavCaps,Xeno-canto,False,True,False,0.6962870546935183,10
+sl_eat_all_ssl_all,12,WavCaps,iNaturalist,False,True,False,0.6965722495596067,10
+sl_eat_all_ssl_all,12,Xeno-canto,iNaturalist,True,True,True,0.7347712268771532,10
+sl_eat_bio_ssl_all,0,Animal Sound Archive,NatureLM,True,False,False,0.8279687135302902,10
+sl_eat_bio_ssl_all,0,Animal Sound Archive,Watkins,True,True,True,0.8290889430953958,10
+sl_eat_bio_ssl_all,0,Animal Sound Archive,WavCaps,True,False,False,0.8906108762969778,10
+sl_eat_bio_ssl_all,0,Animal Sound Archive,Xeno-canto,True,True,True,0.8904285863642046,10
+sl_eat_bio_ssl_all,0,Animal Sound Archive,iNaturalist,True,True,True,0.9401921322427838,10
+sl_eat_bio_ssl_all,0,NatureLM,Watkins,False,True,False,0.736953926417864,10
+sl_eat_bio_ssl_all,0,NatureLM,WavCaps,False,False,True,0.8205393343960227,10
+sl_eat_bio_ssl_all,0,NatureLM,Xeno-canto,False,True,False,0.8571615336800777,10
+sl_eat_bio_ssl_all,0,NatureLM,iNaturalist,False,True,False,0.8674868004497716,10
+sl_eat_bio_ssl_all,0,Watkins,WavCaps,True,False,False,0.796968879945662,10
+sl_eat_bio_ssl_all,0,Watkins,Xeno-canto,True,True,True,0.827236549898646,10
+sl_eat_bio_ssl_all,0,Watkins,iNaturalist,True,True,True,0.8420917617183742,10
+sl_eat_bio_ssl_all,0,WavCaps,Xeno-canto,False,True,False,0.8772527518378489,10
+sl_eat_bio_ssl_all,0,WavCaps,iNaturalist,False,True,False,0.8940102764359704,10
+sl_eat_bio_ssl_all,0,Xeno-canto,iNaturalist,True,True,True,0.9515778603461031,10
+sl_eat_bio_ssl_all,1,Animal Sound Archive,NatureLM,True,False,False,0.8330796263221778,10
+sl_eat_bio_ssl_all,1,Animal Sound Archive,Watkins,True,True,True,0.6822853351208066,10
+sl_eat_bio_ssl_all,1,Animal Sound Archive,WavCaps,True,False,False,0.9208683301564864,10
+sl_eat_bio_ssl_all,1,Animal Sound Archive,Xeno-canto,True,True,True,0.9524445066881485,10
+sl_eat_bio_ssl_all,1,Animal Sound Archive,iNaturalist,True,True,True,0.96544673694164,10
+sl_eat_bio_ssl_all,1,NatureLM,Watkins,False,True,False,0.7018070557046319,10
+sl_eat_bio_ssl_all,1,NatureLM,WavCaps,False,False,True,0.8330840118372805,10
+sl_eat_bio_ssl_all,1,NatureLM,Xeno-canto,False,True,False,0.8185577516322873,10
+sl_eat_bio_ssl_all,1,NatureLM,iNaturalist,False,True,False,0.8413337453973275,10
+sl_eat_bio_ssl_all,1,Watkins,WavCaps,True,False,False,0.7139852579458135,10
+sl_eat_bio_ssl_all,1,Watkins,Xeno-canto,True,True,True,0.6760937648153124,10
+sl_eat_bio_ssl_all,1,Watkins,iNaturalist,True,True,True,0.6858919649551346,10
+sl_eat_bio_ssl_all,1,WavCaps,Xeno-canto,False,True,False,0.9092259623440645,10
+sl_eat_bio_ssl_all,1,WavCaps,iNaturalist,False,True,False,0.9270990033331291,10
+sl_eat_bio_ssl_all,1,Xeno-canto,iNaturalist,True,True,True,0.9659923614064354,10
+sl_eat_bio_ssl_all,2,Animal Sound Archive,NatureLM,True,False,False,0.7579729526203096,10
+sl_eat_bio_ssl_all,2,Animal Sound Archive,Watkins,True,True,True,0.6843609411181062,10
+sl_eat_bio_ssl_all,2,Animal Sound Archive,WavCaps,True,False,False,0.8052886482637748,10
+sl_eat_bio_ssl_all,2,Animal Sound Archive,Xeno-canto,True,True,True,0.8444764282473243,10
+sl_eat_bio_ssl_all,2,Animal Sound Archive,iNaturalist,True,True,True,0.8701033244906622,10
+sl_eat_bio_ssl_all,2,NatureLM,Watkins,False,True,False,0.7213611046081363,10
+sl_eat_bio_ssl_all,2,NatureLM,WavCaps,False,False,True,0.8138972452459162,10
+sl_eat_bio_ssl_all,2,NatureLM,Xeno-canto,False,True,False,0.701637811621344,10
+sl_eat_bio_ssl_all,2,NatureLM,iNaturalist,False,True,False,0.7324267615405985,10
+sl_eat_bio_ssl_all,2,Watkins,WavCaps,True,False,False,0.7355269909599607,10
+sl_eat_bio_ssl_all,2,Watkins,Xeno-canto,True,True,True,0.6601769422772772,10
+sl_eat_bio_ssl_all,2,Watkins,iNaturalist,True,True,True,0.6919874678604063,10
+sl_eat_bio_ssl_all,2,WavCaps,Xeno-canto,False,True,False,0.7824913703755108,10
+sl_eat_bio_ssl_all,2,WavCaps,iNaturalist,False,True,False,0.8052625815882267,10
+sl_eat_bio_ssl_all,2,Xeno-canto,iNaturalist,True,True,True,0.8525356138862966,10
+sl_eat_bio_ssl_all,3,Animal Sound Archive,NatureLM,True,False,False,0.7013169780847716,10
+sl_eat_bio_ssl_all,3,Animal Sound Archive,Watkins,True,True,True,0.6260763799574371,10
+sl_eat_bio_ssl_all,3,Animal Sound Archive,WavCaps,True,False,False,0.7415515788981913,10
+sl_eat_bio_ssl_all,3,Animal Sound Archive,Xeno-canto,True,True,True,0.8632173201977473,10
+sl_eat_bio_ssl_all,3,Animal Sound Archive,iNaturalist,True,True,True,0.8454290333034116,10
+sl_eat_bio_ssl_all,3,NatureLM,Watkins,False,True,False,0.7268713452818111,10
+sl_eat_bio_ssl_all,3,NatureLM,WavCaps,False,False,True,0.773798828628473,10
+sl_eat_bio_ssl_all,3,NatureLM,Xeno-canto,False,True,False,0.6492195684932335,10
+sl_eat_bio_ssl_all,3,NatureLM,iNaturalist,False,True,False,0.6739583842123235,10
+sl_eat_bio_ssl_all,3,Watkins,WavCaps,True,False,False,0.7176611102512184,10
+sl_eat_bio_ssl_all,3,Watkins,Xeno-canto,True,True,True,0.6407430585310357,10
+sl_eat_bio_ssl_all,3,Watkins,iNaturalist,True,True,True,0.6583943965891524,10
+sl_eat_bio_ssl_all,3,WavCaps,Xeno-canto,False,True,False,0.7491606001243627,10
+sl_eat_bio_ssl_all,3,WavCaps,iNaturalist,False,True,False,0.7628594074873136,10
+sl_eat_bio_ssl_all,3,Xeno-canto,iNaturalist,True,True,True,0.8940841478661602,10
+sl_eat_bio_ssl_all,4,Animal Sound Archive,NatureLM,True,False,False,0.6266210031336509,10
+sl_eat_bio_ssl_all,4,Animal Sound Archive,Watkins,True,True,True,0.6124968971936269,10
+sl_eat_bio_ssl_all,4,Animal Sound Archive,WavCaps,True,False,False,0.7481988521577219,10
+sl_eat_bio_ssl_all,4,Animal Sound Archive,Xeno-canto,True,True,True,0.7754073813602235,10
+sl_eat_bio_ssl_all,4,Animal Sound Archive,iNaturalist,True,True,True,0.755643620715205,10
+sl_eat_bio_ssl_all,4,NatureLM,Watkins,False,True,False,0.6235377470657292,10
+sl_eat_bio_ssl_all,4,NatureLM,WavCaps,False,False,True,0.7156736941098905,10
+sl_eat_bio_ssl_all,4,NatureLM,Xeno-canto,False,True,False,0.588553585430177,10
+sl_eat_bio_ssl_all,4,NatureLM,iNaturalist,False,True,False,0.6020438084610317,10
+sl_eat_bio_ssl_all,4,Watkins,WavCaps,True,False,False,0.6748370267464678,10
+sl_eat_bio_ssl_all,4,Watkins,Xeno-canto,True,True,True,0.606980996239255,10
+sl_eat_bio_ssl_all,4,Watkins,iNaturalist,True,True,True,0.6482788572517498,10
+sl_eat_bio_ssl_all,4,WavCaps,Xeno-canto,False,True,False,0.7203455819798993,10
+sl_eat_bio_ssl_all,4,WavCaps,iNaturalist,False,True,False,0.73781993865148,10
+sl_eat_bio_ssl_all,4,Xeno-canto,iNaturalist,True,True,True,0.8358839508606261,10
+sl_eat_bio_ssl_all,5,Animal Sound Archive,NatureLM,True,False,False,0.6221787316768775,10
+sl_eat_bio_ssl_all,5,Animal Sound Archive,Watkins,True,True,True,0.5440052896586374,10
+sl_eat_bio_ssl_all,5,Animal Sound Archive,WavCaps,True,False,False,0.7095412915901272,10
+sl_eat_bio_ssl_all,5,Animal Sound Archive,Xeno-canto,True,True,True,0.7804394797421799,10
+sl_eat_bio_ssl_all,5,Animal Sound Archive,iNaturalist,True,True,True,0.7465467790985639,10
+sl_eat_bio_ssl_all,5,NatureLM,Watkins,False,True,False,0.5434599383890133,10
+sl_eat_bio_ssl_all,5,NatureLM,WavCaps,False,False,True,0.6991669931771719,10
+sl_eat_bio_ssl_all,5,NatureLM,Xeno-canto,False,True,False,0.5745287185590915,10
+sl_eat_bio_ssl_all,5,NatureLM,iNaturalist,False,True,False,0.5965705336598914,10
+sl_eat_bio_ssl_all,5,Watkins,WavCaps,True,False,False,0.6304108827655449,10
+sl_eat_bio_ssl_all,5,Watkins,Xeno-canto,True,True,True,0.5678792892314372,10
+sl_eat_bio_ssl_all,5,Watkins,iNaturalist,True,True,True,0.5396157237835004,10
+sl_eat_bio_ssl_all,5,WavCaps,Xeno-canto,False,True,False,0.6654596764918609,10
+sl_eat_bio_ssl_all,5,WavCaps,iNaturalist,False,True,False,0.6720480787468487,10
+sl_eat_bio_ssl_all,5,Xeno-canto,iNaturalist,True,True,True,0.7744068519480236,10
+sl_eat_bio_ssl_all,6,Animal Sound Archive,NatureLM,True,False,False,0.5338842975228808,10
+sl_eat_bio_ssl_all,6,Animal Sound Archive,Watkins,True,True,True,0.40469639330198015,10
+sl_eat_bio_ssl_all,6,Animal Sound Archive,WavCaps,True,False,False,0.596142872630271,10
+sl_eat_bio_ssl_all,6,Animal Sound Archive,Xeno-canto,True,True,True,0.7185926076924263,10
+sl_eat_bio_ssl_all,6,Animal Sound Archive,iNaturalist,True,True,True,0.6641356995469635,10
+sl_eat_bio_ssl_all,6,NatureLM,Watkins,False,True,False,0.4318039554168175,10
+sl_eat_bio_ssl_all,6,NatureLM,WavCaps,False,False,True,0.6250386943162003,10
+sl_eat_bio_ssl_all,6,NatureLM,Xeno-canto,False,True,False,0.507943474585926,10
+sl_eat_bio_ssl_all,6,NatureLM,iNaturalist,False,True,False,0.528710419047888,10
+sl_eat_bio_ssl_all,6,Watkins,WavCaps,True,False,False,0.48100466600563985,10
+sl_eat_bio_ssl_all,6,Watkins,Xeno-canto,True,True,True,0.4215682245611375,10
+sl_eat_bio_ssl_all,6,Watkins,iNaturalist,True,True,True,0.40603139638981994,10
+sl_eat_bio_ssl_all,6,WavCaps,Xeno-canto,False,True,False,0.5608843476201051,10
+sl_eat_bio_ssl_all,6,WavCaps,iNaturalist,False,True,False,0.5969195284092224,10
+sl_eat_bio_ssl_all,6,Xeno-canto,iNaturalist,True,True,True,0.6979673206408933,10
+sl_eat_bio_ssl_all,7,Animal Sound Archive,NatureLM,True,False,False,0.5081599815011998,10
+sl_eat_bio_ssl_all,7,Animal Sound Archive,Watkins,True,True,True,0.35062038143175434,10
+sl_eat_bio_ssl_all,7,Animal Sound Archive,WavCaps,True,False,False,0.5503342467255017,10
+sl_eat_bio_ssl_all,7,Animal Sound Archive,Xeno-canto,True,True,True,0.6431737302625665,10
+sl_eat_bio_ssl_all,7,Animal Sound Archive,iNaturalist,True,True,True,0.642528072645272,10
+sl_eat_bio_ssl_all,7,NatureLM,Watkins,False,True,False,0.3729407179278955,10
+sl_eat_bio_ssl_all,7,NatureLM,WavCaps,False,False,True,0.6004878884434757,10
+sl_eat_bio_ssl_all,7,NatureLM,Xeno-canto,False,True,False,0.49207050711583467,10
+sl_eat_bio_ssl_all,7,NatureLM,iNaturalist,False,True,False,0.5066815492114494,10
+sl_eat_bio_ssl_all,7,Watkins,WavCaps,True,False,False,0.4049765926485748,10
+sl_eat_bio_ssl_all,7,Watkins,Xeno-canto,True,True,True,0.3308023106747227,10
+sl_eat_bio_ssl_all,7,Watkins,iNaturalist,True,True,True,0.3577655705895138,10
+sl_eat_bio_ssl_all,7,WavCaps,Xeno-canto,False,True,False,0.5196577919810423,10
+sl_eat_bio_ssl_all,7,WavCaps,iNaturalist,False,True,False,0.5384203742423135,10
+sl_eat_bio_ssl_all,7,Xeno-canto,iNaturalist,True,True,True,0.6906704173127465,10
+sl_eat_bio_ssl_all,8,Animal Sound Archive,NatureLM,True,False,False,0.6045897943389082,10
+sl_eat_bio_ssl_all,8,Animal Sound Archive,Watkins,True,True,True,0.4467980669456796,10
+sl_eat_bio_ssl_all,8,Animal Sound Archive,WavCaps,True,False,False,0.6502122265884621,10
+sl_eat_bio_ssl_all,8,Animal Sound Archive,Xeno-canto,True,True,True,0.7119350574526353,10
+sl_eat_bio_ssl_all,8,Animal Sound Archive,iNaturalist,True,True,True,0.7162589560930313,10
+sl_eat_bio_ssl_all,8,NatureLM,Watkins,False,True,False,0.44609645702799694,10
+sl_eat_bio_ssl_all,8,NatureLM,WavCaps,False,False,True,0.6751227102479581,10
+sl_eat_bio_ssl_all,8,NatureLM,Xeno-canto,False,True,False,0.5431086390234182,10
+sl_eat_bio_ssl_all,8,NatureLM,iNaturalist,False,True,False,0.5577105446975201,10
+sl_eat_bio_ssl_all,8,Watkins,WavCaps,True,False,False,0.4957154283543986,10
+sl_eat_bio_ssl_all,8,Watkins,Xeno-canto,True,True,True,0.41861740823030297,10
+sl_eat_bio_ssl_all,8,Watkins,iNaturalist,True,True,True,0.41899349032897293,10
+sl_eat_bio_ssl_all,8,WavCaps,Xeno-canto,False,True,False,0.6230854701111705,10
+sl_eat_bio_ssl_all,8,WavCaps,iNaturalist,False,True,False,0.6335880095030932,10
+sl_eat_bio_ssl_all,8,Xeno-canto,iNaturalist,True,True,True,0.7781414987278017,10
+sl_eat_bio_ssl_all,9,Animal Sound Archive,NatureLM,True,False,False,0.487080772919251,10
+sl_eat_bio_ssl_all,9,Animal Sound Archive,Watkins,True,True,True,0.3782790585657941,10
+sl_eat_bio_ssl_all,9,Animal Sound Archive,WavCaps,True,False,False,0.568332415773056,10
+sl_eat_bio_ssl_all,9,Animal Sound Archive,Xeno-canto,True,True,True,0.6590059810034672,10
+sl_eat_bio_ssl_all,9,Animal Sound Archive,iNaturalist,True,True,True,0.6453016988971907,10
+sl_eat_bio_ssl_all,9,NatureLM,Watkins,False,True,False,0.3898145085682064,10
+sl_eat_bio_ssl_all,9,NatureLM,WavCaps,False,False,True,0.6159371605299092,10
+sl_eat_bio_ssl_all,9,NatureLM,Xeno-canto,False,True,False,0.4756155687138805,10
+sl_eat_bio_ssl_all,9,NatureLM,iNaturalist,False,True,False,0.4951012486333635,10
+sl_eat_bio_ssl_all,9,Watkins,WavCaps,True,False,False,0.42435524182010553,10
+sl_eat_bio_ssl_all,9,Watkins,Xeno-canto,True,True,True,0.3757788666464427,10
+sl_eat_bio_ssl_all,9,Watkins,iNaturalist,True,True,True,0.36116546210127526,10
+sl_eat_bio_ssl_all,9,WavCaps,Xeno-canto,False,True,False,0.5652691149451641,10
+sl_eat_bio_ssl_all,9,WavCaps,iNaturalist,False,True,False,0.5698183068341153,10
+sl_eat_bio_ssl_all,9,Xeno-canto,iNaturalist,True,True,True,0.7198216244040825,10
+sl_eat_bio_ssl_all,10,Animal Sound Archive,NatureLM,True,False,False,0.5433108485270869,10
+sl_eat_bio_ssl_all,10,Animal Sound Archive,Watkins,True,True,True,0.41601054063621523,10
+sl_eat_bio_ssl_all,10,Animal Sound Archive,WavCaps,True,False,False,0.659528358295488,10
+sl_eat_bio_ssl_all,10,Animal Sound Archive,Xeno-canto,True,True,True,0.6821266168034013,10
+sl_eat_bio_ssl_all,10,Animal Sound Archive,iNaturalist,True,True,True,0.7160058510868347,10
+sl_eat_bio_ssl_all,10,NatureLM,Watkins,False,True,False,0.4446627476323991,10
+sl_eat_bio_ssl_all,10,NatureLM,WavCaps,False,False,True,0.6566720821636234,10
+sl_eat_bio_ssl_all,10,NatureLM,Xeno-canto,False,True,False,0.5301497960151974,10
+sl_eat_bio_ssl_all,10,NatureLM,iNaturalist,False,True,False,0.5882226288893657,10
+sl_eat_bio_ssl_all,10,Watkins,WavCaps,True,False,False,0.45009551165641176,10
+sl_eat_bio_ssl_all,10,Watkins,Xeno-canto,True,True,True,0.42126940187208256,10
+sl_eat_bio_ssl_all,10,Watkins,iNaturalist,True,True,True,0.45141927781769614,10
+sl_eat_bio_ssl_all,10,WavCaps,Xeno-canto,False,True,False,0.6495839254638786,10
+sl_eat_bio_ssl_all,10,WavCaps,iNaturalist,False,True,False,0.721174002476182,10
+sl_eat_bio_ssl_all,10,Xeno-canto,iNaturalist,True,True,True,0.7973218955369836,10
+sl_eat_bio_ssl_all,11,Animal Sound Archive,NatureLM,True,False,False,0.5914784792546464,10
+sl_eat_bio_ssl_all,11,Animal Sound Archive,Watkins,True,True,True,0.4958566243839064,10
+sl_eat_bio_ssl_all,11,Animal Sound Archive,WavCaps,True,False,False,0.73698166640657,10
+sl_eat_bio_ssl_all,11,Animal Sound Archive,Xeno-canto,True,True,True,0.7784429784790212,10
+sl_eat_bio_ssl_all,11,Animal Sound Archive,iNaturalist,True,True,True,0.8050092164564957,10
+sl_eat_bio_ssl_all,11,NatureLM,Watkins,False,True,False,0.4880158357844335,10
+sl_eat_bio_ssl_all,11,NatureLM,WavCaps,False,False,True,0.7038225588994287,10
+sl_eat_bio_ssl_all,11,NatureLM,Xeno-canto,False,True,False,0.5964996986855002,10
+sl_eat_bio_ssl_all,11,NatureLM,iNaturalist,False,True,False,0.6318321919986352,10
+sl_eat_bio_ssl_all,11,Watkins,WavCaps,True,False,False,0.4949917032671175,10
+sl_eat_bio_ssl_all,11,Watkins,Xeno-canto,True,True,True,0.49381556941228827,10
+sl_eat_bio_ssl_all,11,Watkins,iNaturalist,True,True,True,0.5076798020787956,10
+sl_eat_bio_ssl_all,11,WavCaps,Xeno-canto,False,True,False,0.6872423054231174,10
+sl_eat_bio_ssl_all,11,WavCaps,iNaturalist,False,True,False,0.6918964491296071,10
+sl_eat_bio_ssl_all,11,Xeno-canto,iNaturalist,True,True,True,0.8247515264628893,10
+sl_eat_bio_ssl_all,12,Animal Sound Archive,NatureLM,True,False,False,0.6318329571407739,10
+sl_eat_bio_ssl_all,12,Animal Sound Archive,Watkins,True,True,True,0.5434592565546202,10
+sl_eat_bio_ssl_all,12,Animal Sound Archive,WavCaps,True,False,False,0.7543007289463568,10
+sl_eat_bio_ssl_all,12,Animal Sound Archive,Xeno-canto,True,True,True,0.6882921706906654,10
+sl_eat_bio_ssl_all,12,Animal Sound Archive,iNaturalist,True,True,True,0.740650639996346,10
+sl_eat_bio_ssl_all,12,NatureLM,Watkins,False,True,False,0.53076052870569,10
+sl_eat_bio_ssl_all,12,NatureLM,WavCaps,False,False,True,0.7340974173667073,10
+sl_eat_bio_ssl_all,12,NatureLM,Xeno-canto,False,True,False,0.5911278751835684,10
+sl_eat_bio_ssl_all,12,NatureLM,iNaturalist,False,True,False,0.6125131378374065,10
+sl_eat_bio_ssl_all,12,Watkins,WavCaps,True,False,False,0.5719129263431187,10
+sl_eat_bio_ssl_all,12,Watkins,Xeno-canto,True,True,True,0.5617523121860365,10
+sl_eat_bio_ssl_all,12,Watkins,iNaturalist,True,True,True,0.5432626859434205,10
+sl_eat_bio_ssl_all,12,WavCaps,Xeno-canto,False,True,False,0.6755975665060527,10
+sl_eat_bio_ssl_all,12,WavCaps,iNaturalist,False,True,False,0.6886813622557165,10
+sl_eat_bio_ssl_all,12,Xeno-canto,iNaturalist,True,True,True,0.7608035535280598,10
+random_init_eat_seed42,0,Animal Sound Archive,NatureLM,True,False,False,0.9070665088562773,10
+random_init_eat_seed42,0,Animal Sound Archive,Watkins,True,True,True,0.8605152289858766,10
+random_init_eat_seed42,0,Animal Sound Archive,WavCaps,True,False,False,0.914176065066212,10
+random_init_eat_seed42,0,Animal Sound Archive,Xeno-canto,True,True,True,0.9876503543899761,10
+random_init_eat_seed42,0,Animal Sound Archive,iNaturalist,True,True,True,0.9814419467378908,10
+random_init_eat_seed42,0,NatureLM,Watkins,False,True,False,0.8946119472249248,10
+random_init_eat_seed42,0,NatureLM,WavCaps,False,False,True,0.9863203166931088,10
+random_init_eat_seed42,0,NatureLM,Xeno-canto,False,True,False,0.9095993659395359,10
+random_init_eat_seed42,0,NatureLM,iNaturalist,False,True,False,0.9345510547795394,10
+random_init_eat_seed42,0,Watkins,WavCaps,True,False,False,0.8877268320937667,10
+random_init_eat_seed42,0,Watkins,Xeno-canto,True,True,True,0.8458993176181405,10
+random_init_eat_seed42,0,Watkins,iNaturalist,True,True,True,0.8672654560615815,10
+random_init_eat_seed42,0,WavCaps,Xeno-canto,False,True,False,0.9159075659769945,10
+random_init_eat_seed42,0,WavCaps,iNaturalist,False,True,False,0.9383420906942614,10
+random_init_eat_seed42,0,Xeno-canto,iNaturalist,True,True,True,0.9810858060806789,10
+random_init_eat_seed42,1,Animal Sound Archive,NatureLM,True,False,False,0.9811876858436847,10
+random_init_eat_seed42,1,Animal Sound Archive,Watkins,True,True,True,0.884744612566184,10
+random_init_eat_seed42,1,Animal Sound Archive,WavCaps,True,False,False,0.9624805706272866,10
+random_init_eat_seed42,1,Animal Sound Archive,Xeno-canto,True,True,True,0.9858806295345917,10
+random_init_eat_seed42,1,Animal Sound Archive,iNaturalist,True,True,True,0.9816511920415761,10
+random_init_eat_seed42,1,NatureLM,Watkins,False,True,False,0.8772855828797415,10
+random_init_eat_seed42,1,NatureLM,WavCaps,False,False,True,0.9483111708162262,10
+random_init_eat_seed42,1,NatureLM,Xeno-canto,False,True,False,0.973730243482177,10
+random_init_eat_seed42,1,NatureLM,iNaturalist,False,True,False,0.9709316050484424,10
+random_init_eat_seed42,1,Watkins,WavCaps,True,False,False,0.857458687006136,10
+random_init_eat_seed42,1,Watkins,Xeno-canto,True,True,True,0.8715982725290725,10
+random_init_eat_seed42,1,Watkins,iNaturalist,True,True,True,0.876409386070863,10
+random_init_eat_seed42,1,WavCaps,Xeno-canto,False,True,False,0.9672890629981724,10
+random_init_eat_seed42,1,WavCaps,iNaturalist,False,True,False,0.9534095674645012,10
+random_init_eat_seed42,1,Xeno-canto,iNaturalist,True,True,True,0.9874279503413483,10
+random_init_eat_seed42,2,Animal Sound Archive,NatureLM,True,False,False,0.9736923556130801,10
+random_init_eat_seed42,2,Animal Sound Archive,Watkins,True,True,True,0.8877330517999196,10
+random_init_eat_seed42,2,Animal Sound Archive,WavCaps,True,False,False,0.9530450549857582,10
+random_init_eat_seed42,2,Animal Sound Archive,Xeno-canto,True,True,True,0.9807654236035335,10
+random_init_eat_seed42,2,Animal Sound Archive,iNaturalist,True,True,True,0.9857151556898289,10
+random_init_eat_seed42,2,NatureLM,Watkins,False,True,False,0.8796213536998605,10
+random_init_eat_seed42,2,NatureLM,WavCaps,False,False,True,0.9530849587893057,10
+random_init_eat_seed42,2,NatureLM,Xeno-canto,False,True,False,0.9638942661637389,10
+random_init_eat_seed42,2,NatureLM,iNaturalist,False,True,False,0.972122250497389,10
+random_init_eat_seed42,2,Watkins,WavCaps,True,False,False,0.8494236724514324,10
+random_init_eat_seed42,2,Watkins,Xeno-canto,True,True,True,0.8682308532136837,10
+random_init_eat_seed42,2,Watkins,iNaturalist,True,True,True,0.9046758847115604,10
+random_init_eat_seed42,2,WavCaps,Xeno-canto,False,True,False,0.955347643047163,10
+random_init_eat_seed42,2,WavCaps,iNaturalist,False,True,False,0.9467770766770072,10
+random_init_eat_seed42,2,Xeno-canto,iNaturalist,True,True,True,0.9759399877428496,10
+random_init_eat_seed42,3,Animal Sound Archive,NatureLM,True,False,False,0.9730797689227856,10
+random_init_eat_seed42,3,Animal Sound Archive,Watkins,True,True,True,0.9006982921091182,10
+random_init_eat_seed42,3,Animal Sound Archive,WavCaps,True,False,False,0.9843282221710717,10
+random_init_eat_seed42,3,Animal Sound Archive,Xeno-canto,True,True,True,0.976022972302568,10
+random_init_eat_seed42,3,Animal Sound Archive,iNaturalist,True,True,True,0.989580979564316,10
+random_init_eat_seed42,3,NatureLM,Watkins,False,True,False,0.887849315825798,10
+random_init_eat_seed42,3,NatureLM,WavCaps,False,False,True,0.9806925534053038,10
+random_init_eat_seed42,3,NatureLM,Xeno-canto,False,True,False,0.9516810410883902,10
+random_init_eat_seed42,3,NatureLM,iNaturalist,False,True,False,0.9740534678663693,10
+random_init_eat_seed42,3,Watkins,WavCaps,True,False,False,0.897176088152559,10
+random_init_eat_seed42,3,Watkins,Xeno-canto,True,True,True,0.8820420617651576,10
+random_init_eat_seed42,3,Watkins,iNaturalist,True,True,True,0.9036136876634482,10
+random_init_eat_seed42,3,WavCaps,Xeno-canto,False,True,False,0.9634252954793313,10
+random_init_eat_seed42,3,WavCaps,iNaturalist,False,True,False,0.9801209521330142,10
+random_init_eat_seed42,3,Xeno-canto,iNaturalist,True,True,True,0.9789507004012897,10
+random_init_eat_seed42,4,Animal Sound Archive,NatureLM,True,False,False,0.9718772823724642,10
+random_init_eat_seed42,4,Animal Sound Archive,Watkins,True,True,True,0.8870059000822487,10
+random_init_eat_seed42,4,Animal Sound Archive,WavCaps,True,False,False,0.9792534217908487,10
+random_init_eat_seed42,4,Animal Sound Archive,Xeno-canto,True,True,True,0.954259964568546,10
+random_init_eat_seed42,4,Animal Sound Archive,iNaturalist,True,True,True,0.9798376044018046,10
+random_init_eat_seed42,4,NatureLM,Watkins,False,True,False,0.8892498691608491,10
+random_init_eat_seed42,4,NatureLM,WavCaps,False,False,True,0.9798194043749751,10
+random_init_eat_seed42,4,NatureLM,Xeno-canto,False,True,False,0.9199979835314007,10
+random_init_eat_seed42,4,NatureLM,iNaturalist,False,True,False,0.977654647110122,10
+random_init_eat_seed42,4,Watkins,WavCaps,True,False,False,0.8876213653976925,10
+random_init_eat_seed42,4,Watkins,Xeno-canto,True,True,True,0.8774393805408245,10
+random_init_eat_seed42,4,Watkins,iNaturalist,True,True,True,0.9066685496542777,10
+random_init_eat_seed42,4,WavCaps,Xeno-canto,False,True,False,0.9209321206255016,10
+random_init_eat_seed42,4,WavCaps,iNaturalist,False,True,False,0.9753320919024538,10
+random_init_eat_seed42,4,Xeno-canto,iNaturalist,True,True,True,0.9311122001681527,10
+random_init_eat_seed42,5,Animal Sound Archive,NatureLM,True,False,False,0.9784872415041571,10
+random_init_eat_seed42,5,Animal Sound Archive,Watkins,True,True,True,0.8812563862159035,10
+random_init_eat_seed42,5,Animal Sound Archive,WavCaps,True,False,False,0.9719707886115341,10
+random_init_eat_seed42,5,Animal Sound Archive,Xeno-canto,True,True,True,0.9400847375855935,10
+random_init_eat_seed42,5,Animal Sound Archive,iNaturalist,True,True,True,0.9780928387784705,10
+random_init_eat_seed42,5,NatureLM,Watkins,False,True,False,0.8851513346511067,10
+random_init_eat_seed42,5,NatureLM,WavCaps,False,False,True,0.9670802347080653,10
+random_init_eat_seed42,5,NatureLM,Xeno-canto,False,True,False,0.9174350320437897,10
+random_init_eat_seed42,5,NatureLM,iNaturalist,False,True,False,0.9787991907745169,10
+random_init_eat_seed42,5,Watkins,WavCaps,True,False,False,0.8583424255309247,10
+random_init_eat_seed42,5,Watkins,Xeno-canto,True,True,True,0.8311679161848886,10
+random_init_eat_seed42,5,Watkins,iNaturalist,True,True,True,0.8920542570638439,10
+random_init_eat_seed42,5,WavCaps,Xeno-canto,False,True,False,0.9270435093670507,10
+random_init_eat_seed42,5,WavCaps,iNaturalist,False,True,False,0.9559177524372838,10
+random_init_eat_seed42,5,Xeno-canto,iNaturalist,True,True,True,0.9101919214671021,10
+random_init_eat_seed42,6,Animal Sound Archive,NatureLM,True,False,False,0.971445440005505,10
+random_init_eat_seed42,6,Animal Sound Archive,Watkins,True,True,True,0.8816083623635989,10
+random_init_eat_seed42,6,Animal Sound Archive,WavCaps,True,False,False,0.9704333904483722,10
+random_init_eat_seed42,6,Animal Sound Archive,Xeno-canto,True,True,True,0.939239685858974,10
+random_init_eat_seed42,6,Animal Sound Archive,iNaturalist,True,True,True,0.9744616114263586,10
+random_init_eat_seed42,6,NatureLM,Watkins,False,True,False,0.88492016432082,10
+random_init_eat_seed42,6,NatureLM,WavCaps,False,False,True,0.9610463076113744,10
+random_init_eat_seed42,6,NatureLM,Xeno-canto,False,True,False,0.9064248555226321,10
+random_init_eat_seed42,6,NatureLM,iNaturalist,False,True,False,0.9727894902622977,10
+random_init_eat_seed42,6,Watkins,WavCaps,True,False,False,0.856135639154527,10
+random_init_eat_seed42,6,Watkins,Xeno-canto,True,True,True,0.8402066065579588,10
+random_init_eat_seed42,6,Watkins,iNaturalist,True,True,True,0.880441906688547,10
+random_init_eat_seed42,6,WavCaps,Xeno-canto,False,True,False,0.9204769836898814,10
+random_init_eat_seed42,6,WavCaps,iNaturalist,False,True,False,0.9549501900366947,10
+random_init_eat_seed42,6,Xeno-canto,iNaturalist,True,True,True,0.9155838270590563,10
+random_init_eat_seed42,7,Animal Sound Archive,NatureLM,True,False,False,0.9695223210497584,10
+random_init_eat_seed42,7,Animal Sound Archive,Watkins,True,True,True,0.8737001398876518,10
+random_init_eat_seed42,7,Animal Sound Archive,WavCaps,True,False,False,0.9603848096995795,10
+random_init_eat_seed42,7,Animal Sound Archive,Xeno-canto,True,True,True,0.9809945801061909,10
+random_init_eat_seed42,7,Animal Sound Archive,iNaturalist,True,True,True,0.9545687996724732,10
+random_init_eat_seed42,7,NatureLM,Watkins,False,True,False,0.8749048573397376,10
+random_init_eat_seed42,7,NatureLM,WavCaps,False,False,True,0.946298965807013,10
+random_init_eat_seed42,7,NatureLM,Xeno-canto,False,True,False,0.9524944597276301,10
+random_init_eat_seed42,7,NatureLM,iNaturalist,False,True,False,0.9503791759450573,10
+random_init_eat_seed42,7,Watkins,WavCaps,True,False,False,0.8489209387146858,10
+random_init_eat_seed42,7,Watkins,Xeno-canto,True,True,True,0.850468109324251,10
+random_init_eat_seed42,7,Watkins,iNaturalist,True,True,True,0.9164912069090366,10
+random_init_eat_seed42,7,WavCaps,Xeno-canto,False,True,False,0.9601186833801492,10
+random_init_eat_seed42,7,WavCaps,iNaturalist,False,True,False,0.9116404559210605,10
+random_init_eat_seed42,7,Xeno-canto,iNaturalist,True,True,True,0.9443378004691338,10
+random_init_eat_seed42,8,Animal Sound Archive,NatureLM,True,False,False,0.9704854021290629,10
+random_init_eat_seed42,8,Animal Sound Archive,Watkins,True,True,True,0.8927718725776141,10
+random_init_eat_seed42,8,Animal Sound Archive,WavCaps,True,False,False,0.9802134807577106,10
+random_init_eat_seed42,8,Animal Sound Archive,Xeno-canto,True,True,True,0.9048713813222365,10
+random_init_eat_seed42,8,Animal Sound Archive,iNaturalist,True,True,True,0.9755305033399267,10
+random_init_eat_seed42,8,NatureLM,Watkins,False,True,False,0.88655151780259,10
+random_init_eat_seed42,8,NatureLM,WavCaps,False,False,True,0.980950898183022,10
+random_init_eat_seed42,8,NatureLM,Xeno-canto,False,True,False,0.8924325098147884,10
+random_init_eat_seed42,8,NatureLM,iNaturalist,False,True,False,0.9721864143186224,10
+random_init_eat_seed42,8,Watkins,WavCaps,True,False,False,0.9022033339502638,10
+random_init_eat_seed42,8,Watkins,Xeno-canto,True,True,True,0.8579370344408479,10
+random_init_eat_seed42,8,Watkins,iNaturalist,True,True,True,0.8837618287737431,10
+random_init_eat_seed42,8,WavCaps,Xeno-canto,False,True,False,0.8950575297723017,10
+random_init_eat_seed42,8,WavCaps,iNaturalist,False,True,False,0.9782129561253455,10
+random_init_eat_seed42,8,Xeno-canto,iNaturalist,True,True,True,0.8902943697742314,10
+random_init_eat_seed42,9,Animal Sound Archive,NatureLM,True,False,False,0.9580611467129374,10
+random_init_eat_seed42,9,Animal Sound Archive,Watkins,True,True,True,0.8727875312608969,10
+random_init_eat_seed42,9,Animal Sound Archive,WavCaps,True,False,False,0.9698875291480678,10
+random_init_eat_seed42,9,Animal Sound Archive,Xeno-canto,True,True,True,0.937160737978122,10
+random_init_eat_seed42,9,Animal Sound Archive,iNaturalist,True,True,True,0.9097027351975736,10
+random_init_eat_seed42,9,NatureLM,Watkins,False,True,False,0.8778014416850605,10
+random_init_eat_seed42,9,NatureLM,WavCaps,False,False,True,0.9540095988432716,10
+random_init_eat_seed42,9,NatureLM,Xeno-canto,False,True,False,0.9162206152903328,10
+random_init_eat_seed42,9,NatureLM,iNaturalist,False,True,False,0.9037547609158431,10
+random_init_eat_seed42,9,Watkins,WavCaps,True,False,False,0.8553964737576694,10
+random_init_eat_seed42,9,Watkins,Xeno-canto,True,True,True,0.8620859531040761,10
+random_init_eat_seed42,9,Watkins,iNaturalist,True,True,True,0.8504071813427714,10
+random_init_eat_seed42,9,WavCaps,Xeno-canto,False,True,False,0.9295115685765577,10
+random_init_eat_seed42,9,WavCaps,iNaturalist,False,True,False,0.9060740514789328,10
+random_init_eat_seed42,9,Xeno-canto,iNaturalist,True,True,True,0.9457506348904999,10
+random_init_eat_seed42,10,Animal Sound Archive,NatureLM,True,False,False,0.9526303550885334,10
+random_init_eat_seed42,10,Animal Sound Archive,Watkins,True,True,True,0.8624166862348404,10
+random_init_eat_seed42,10,Animal Sound Archive,WavCaps,True,False,False,0.9307455867004789,10
+random_init_eat_seed42,10,Animal Sound Archive,Xeno-canto,True,True,True,0.9186274080330081,10
+random_init_eat_seed42,10,Animal Sound Archive,iNaturalist,True,True,True,0.9230474979063137,10
+random_init_eat_seed42,10,NatureLM,Watkins,False,True,False,0.8569410718902445,10
+random_init_eat_seed42,10,NatureLM,WavCaps,False,False,True,0.9456024032604654,10
+random_init_eat_seed42,10,NatureLM,Xeno-canto,False,True,False,0.8835135121443665,10
+random_init_eat_seed42,10,NatureLM,iNaturalist,False,True,False,0.8953657711981441,10
+random_init_eat_seed42,10,Watkins,WavCaps,True,False,False,0.8948077070587491,10
+random_init_eat_seed42,10,Watkins,Xeno-canto,True,True,True,0.8430007242061315,10
+random_init_eat_seed42,10,Watkins,iNaturalist,True,True,True,0.8397922154501037,10
+random_init_eat_seed42,10,WavCaps,Xeno-canto,False,True,False,0.890324432327956,10
+random_init_eat_seed42,10,WavCaps,iNaturalist,False,True,False,0.8992730385881126,10
+random_init_eat_seed42,10,Xeno-canto,iNaturalist,True,True,True,0.9495408029071941,10
+random_init_eat_seed42,11,Animal Sound Archive,NatureLM,True,False,False,0.8833761254773698,10
+random_init_eat_seed42,11,Animal Sound Archive,Watkins,True,True,True,0.8426334325875316,10
+random_init_eat_seed42,11,Animal Sound Archive,WavCaps,True,False,False,0.948133082849151,10
+random_init_eat_seed42,11,Animal Sound Archive,Xeno-canto,True,True,True,0.9743711051103316,10
+random_init_eat_seed42,11,Animal Sound Archive,iNaturalist,True,True,True,0.9451245950829794,10
+random_init_eat_seed42,11,NatureLM,Watkins,False,True,False,0.8586940262967342,10
+random_init_eat_seed42,11,NatureLM,WavCaps,False,False,True,0.9384508202209746,10
+random_init_eat_seed42,11,NatureLM,Xeno-canto,False,True,False,0.869619733422874,10
+random_init_eat_seed42,11,NatureLM,iNaturalist,False,True,False,0.884787115064926,10
+random_init_eat_seed42,11,Watkins,WavCaps,True,False,False,0.8480611411598818,10
+random_init_eat_seed42,11,Watkins,Xeno-canto,True,True,True,0.8211391747169516,10
+random_init_eat_seed42,11,Watkins,iNaturalist,True,True,True,0.8198677518563512,10
+random_init_eat_seed42,11,WavCaps,Xeno-canto,False,True,False,0.9317113135963302,10
+random_init_eat_seed42,11,WavCaps,iNaturalist,False,True,False,0.9220796853026745,10
+random_init_eat_seed42,11,Xeno-canto,iNaturalist,True,True,True,0.9522400188102644,10
+random_init_eat_seed42,12,Animal Sound Archive,NatureLM,True,False,False,0.914220660352916,10
+random_init_eat_seed42,12,Animal Sound Archive,Watkins,True,True,True,0.8566093090322602,10
+random_init_eat_seed42,12,Animal Sound Archive,WavCaps,True,False,False,0.9589838029623889,10
+random_init_eat_seed42,12,Animal Sound Archive,Xeno-canto,True,True,True,0.9745279608398679,10
+random_init_eat_seed42,12,Animal Sound Archive,iNaturalist,True,True,True,0.929088890720388,10
+random_init_eat_seed42,12,NatureLM,Watkins,False,True,False,0.8400760091847204,10
+random_init_eat_seed42,12,NatureLM,WavCaps,False,False,True,0.920009129808434,10
+random_init_eat_seed42,12,NatureLM,Xeno-canto,False,True,False,0.9168468334500858,10
+random_init_eat_seed42,12,NatureLM,iNaturalist,False,True,False,0.926965769257538,10
+random_init_eat_seed42,12,Watkins,WavCaps,True,False,False,0.8615356922437307,10
+random_init_eat_seed42,12,Watkins,Xeno-canto,True,True,True,0.8350420064350113,10
+random_init_eat_seed42,12,Watkins,iNaturalist,True,True,True,0.8346307978633692,10
+random_init_eat_seed42,12,WavCaps,Xeno-canto,False,True,False,0.9516124298295449,10
+random_init_eat_seed42,12,WavCaps,iNaturalist,False,True,False,0.9437235927835802,10
+random_init_eat_seed42,12,Xeno-canto,iNaturalist,True,True,True,0.9446852703578633,10
