@@ -255,12 +255,38 @@ centroid axis. It's a sharp asymmetric response. Reviewers who would
 otherwise interpret §4 as "linear-feature decomposition à la Burns
 2022" can be redirected here.
 
-**Caveats.** (1) `sl_eat_bio_ssl_all` only — the other three trained
-models are §9.7 OPEN. (2) Pilot scale (25 clip pairs); a larger run
-would tighten the std bands but the asymmetry is too large to be
-explained by 25 pairs of noise. (3) Audio-domain mixing is a particular
-intervention; concatenation, time-domain noise injection, or
-spectrogram-domain mixing might give different curves.
+**Caveats.** (1) Pilot scale (25 clip pairs); a larger run would tighten
+the std bands but the asymmetry is too large to be explained by 25 pairs
+of noise. (2) Audio-domain mixing is a particular intervention;
+concatenation, time-domain noise injection, or spectrogram-domain mixing
+might give different curves.
+
+**Extension to the other three trained models (added 2026-04-27).**
+Same protocol on `eat_all`, `eat_bio`, `sl_eat_all_ssl_all`. The
+threshold-like asymmetry is **specific to `sl_eat_bio_ssl_all`**, not an
+architectural property of EAT:
+
+| model               | proj@α=0 | proj@α=1 | range | midpoint dev |
+|---------------------|---------:|---------:|------:|-------------:|
+| eat_all             |    −0.73 |    −0.64 |  0.10 | non-monotonic |
+| eat_bio             |    −0.75 |    −0.62 |  0.13 | non-monotonic |
+| sl_eat_all_ssl_all  |    −0.52 |    −0.92 |  0.40 |       +0.30   |
+| sl_eat_bio_ssl_all  |    +0.40 |    −1.35 |  1.75 |       −0.30   |
+
+`eat_all` and `eat_bio` simply do not have a strong enough bio-vs-non-bio
+direction for "linear vs threshold" to be a meaningful question — the
+full-range projection is barely 0.10–0.13 and the curves are
+non-monotonic noise. `sl_eat_all_ssl_all` (SSL on top of non-bio
+pretrain) gets a partial bio-axis (range 0.40) with mild asymmetry. Only
+`sl_eat_bio_ssl_all` (bio pretrain + SSL) has both a wide bio-axis and
+clear asymmetric threshold.
+
+**Mechanistic conclusion.** The wide bio-axis is unlocked by the
+*combination* of bio pretraining + SSL fine-tune, not by either
+ingredient alone. SSL on top of non-bio pretrain (`sl_eat_all_ssl_all`)
+gets ~25 % of the way; bio pretraining alone (`eat_bio`) gets nowhere on
+this 1-D centroid-axis diagnostic. Source:
+`audio_mixing_pilot_extended/{eat_all,eat_bio,sl_eat_all_ssl_all}/mixing_summary_by_alpha.csv`.
 
 ---
 
@@ -511,8 +537,9 @@ Still open:
    with teammate (TODO.md Step 3c).
 6. **Species barycenters (TODO.md Step 3b).** Still pending; requires
    species labels.
-7. **Linearity of the bio↔non-bio mechanism for the other three trained
-   models** (§4.5 was on `sl_eat_bio_ssl_all` only). Quick to run.
+7. ~~Linearity of the bio↔non-bio mechanism for the other three trained
+   models.~~ Done in `audio_mixing_pilot_extended/`. Threshold-like
+   asymmetry is specific to `sl_eat_bio_ssl_all`; see §4.5 extension.
 
 ---
 
