@@ -41,19 +41,23 @@ From the `dd24541` Step 2 results:
 - [x] **TwoNN ID stays ~8–12 everywhere** while linear effective rank swings 3–148 — addressed via the pooled-vs-frame comparison in `11f9920`. Frame-level TwoNN is ~3–5 (much lower), confirming the curved low-dim manifold story; the pooled-level TwoNN was a measurement artifact of mean-pooling.
 - [x] **L0 effective rank ≈ 3 across all four models** — **rejected as a "shared tokenizer" story** in `10601b9`. Three models share L0 subspace at cos 0.91–0.98, but `eat_bio` is ~orthogonal to all of them (cos 0.28–0.32). Each model independently learned a low-dim L0 subspace; they happen to land at similar dimensionality but not the same direction.
 
-### Step 2 outstanding (new, from this round of findings)
+### Step 2 outstanding (Tier 1 follow-ups)
 
-- [ ] **TwoNN sanity check at frame level**. The frame-level TwoNN curve in `step2_pooled_vs_frame/` shows an unstable point at L4 (drops to ~2.6 sandwiched between 10.1 and 7.4). With k=2 NN over 10k subsampled rows the estimator can be jumpy. Worth re-running with a larger neighbor count or MLE-ID as a cross-check before any claim about layerwise TwoNN trends.
-- [ ] **Generalize the pooled-vs-frame check to the other three models**. The story above is currently sl_eat_bio_ssl_all only. If pooling distorts geometry on the other three the same way, the original spectral-dim conclusions need to be re-stated against frame-level numbers. If only sl_eat_bio is distorted, that itself is a finding.
+Done in `step2_tier1_frame_level.py` (output: `step2_tier1_frame_level/`):
 
-## Roadmap Section 2 — Probes + attribution (next)
+- [x] **TwoNN L4 dip resolved as a TwoNN(k=2) estimator artifact.** Adding MLE-ID with k=20 alongside TwoNN: 3 of 4 models show the L4 TwoNN crash (`eat_all` 0.95, `sl_eat_all_ssl_all` 1.67, `sl_eat_bio_ssl_all` 2.63) while MLE-ID(k=20) reads stable values (13.27, 13.69, 14.05). The "L4 dip" is a TwoNN failure mode, not a model phenomenon — retract from any narrative built on `step2_pooled_vs_frame/`.
+- [x] **Pooled-vs-frame distortion is universal but heterogeneous.** Frame-level eff_rank > pooled eff_rank at every (model, layer); the ratio varies wildly. Pooled L0 was uniformly ~3 across all four models — frame-level L0 spreads to **11 / 26 / 44 / 17** for `eat_all` / `eat_bio` / `sl_eat_all_ssl_all` / `sl_eat_bio_ssl_all`. The "L0 effective rank ≈ 3 across all four models" finding from `dd24541` was a pooling artifact; at frame level the four L0s are visibly different.
+- [x] **Bio-vs-nonbio direction story survives at frame level but is muted.** The pooled "0.33 at L9 for `sl_eat_bio_ssl_all` vs 0.55–0.70 elsewhere" becomes "**0.57 at L9 vs 0.68–0.81 elsewhere**" at frame level. `sl_eat_bio_ssl_all` is still the most-separated model and still bottoms out around L7–L9, but pooling inflated the dramatic-looking number. Restate as: "bio fine-tune separates bio from non-bio in subspace direction at frame level (mean cos drops to ~0.57 in mid-network), but the effect is smaller than mean-pooling suggested."
 
-Begin once Step 2 outstanding items are closed.
+### Step 2 new findings from Tier 1
 
-- [ ] **Step 2.1** — identify two (or more) species in `NatureLM-audio-training` with substantial sample counts. Probably draw from the Xeno-canto slice of the existing manifest first; expand the manifest if counts are too thin.
-- [ ] **Step 2.2** — train per-layer linear probes for one-vs-one species separation across all four models. Reuse the PCA-to-50 + logistic-regression pattern from the existing `probe_species.py`.
-- [ ] **Step 2.4** — add hierarchical probes: Class (Aves vs Mammalia), Order (Passeriformes / Charadriiformes / Piciformes / Strigiformes), Species. Test for hierarchical geometry — gaussian blob fit on activation centroids is the roadmap's suggested cheap version.
-- [ ] **Step 2.3** — attribution methods to recover which input patches the probes rely on. Roadmap says "more details coming soon" — defer until Step 2.2/2.4 are landed and we have a concrete probe to attribute through.
+- [ ] **Late-layer collapse splits the family by `_bio` vs not.** Frame-level L12 eff_rank: `eat_all` 62.6, `sl_eat_all_ssl_all` **11.2**, vs `eat_bio` 180.4, `sl_eat_bio_ssl_all` 188.7. The two non-bio models collapse hard at the output; the two bio fine-tunes retain rich variance through to L12. SSL on top of `eat_all` (i.e. `sl_eat_all_ssl_all`) collapses harder than `eat_all` alone. Worth a follow-up: is this saying the bio pretrain leaves the output-side representation usable for downstream tasks while the non-bio + SSL combo over-compresses?
+- [ ] **Frame-level model rank order at the eff_rank peak is `sl_eat_bio_ssl_all` > `eat_all` ≈ `sl_eat_all_ssl_all` > `eat_bio`.** Pooled said `sl_eat_bio_ssl_all` ≫ `eat_bio` ≈ `sl_eat_all` > `eat_all`. The relative position of `eat_bio` vs the other two flips between pooled and frame-level — pooled overstates `eat_bio`'s linear subspace width relative to `eat_all` and `sl_eat_all_ssl_all`. Worth restating any claims that ranked `eat_bio` high on linear width.
+- [ ] **MLE-ID(k=20) frame-level intrinsic dim sits at 7–14 across all (model, layer)** vs eff_rank swings of 11–348. Confirms the curved-low-dim-manifold-inside-wide-linear-subspace story holds for every model in the family, not just `sl_eat_bio_ssl_all`. The intrinsic dim is fairly conserved across models; the linear envelope is what differentiates them.
+
+## Roadmap Section 2 — owned by teammate
+
+Probes + attribution work is being pursued by a teammate. Out of scope for this thread; do not duplicate.
 
 ## Out of scope for the current pilot
 
