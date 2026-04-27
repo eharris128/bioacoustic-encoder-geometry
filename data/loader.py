@@ -141,12 +141,9 @@ def load_audio_file(path: str, target_sr: int = 16000) -> torch.Tensor:
             data = scipy_signal.resample(data, n_out)
         return torch.from_numpy(data.astype(np.float32)).unsqueeze(0)
     except Exception:
-        import torchaudio
-        waveform, sr = torchaudio.load(path)
-        waveform = waveform.mean(dim=0, keepdim=True)
-        if sr != target_sr:
-            waveform = torchaudio.functional.resample(waveform, sr, target_sr)
-        return waveform.float()
+        import librosa
+        data, _ = librosa.load(path, sr=target_sr, mono=True)
+        return torch.from_numpy(data).unsqueeze(0)
 
 
 def _audio_from_hf_item(item: dict, target_sr: int = 16000) -> torch.Tensor:

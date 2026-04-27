@@ -123,24 +123,14 @@ after training — they don't interact with the individual plot functions direct
 **`experiments/animals_vs_music.py`**
 Config + entry point for the binary animal-vs-music probe. Label 0 = animal, label 1 = music.
 
-*Data available on disk (as of 2026-04-16):*
+*Current config (NatureLM version — requires Lambda / stable HuggingFace connection):*
 
-| Class | Species / Source | Files on disk | Configured in RECORDINGS |
-|---|---|---|---|
-| Animal (0) | Eurasian Bullfinch | 38 (WAV) | 3 |
-| Animal (0) | Hawfinch | 5 unique recordings (WAV + duplicate MP3s) | 3 |
-| Animal (0) | Helmeted Guineafowl | 3 unique recordings (WAV + MP3 pairs) | 3 |
-| Music (1) | Violin | 5 MP3s | 5 |
+- **Animal (0):** up to 200 recordings streamed from NatureLM xeno-canto, mean-pooled (one vector per recording)
+- **Music (1):** 19 local recordings (5 violin + 5 piano + 5 flute + 4 guitar), mean-pooled
 
-**9 animal recordings vs 5 violin recordings are wired into RECORDINGS** — a mild class
-imbalance (9:5). LORO will train on 8 animal + 5 violin per fold when holding out an
-animal recording, and 9 animal + 4 violin per fold when holding out a violin recording.
-This is acceptable but worth noting when interpreting per-fold variance.
+Class imbalance (200 animal vs 19 music) is expected — LORO handles it but probe will be biased toward the larger class. Consider capping animals at 19 for a balanced comparison, or adding more music sources.
 
-**Unused data:** 35 additional bullfinch WAVs and 2 additional hawfinch WAVs are on disk
-but not configured. Adding more animal recordings would better balance the dataset (aim
-for ~14 animal vs 5 music, or add more violin). Guineafowl WAV/MP3 duplicates — only
-use the WAV paths (already correct in RECORDINGS).
+*Offline/local version* (20 animal vs 19 music, no network required) is available in git history (commit before the NatureLM revert).
 
 **`experiments/music_vs_speech.py`**
 Config + entry point for the binary music-vs-speech probe. Label 0 = violin,
@@ -187,10 +177,10 @@ via `.gitkeep`.
 
 ### Definition of "done" before moving to attribution
 
-- [ ] All three experiment scripts run end-to-end without error
-- [ ] Accuracy curves saved to `results/` for all three experiments (+ all three species pairs)
-- [ ] LDA projection plots saved for all experiments
-- [ ] Peak accuracy layer identified for each experiment and noted in the summary table below
+- [x] All three experiment scripts run end-to-end without error (animals_vs_music ✓)
+- [x] Accuracy curves saved to `results/` for all three experiments (+ all three species pairs) (animals_vs_music ✓ → `results/probe-output/animals_vs_music/`)
+- [x] LDA projection plots saved for all experiments (animals_vs_music ✓)
+- [x] Peak accuracy layer identified for each experiment and noted in the summary table below (animals_vs_music: T5 @ 98.9%)
 - [ ] Results compared to mentor's class/order baselines — does the layer hierarchy hold?
 - [ ] `music_vs_speech` has ≥5 speech recordings (not just 2)
 - [ ] `species_vs_species.py` populated with confirmed pair and run end-to-end
@@ -204,7 +194,7 @@ activation patching to identify which heads and layers drive each separation).
 
 | Experiment | Peak layer | Peak accuracy | Chance level |
 |---|---|---|---|
-| Animals vs Music | TBD | TBD | 50% |
+| Animals vs Music | T5 | 98.9% | 50% |
 | Music vs Speech | TBD | TBD | 50% |
 | Bullfinch vs Hawfinch | TBD | TBD | 50% |
 | Bullfinch vs Guineafowl | TBD | TBD | 50% |

@@ -18,6 +18,7 @@ import os
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import StandardScaler
 
@@ -74,17 +75,11 @@ def plot_accuracy_curve(
     labels = [_layer_label(l) for l in layers]
 
     peak_idx = int(np.argmax(accs))
+    bar_colors = ["gold" if i == peak_idx else "#1976D2" for i in range(len(layers))]
 
     fig, ax = plt.subplots(figsize=(11, 5))
 
-    ax.plot(layers, accs, "o-", color="#1976D2", linewidth=2, markersize=6, zorder=3)
-
-    # Gold star at peak
-    ax.scatter(
-        [layers[peak_idx]], [accs[peak_idx]],
-        color="gold", edgecolors="#333", s=120, zorder=4,
-        label=f"Peak: {_layer_label(layers[peak_idx])} ({accs[peak_idx]:.1%})",
-    )
+    bars = ax.bar(layers, accs, color=bar_colors, edgecolor="#333", linewidth=0.5, zorder=3)
 
     # Chance reference
     ax.axhline(
@@ -92,17 +87,26 @@ def plot_accuracy_curve(
         label=f"Chance ({chance_level:.0%})",
     )
 
+    # Peak label
+    peak_layer = layers[peak_idx]
+    ax.annotate(
+        f"Peak: {_layer_label(peak_layer)} ({accs[peak_idx]:.1%})",
+        xy=(peak_layer, accs[peak_idx]),
+        xytext=(0, 6), textcoords="offset points",
+        ha="center", fontsize=8, color="#333",
+    )
+
     ax.set_xticks(layers)
     ax.set_xticklabels(labels, fontsize=8)
     ax.set_xlabel("AVES Layer", fontsize=11)
     ax.set_ylabel("LORO Accuracy", fontsize=11)
-    ax.set_ylim(0, 1.05)
+    ax.set_ylim(0, 1.12)
     ax.set_title(
         f"{title}\nClasses: {' vs '.join(label_names)}",
         fontsize=12, fontweight="bold",
     )
     ax.legend(fontsize=9)
-    ax.grid(True, alpha=0.3)
+    ax.grid(True, alpha=0.3, axis="y")
 
     plt.tight_layout()
     os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
@@ -143,29 +147,38 @@ def plot_lda_projection(
 
     fig.suptitle(title, fontsize=13, fontweight="bold")
 
+    binary = len(label_names) == 2
+
     for ax, layer in zip(axes, layers_to_plot):
         X, y = dataset[layer]
 
-        # Standardize before LDA (same convention as the probes)
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
 
-        n_components = min(2, len(label_names) - 1)
-        lda = LinearDiscriminantAnalysis(n_components=n_components)
-        coords = lda.fit_transform(X_scaled, y)
+        if binary:
+            # LDA gives 1 axis for binary; use it as x, PCA PC2 as y
+            lda = LinearDiscriminantAnalysis(n_components=1)
+            ld1 = lda.fit_transform(X_scaled, y)[:, 0]
+            pca = PCA(n_components=2)
+            pcs = pca.fit_transform(X_scaled)
+            coords = np.column_stack([ld1, pcs[:, 1]])
+            xlabel, ylabel = "LD1", "PC2"
+        else:
+            lda = LinearDiscriminantAnalysis(n_components=2)
+            coords = lda.fit_transform(X_scaled, y)
+            xlabel, ylabel = "LD1", "LD2"
 
         for class_idx, name in enumerate(label_names):
             mask = y == class_idx
             color = _CLASS_COLORS[class_idx % len(_CLASS_COLORS)]
             ax.scatter(
-                coords[mask, 0],
-                coords[mask, 1] if n_components > 1 else np.zeros(mask.sum()),
+                coords[mask, 0], coords[mask, 1],
                 c=color, alpha=0.3, s=3, label=name, rasterized=True,
             )
 
         ax.set_title(_layer_label(layer), fontsize=10, fontweight="bold")
-        ax.set_xlabel("LD1", fontsize=8)
-        ax.set_ylabel("LD2" if n_components > 1 else "", fontsize=8)
+        ax.set_xlabel(xlabel, fontsize=8)
+        ax.set_ylabel(ylabel, fontsize=8)
         ax.tick_params(labelsize=7)
 
     # Single legend on the last panel
