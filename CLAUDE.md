@@ -4,91 +4,179 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Interpretability research on AVES (Animal Vocalization Encoder based on Self-Supervision), a HuBERT-based transformer (12 layers, 12 heads, 768-dim) fine-tuned on animal sounds by the Earth Species Project. We systematically probe what each layer learns using Bullfinch recordings from xeno-canto.
+Geometric interpretability of the **ESP-AVES2 EAT-family** of audio encoders
+released by the Earth Species Project. We collect residual-stream activations
+from 4 EAT checkpoints over a frozen slice of NatureLM-audio-training and
+study how the geometry of those activations is shaped by training. Plus a
+random-init EAT baseline (architecture only, no learned weights) that anchors
+absolute magnitudes.
+
+The project pivoted from an earlier exploratory phase on the legacy AVES
+torchaudio model + Bullfinch recordings; that phase is **out of scope**. See
+`memory/MEMORY.md` and the project memory at
+`~/.claude-heron/projects/-home-evan-projects-sentient-futures/memory/`.
+
+Read `RESULTS.md` for the running narrative (CLAIM / RETRACTED / OPEN
+sections) and `TODO.md` for what's next.
+
+## Models in scope
+
+Four trained EAT checkpoints (all 13 layers — `model.pos_drop` + 12
+transformer blocks — at hidden dim 768) plus one random-init baseline:
+
+| key                       | description                                    |
+|---------------------------|------------------------------------------------|
+| `eat_all`                 | EAT pretrained on bio + non-bio audio          |
+| `eat_bio`                 | EAT pretrained on bio-only audio               |
+| `sl_eat_all_ssl_all`      | `eat_all` + SSL fine-tune on bio + non-bio     |
+| `sl_eat_bio_ssl_all`      | `eat_bio` + SSL fine-tune on bio + non-bio     |
+| `random_init_eat_seed42`  | EAT-base architecture, random reinit at seed 42|
+
+Two more random-init seeds (7 and 13) were extracted to validate init
+variability — shards have been deleted to save disk; per-seed CSVs persist
+under `artifacts/.../random_init_variability/`.
 
 ## Setup
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-pip install esp-aves torchcodec matplotlib scikit-learn
-git clone https://github.com/earthspecies/aves.git
-mkdir -p models
-curl -L -o models/aves-base-all.torchaudio.pt \
-  https://storage.googleapis.com/esp-public-files/ported_aves/aves-base-all.torchaudio.pt
+pip install torch torchaudio transformers huggingface_hub safetensors \
+            pyarrow matplotlib scikit-learn scipy timm
 ```
 
-## Running Scripts
+The EAT base architecture is fetched on first use via
+`AutoModel.from_pretrained("worstchan/EAT-base_epoch30_pretrain", trust_remote_code=True)`.
+Per-checkpoint safetensors are pulled from the corresponding
+`EarthSpeciesProject/esp-aves2-*` HF repos. Audio comes from the
+`EarthSpeciesProject/NatureLM-audio-training` parquet shards via
+`hf_hub_download` — these get cached under `~/.cache/huggingface/hub/`
+(~14G; required for any new extraction or audio-mixing experiment).
 
-All scripts are standalone and run from the project root:
+## Running scripts
+
+All scripts are standalone, run from the project root. No test suite — each
+script writes CSVs/PNGs to `artifacts/comparisons/...` and prints results to
+stdout.
+
 ```bash
 source venv/bin/activate
-python <script_name>.py
-```
-No test suite — this is exploratory research. Each script produces PNG plots and prints results to stdout. Suppress sklearn convergence warnings with `python -W ignore <script>.py`.
-
-## Architecture
-
-### Model Access Pattern
-
-Every script follows this pattern:
-```python
-from aves import load_feature_extractor
-from aves.utils import load_audio
-
-model = load_feature_extractor(
-    config_path="./aves/config/default_cfg_aves-base-all.json",
-    model_path="./models/aves-base-all.torchaudio.pt",
-    device="cpu", for_inference=True,
-)
-audio = load_audio(path, mono=True, mono_avg=False)  # Returns 16kHz tensor
-layer_outputs = model.extract_features(audio, layers=None)  # List of 12 tensors, each (1, n_frames, 768)
+python -W ignore <script>.py
 ```
 
-### Model Internals (for hooks)
+## Pipeline
 
-The AVES wrapper (`model`) contains a torchaudio wav2vec2 model at `model.model`:
+### Step 1 — extraction
+
 ```
-model.model.feature_extractor.conv_layers[0..6]  # 7 CNN layers (return tuples: (tensor, length))
-model.model.encoder.feature_projection            # Linear projection 512→768
-model.model.encoder.transformer.layers[0..11]     # 12 transformer layers
-model.model.encoder.transformer.layers[i].attention.{q_proj, k_proj, v_proj, out_proj}
+collect_esp_aves2_activations.py --manifest <jsonl> --models <key,key,...>
 ```
 
-Attention weights are NOT exposed by torchaudio — must hook Q/K projections and compute `softmax(QK^T/sqrt(d))` manually. See `explore_attention.py` for the pattern.
+Hooks the 13 layers (`model.pos_drop` + `model.blocks.0..11`), forwards each
+manifest item through the model, and writes shards (one .pt per ~25 samples,
+shape `(B, 13, 513, 768)` in float16) to
+`artifacts/roadmap_part1/<manifest>/<model>/shards/`. Resumable via the
+existing-shards scan. The `--random-init-seed N` path (used for the baseline)
+loads EAT-base, then walks `init_weights` + `reset_parameters` + a
+`normal(0, 0.02)` fallback for the 2/150 parameters those paths miss.
 
-CNN layer hooks receive tuples `(tensor, length)` — extract `output[0]` before processing.
+### Step 2 — geometry analysis
 
-### Frame Rate Alignment
+Each script reads from shards and writes to
+`artifacts/comparisons/<manifest>/nway_eat_all4/<subdir>/`:
 
-AVES downsamples by 320x: 16000 Hz / 320 = 50 fps. One frame = 20ms. When computing mel spectrograms for comparison, always use `hop_length=320` to align with AVES frames.
+| script                              | purpose                                     |
+|-------------------------------------|---------------------------------------------|
+| `nway_compare_eat_models.py`        | Consolidated pooled embeddings + cross-model CKA |
+| `step2_spectral_dim_eat.py`         | Singular values, eff_rank, PR, TwoNN per (model, layer) |
+| `step2_subspace_angles_eat.py`      | L2-norm histograms + across-layer/model/bio-vs-non-bio top-10 subspace overlap |
+| `step2_pooled_vs_frame_eat.py`      | Pooled-vs-frame distortion check on `sl_eat_bio_ssl_all` |
+| `step2_tier1_frame_level.py`        | Frame-level eff_rank/PR/TwoNN/MLE-ID across all 4 trained models + bio-vs-non-bio at frame level |
+| `step2_random_init_compare.py`      | 5-way comparison: trained models vs random-init baseline |
+| `step2_random_init_variability.py`  | Init variability across random-init seeds 7/13/42 |
 
-### Data
+### Frame-level subsampling
 
-- `aves/example_audios/` — 2 files (Guineafowl .wav, Bullfinch .mp3) from the cloned repo
-- `audio/bullfinch/` — 30 recordings from xeno-canto (gitignored, ~89MB)
-- `audio/hawfinch/` — 5 recordings from xeno-canto (gitignored)
-- Skip `XC1086809.mp3` (35MB, dominates datasets) and `XC657517.mp3` (corrupted)
+Where frame-level analyses subsample, we draw 50 frames per item uniformly
+from the valid-token range with seed 42 (600 × 50 = 30,000 rows per
+(model, layer)). TwoNN and MLE-ID further subsample to 10,000 rows.
 
-### HuBERT Comparison
+## Geometry primitives
 
-HuBERT-base weights cached at `~/.cache/torch/hub/checkpoints/hubert_fairseq_base_ls960.pth`. Load via `torchaudio.pipelines.HUBERT_BASE.get_model()`. Same architecture as AVES — hooks work identically but access transformer at `model.encoder.transformer.layers[i]` (no `.model` prefix).
+Defined in `step2_tier1_frame_level.py`; reused via import by later scripts.
 
-## Key Findings So Far
+- **Effective rank** = `exp(-Σ p_i log p_i)` over normalized eigenvalues of
+  the centered covariance.
+- **Participation ratio** = `(Σλ)² / Σλ²`.
+- **Intrinsic dimension** — TwoNN(k=2) and MLE-ID(k=20). MLE-ID is the
+  preferred estimator; TwoNN has a known L4 failure mode (see
+  `RESULTS.md` §7).
+- **Subspace overlap** — `mean(cos(principal_angles))` between top-k=10 PCA
+  bases via `scipy.linalg.subspace_angles`. 1.0 = identical, 0.0 =
+  orthogonal.
 
-1. **CNN does the heavy lifting** — per-layer CKA of 0.10-0.23 vs transformer's 0.97-0.99
-2. **Recording identity erases monotonically** across transformer layers (silhouette 0.02 → -0.003)
-3. **Species probe peaks at layer 1** (94%), dips mid-network (84%), recovers at layer 11 (91%)
-4. **Temporal prediction comes from CNN**, not transformer — all transformer layers predict equally
-5. **Acoustic features linearly decodable only at layers 0-1** — late-layer clusters are nonlinearly acoustic
-6. **AVES vs HuBERT**: broad hierarchy is architecture-driven; attention strategies are data-driven
+## Pooling convention
+
+The pooled comparison expects mean over `tokens[1:valid_token_count]`,
+**skipping token 0** (EAT's CLS-like token). See
+`compare_esp_aves2_models.pooled_layer_vectors`. Frame-level analyses
+include token 0; that's the existing convention everywhere.
+
+## Data
+
+- `artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl` —
+  the frozen 600-sample manifest (100 × 7 source datasets), tracked.
+- `artifacts/roadmap_part1/<manifest>/<model>/shards/` — per-model
+  activation shards (~5.8G/model, gitignored). 5 models present:
+  the 4 trained + `random_init_eat_seed42`. Seeds 7 and 13 were extracted,
+  stats computed, shards deleted.
+- `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_*,random_init_*}/`
+  — committed CSVs, plots, and per-seed stats.
+
+Raw audio waveforms live in the HF parquet cache
+(`~/.cache/huggingface/hub/datasets--EarthSpeciesProject--NatureLM-audio-training/`,
+~14G). **Do not delete** while audio-mixing follow-ups are open.
+
+## Key findings (current state — see `RESULTS.md` for full claims + retractions)
+
+1. **Pooling distorts geometry** universally. Frame-level eff_rank > pooled
+   eff_rank everywhere; the ratio varies ×2–×15 across (model, layer).
+2. **Bio fine-tuning produces a learned directional separation.**
+   `sl_eat_bio_ssl_all` drops bio-vs-non-bio top-10 cos to 0.57 at L9 vs a
+   random-init baseline of 0.91 at the same layer.
+3. **Late-layer collapse splits the family by `_bio` vs not.**
+   `sl_eat_all_ssl_all` L12 eff_rank (11.2) is essentially identical to the
+   random-init baseline (9.8); the bio fine-tunes retain 180+ at L12.
+4. **Architecture sets manifold dim, training expands the linear envelope.**
+   Random-init MLE-ID = 11–15; trained MLE-ID = 7–14. Training does not
+   widen the manifold — it expands the eff_rank/MLE-ID *ratio* from ~1
+   (random) to 17–43 (trained).
+5. **Init variability is tight.** Seeds 7/13/42 random-init eff_rank spreads
+   ≤1.3 across all layers vs trained-vs-random gaps of ~200–350.
+
+Retracted: the L4 TwoNN dip (estimator artifact) and the "pooled L0 ≈ 3
+across all four models = shared tokenizer" story (pooling artifact). See
+`RESULTS.md` §7–§8.
+
+## Scope and ownership
+
+- **In scope (us):** Step 1 + Step 2 + Step 3a (audio mixing) + Step 3b
+  (species barycenters) + Step 3c (Veitch hierarchy test). Plus per-Class
+  and per-Order taxonomic resolution at frame level (the geometric
+  complement to the teammate's probes). See `TODO.md`.
+- **Owned by teammate:** linear probes, attribution, noise dynamics. Do not
+  duplicate. Coordinate on manifest enrichment with Class/Order/Species
+  labels (the teammate already has them via probe training).
+- **Out of scope:** Section 3 (SAEs, dictionary learning), legacy AVES
+  exploration, cross-species call-type transfer, RSA with CRCNS zebra-finch.
 
 ## Conventions
 
-- Random seed: 42 throughout
-- Frame subsampling: `rng.choice(n, MAX_FRAMES, replace=False)` with sorted indices
-- Train/test split: temporal (80/20), not shuffled, to respect sequential structure
-- Plots: 150 dpi, `bbox_inches="tight"`, saved as PNG
-- PCA to 50 dims before logistic regression probes (768-dim is too slow on CPU)
-- All generated PNGs are committed; audio files and model weights are gitignored
+- Random seed: 42 throughout for data subsampling and random-init.
+- Plots: 150 dpi, `bbox_inches="tight"`, PNG.
+- All artifacts under `artifacts/comparisons/` are committed; shards under
+  `artifacts/roadmap_part1/` are gitignored.
+- Suppress sklearn convergence warnings with `python -W ignore <script>.py`.
+- When extending the pipeline, write the metric definition once in
+  `step2_tier1_frame_level.py` and import elsewhere — do not duplicate
+  primitives across scripts.
