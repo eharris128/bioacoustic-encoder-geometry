@@ -94,6 +94,20 @@ MODEL_SPECS: Dict[str, ModelSpec] = {
         norm_std=4.606,
         random_init_seed=42,
     ),
+    "random_init_eat_seed07": ModelSpec(
+        hf_repo=None,
+        checkpoint_filename=None,
+        norm_mean=-5.553,
+        norm_std=4.606,
+        random_init_seed=7,
+    ),
+    "random_init_eat_seed13": ModelSpec(
+        hf_repo=None,
+        checkpoint_filename=None,
+        norm_mean=-5.553,
+        norm_std=4.606,
+        random_init_seed=13,
+    ),
 }
 
 

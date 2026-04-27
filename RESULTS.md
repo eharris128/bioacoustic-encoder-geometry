@@ -6,9 +6,10 @@ later analysis; **OPEN** are questions raised but not resolved here. Numbers
 trace back to committed CSVs and scripts named in each section. Single-seed
 point estimates throughout — no bootstrap CIs yet.
 
-**Last update: 2026-04-27** — added random-init EAT baseline (§2), and
-revised §3–§6 to anchor against it. The baseline substantially strengthens
-§3 (bio-vs-nonbio) and §5 (late-layer collapse), and *re-frames* §6 (intrinsic
+**Last update: 2026-04-27** — added random-init EAT baseline (§2), revised
+§3–§6 to anchor against it, and confirmed §2 numbers are stable across init
+(seeds 7 / 13 / 42). The baseline substantially strengthens §3
+(bio-vs-nonbio) and §5 (late-layer collapse), and *re-frames* §6 (intrinsic
 dim) — the original "conserved at 7–14" claim missed that the random-init
 baseline reads in the same range.
 
@@ -94,11 +95,22 @@ facts it pins down:
   does not increase manifold dim — it slightly compresses it while massively
   expanding the linear envelope.
 
-**Caveat for paper-grade.** Single seed, one random-init checkpoint. Init
-variability (seeds 7 / 13 / 100) is untested. But if the gap between trained
-and random is 30× on eff_rank and 0.4 on bio-vs-nonbio cos, init variability
-within the same scheme would have to be enormous to threaten any of these
-numbers. Worth confirming, not worth blocking on.
+**Init variability (validated 2026-04-27, seeds 7 / 13 / 42).** The headline
+numbers above are not seed-specific. Across the three seeds, per-layer
+spreads are:
+
+| metric (frame-level)             | max(max-min) across layers | max std across layers |
+|----------------------------------|---------------------------:|----------------------:|
+| Effective rank                   |                       1.29 |                  0.65 |
+| MLE-ID(k=20)                     |                       0.51 |                  0.27 |
+| Bio-vs-non-bio cos (top-10)      |                      0.069 |                     — |
+
+These spreads are ~30–500× smaller than the trained-vs-random gaps they
+anchor (eff_rank trained vs random ≈ 200–340; cos trained vs random ≈ 0.34
+at the L9 minimum). Source:
+`random_init_variability/seed_spread_frame_stats.csv`,
+`seed_spread_bio_vs_nonbio.csv`, plots in `init_variability_*.png`. Shards
+for seeds 7 and 13 are deleted after stat extraction; per-seed CSVs persist.
 
 ---
 
@@ -304,24 +316,21 @@ convergent in any meaningful sense.
    eigendecomposition + angles) would give CIs on every number in §3–§6.
    Most important now that the baseline gives the trained-vs-random gap a
    clean magnitude — we need to know its uncertainty.
-2. **Random-init init variability.** §2 uses one seed (42). Seeds 7 / 13 /
-   100 would tell us whether the baseline numbers themselves are stable
-   across init.
-3. **Sensitivity to frame count.** All frame-level numbers use 50 frames/item.
+2. **Sensitivity to frame count.** All frame-level numbers use 50 frames/item.
    Robustness to 10 / 100 / all-valid is untested.
-4. **Sensitivity to top-k for subspace overlap.** Bio-vs-non-bio overlap
+3. **Sensitivity to top-k for subspace overlap.** Bio-vs-non-bio overlap
    uses k=10. The effect could strengthen or weaken at k=5 or k=50.
-5. **Mechanism for late-layer `_bio` vs not collapse split (§5).** Why does
+4. **Mechanism for late-layer `_bio` vs not collapse split (§5).** Why does
    `sl_eat_all_ssl_all` collapse to baseline at L12 while `sl_eat_bio_ssl_all`
    stays at 18× baseline? Candidate explanations: (a) bio pretraining produces
    an output-side representation used for finer-grained downstream tasks;
    (b) SSL collapse interacts with pretraining data in a specific way;
    (c) checkpoint-specific quirks of `eat_bio`. None are tested.
-6. **Per-source frame-level structure.** All frame-level analyses pool across
+5. **Per-source frame-level structure.** All frame-level analyses pool across
    the 7 source datasets. The pooled per-source eff_rank slicing in
    `step2_spectral_dim/effective_rank_by_source.csv` should be redone at
    frame level.
-7. **Within-clip frame structure.** Frames within a single clip almost
+6. **Within-clip frame structure.** Frames within a single clip almost
    certainly have very different geometry (silence vs vocalization). The
    subsampling treats all frames as exchangeable. Whether this matters for
    any of the claims is untested.
@@ -354,11 +363,14 @@ None has been picked.
 - Active scripts: `step2_spectral_dim_eat.py`, `step2_subspace_angles_eat.py`,
   `step2_pooled_vs_frame_eat.py`, `step2_tier1_frame_level.py`,
   `nway_compare_eat_models.py`, `collect_esp_aves2_activations.py`,
-  `step2_random_init_compare.py`.
+  `step2_random_init_compare.py`, `step2_random_init_variability.py`.
 - Active artifacts:
-  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline}/`.
-- Random-init shards:
-  `artifacts/roadmap_part1/<manifest>/random_init_eat_seed42/shards/`.
+  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability}/`.
+- Random-init shards: only `random_init_eat_seed42` is retained on disk.
+  Seeds 7 and 13 were extracted, stats computed, and shards deleted to fit
+  the 234G partition; per-seed stat CSVs persist under
+  `random_init_variability/`.
 - Manifest: `naturelm_by_source_100each_20260418T171459Z`.
-- Random seed: 42 throughout (data subsampling, model reinit).
+- Random seeds: 42 throughout for data subsampling. Random-init seeds
+  evaluated: 7, 13, 42.
 - Last update: 2026-04-27.
