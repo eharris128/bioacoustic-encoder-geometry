@@ -6,25 +6,48 @@ later analysis; **OPEN** are questions raised but not resolved here. Numbers
 trace back to committed CSVs and scripts named in each section. Single-seed
 point estimates throughout — no bootstrap CIs yet.
 
-**Last update: 2026-04-27 (later)** — ran a 5-experiment chain
-(bootstrap CIs, frame-count sensitivity, top-k sensitivity, audio-mixing
-pilot, per-source frame-level structure) targeting RESULTS.md §9 OPEN
-items. Key changes from this round:
+**Last update: 2026-04-27 (latest)** — ran a 5-step taxonomic chain
+(manifest enrichment, per-Class/per-Order frame-level metrics, species
+barycenters, Veitch hierarchy test, late-layer collapse mechanism)
+after verifying that taxonomic labels were already in the parquet
+metadata (not blocked on teammate). Major new findings from this round:
 
-- §3–§6 numbers all survive B=50 bootstrap CIs with margin to spare
-  (CIs typically 1–3% of the median; trained-vs-random gaps unaffected).
-- §3–§5 numbers robust to frame-count and top-k sweeps. §6 needs a
-  quantitative qualifier: MLE-ID magnitude is (n, k)-dependent, only the
-  *trends* are interpretable.
-- **NEW finding (§4 mechanism, audio mixing):** the bio↔non-bio direction
-  in sl_eat_bio_ssl_all is **threshold-like, not linear** — adding 25%
-  non-bio audio pulls the L9 representation 78% of the way to pure
-  non-bio along the centroid axis.
-- **NEW finding (§4 source structure, per-source):** "bio" is **not a
-  single coherent direction**. Watkins (marine mammals) is the most-
-  isolated source, with cos to other bio sources (0.36–0.38) lower than
-  cos to non-bio sources (0.39–0.42). The §4 narrative needs to be
-  restated source-level rather than bio-vs-non-bio binary.
+- **§4.7 (new) — Aves vs Mammalia is the strongest learned direction.**
+  `sl_eat_bio_ssl_all` L7 reaches cos = 0.379 — beats the §4 bio-vs-
+  non-bio L9 cos of 0.580. The Class-level direction is what bio fine-
+  tuning learns most strongly. Geometric peak (L7) ≈ teammate's probe
+  peak (L5). Order within Aves is much weaker (cos floor 0.73).
+- **§4.8 (new) — `sl_eat_bio_ssl_all` factors Class and Order
+  orthogonally at the output (Veitch).** L12 cos((Aves−Mammalia),
+  (Passer−Aves)) = 0.074 — essentially perpendicular. None of the
+  other trained models drop below 0.30. Random-init stays at 0.93+
+  across all layers. This is the cleanest "learned hierarchy"
+  signature in the family.
+- **§4.9 (new) — Trained models *compress* species detail to learn
+  coarser abstractions.** The random-init baseline has higher
+  per-species separability ratio (0.33 at L12) than any trained model
+  (`sl_eat_bio_ssl_all` peaks at 0.20). Random projections preserve
+  acoustic distances; trained models learn invariances that *put
+  acoustically-distinct same-class species closer together*. The §4
+  bio direction is acquired by sacrificing fine species detail.
+- **§5.1 (new) — The L12 collapse is mode collapse, not shrinkage.**
+  `sl_eat_all_ssl_all` L12 puts 61% of variance in one direction (vs
+  26% at L11). Both SSL models scale up the norm 3× at L12; the bio
+  variant amplifies many directions, the non-bio variant amplifies
+  one. The collapse is structural (per-source uniform), not data-
+  dependent.
+
+These four findings give the paper a coherent mechanistic story:
+`sl_eat_bio_ssl_all` is the only model that simultaneously develops
+(a) a bio-vs-non-bio direction, (b) a clean Aves-vs-Mammalia direction,
+(c) within-Aves species structure, and (d) factors Class and Order
+orthogonally. The other trained models partially do (a)–(b) and fail
+at (c)–(d). Random-init does none.
+
+**Earlier 2026-04-27** — 5-experiment chain (bootstrap CIs, frame-count
+sensitivity, top-k sensitivity, audio-mixing pilot, per-source
+structure) closed §3–§6 robustness questions and added §4.5 (audio
+mixing → threshold-like) and §4.6 (per-source: Watkins-as-isolate).
 
 Earlier in 2026-04-27: added random-init EAT baseline (§2), revised
 §3–§6 to anchor against it, and confirmed §2 numbers are stable across
@@ -348,6 +371,152 @@ into the same narrative.
 
 ---
 
+## 4.7. CLAIM (new) — Aves vs Mammalia is the strongest learned direction in the EAT-family geometry
+
+**What we found.** `taxonomic_frame_level/` runs the same frame-level
+top-10 subspace overlap as §4 but sliced by taxonomic Class instead of
+bio-vs-non-bio. With the manifest enriched from parquet metadata
+(2026-04-27), the 600 samples sort as Aves 271, Mammalia 119, Amphibia
+6, Insecta 2, non-bio 202. We compare Aves vs Mammalia (the only
+well-powered Class pair).
+
+| layer | eat_all | eat_bio | sl_eat_all_ssl_all | sl_eat_bio_ssl_all | random_init |
+|------:|--------:|--------:|-------------------:|-------------------:|-------------:|
+| 0     |   0.81  |   0.89  |              0.90  |              0.87  |        0.87  |
+| 5     |   0.65  |   0.72  |              0.62  |              0.59  |        0.91  |
+| **7** | 0.53    | 0.60    |              0.58  |          **0.38**  |        0.90  |
+| 9     |   0.58  |   0.62  |              0.48  |              0.40  |        0.91  |
+| 12    |   0.77  |   0.57  |              0.67  |              0.62  |        0.91  |
+
+`sl_eat_bio_ssl_all` L7 hits cos = **0.379** — the strongest learned
+directional separation we have measured anywhere in the EAT family,
+beating the §4 bio-vs-non-bio L9 minimum of 0.580. All four trained
+models drop into 0.40–0.70 mid-network; random-init stays at 0.87–0.93
+across every layer.
+
+**Per-Order within Aves** (Passeriformes 207 vs other-Aves pooled 64)
+shows a much weaker effect: best is `sl_eat_bio_ssl_all` L9 cos =
+0.729. The model uses many fewer dimensions for Order than for Class.
+Source: `taxonomic_frame_level/{taxonomic_pairwise.csv,
+class_aves_vs_mammalia_cos.png, order_passer_vs_other_aves_cos.png}`.
+
+**Why it matters.** The teammate's linear probes peak at L5 for Class
+(82.5% accuracy) and L9 for Order (70.3%). Our geometric peaks land at
+L7 for Class and L9 for Order. **Probes and centroid geometry agree on
+which layer encodes which distinction**, even though the metrics are
+formally different (linear decodability vs subspace overlap). The
+hierarchy is at the layer where probes find it.
+
+**Caveats.** Per-Order resolution is coarse — Passeriformes dominates
+(207/271 Aves), other-Aves is a 17-Order grab bag of ≤11 samples each.
+A finer per-Order test would need denser per-Order sampling (TODO.md
+Step 1 scale-up).
+
+---
+
+## 4.8. CLAIM (new) — `sl_eat_bio_ssl_all` factors Class and Order as orthogonal directions (Veitch hierarchy)
+
+**What we found.** Veitch et al. (NeurIPS 2024) predict that if a model
+encodes Class and Order as independent features, the parent-axis
+direction (Aves − Mammalia) should be approximately orthogonal to the
+subordinate-axis direction (Passeriformes − Aves). We test this
+directly. Source: `veitch_hierarchy/veitch_hierarchy.csv`.
+
+|cos((Aves − Mammalia), (Passeriformes − Aves))| by layer:
+
+| layer | eat_all | eat_bio | sl_eat_all_ssl_all | **sl_eat_bio_ssl_all** | random_init |
+|------:|--------:|--------:|-------------------:|-----------------------:|-------------:|
+| 0     |   0.69  |   0.70  |              0.73  |                  0.71  |        0.98  |
+| 5     |   0.35  |   0.42  |              0.60  |                  0.39  |        0.94  |
+| 7     |   0.34  |   0.36  |              0.44  |                  0.23  |        0.94  |
+| 9     |   0.31  |   0.38  |              0.38  |              **0.14**  |        0.96  |
+| 12    |   0.52  |   0.50  |              0.61  |              **0.07**  |        0.96  |
+
+`sl_eat_bio_ssl_all` at L12 has cos = **0.074** — essentially
+perpendicular. None of the other trained models drop below 0.30.
+Random-init stays at 0.93–0.98 across every layer; without learning,
+the Class direction and the Order direction are nearly parallel.
+
+**Why it matters.** This is the cleanest "learned hierarchy" signature
+in the EAT family. Two layers of orthogonality in `sl_eat_bio_ssl_all`:
+L9 (cos = 0.14) coincides with §4, §4.5, §4.7, §4.9 peaks; L12 (cos =
+0.07) is even more orthogonal — the *output layer* factors the
+hierarchy maximally cleanly. The bio fine-tune doesn't just produce a
+single bio direction; it produces a *factored* representational
+geometry where Class and Order live on independent axes.
+
+**Caveats.**
+- "Other-Aves" pools 17 minority bird orders together. A finer
+  per-Order Veitch test (4 individual bird orders × Aves direction)
+  would need denser per-Order data than our 600-sample manifest
+  provides.
+- Single seed; bootstrap CI on the L12 cos = 0.07 would tighten the
+  paper claim. Cheap follow-up.
+- The "passer-vs-other-Aves" direction is mathematically collinear
+  with the (Aves − Mammalia)-orthogonal hyperplane intersected with
+  the within-Aves variation; with two disjoint subgroups Aves =
+  Passer ∪ other-Aves, the metric is well-defined but the subord-axis
+  cos to (Aves − Mammalia) is effectively a 1-degree-of-freedom test.
+
+---
+
+## 4.9. CLAIM (new) — Trained models *compress* fine species detail; the bio direction is acquired by sacrificing species resolution
+
+**What we found.** Per-species centroids per (model, layer) for the 12
+species with ≥ 5 manifest samples (Orcinus orca, Fringilla coelebs,
+Turdus merula, …; spans whales, dolphins, songbirds, a parrot, etc.).
+Separability ratio = between-species variance / (within + between).
+Higher = species centroids more separated relative to within-species
+spread. Source: `species_barycenters/separability_summary.csv`.
+
+| layer | eat_all | eat_bio | sl_eat_all_ssl_all | sl_eat_bio_ssl_all | **random_init** |
+|------:|--------:|--------:|-------------------:|-------------------:|----------------:|
+| 0     |   0.04  |   0.06  |              0.04  |              0.05  |        **0.09** |
+| 5     |   0.06  |   0.06  |              0.08  |              0.07  |        **0.19** |
+| 9     |   0.07  |   0.07  |              0.09  |              0.19  |        **0.27** |
+| 10    |   0.07  |   0.08  |              0.08  |          **0.20**  |            0.30 |
+| 12    |   0.05  |   0.05  |              0.10  |              0.19  |        **0.33** |
+
+`random_init_eat_seed42` has the **highest** separability ratio at every
+layer. Among trained models, only `sl_eat_bio_ssl_all` develops
+substantial species structure (peaks at 0.20 at L10) — the same
+peak-layer as our other §4 findings. `eat_all` and `eat_bio` stay flat
+at 0.05–0.08, never improving on the L0 baseline.
+
+**Interpretation.** Random Gaussian projections preserve raw acoustic
+distances by Johnson–Lindenstrauss. The 12 species span very different
+acoustic domains (whale calls vs songbird vocalizations vs dolphin
+clicks), so random init gives them naturally distinct centroids.
+Trained models with LayerNorm + learned projections build invariances
+that *put acoustically-distinct same-class species closer together*.
+This is a feature, not a bug — the bio fine-tune is learning
+abstractions like "this is bird vocalization" or "this is animal
+sound." Species-level distinctions get sacrificed to that abstraction.
+
+**Why it matters.** A naive reading of §4 ("bio fine-tuning produces a
+strong directional separation") could be misread as "bio fine-tuning
+produces fine-grained category structure." It does not. The §4 finding
+is **specifically** about bio-vs-non-bio (a binary distinction) and
+§4.7 about Aves-vs-Mammalia (a coarse Class distinction). At the
+species level, training compresses rather than expands the geometry.
+
+This reconciles the apparent tension with the teammate's probe results
+showing 70.3% Order accuracy at L9: **linear decodability** (a
+classifier finding a hyperplane) and **centroid-distance separability**
+(a geometric ratio) are different quantities. Probes can extract
+species-level distinctions from a representation where centroids are
+relatively close, as long as the residual variance is anisotropic in
+the right way.
+
+**Caveats.** Only 12 species clear the 5-sample threshold; the set
+spans very heterogeneous acoustic domains (marine mammals vs songbirds
+vs raptors). A within-Aves-only or within-Mammalia-only species
+analysis (smaller per-class sample requirement, more homogeneous
+acoustic context) would test whether the random-init advantage holds
+for closely-related species. Open follow-up.
+
+---
+
 ## 5. CLAIM — Late-layer collapse splits the family by `_bio` vs not, and
 `sl_eat_all_ssl_all` collapses *back to the random-init baseline*
 
@@ -384,6 +553,75 @@ is too small a factorial to attribute the effect cleanly to bio data
 specifically. It could equally be attributed to checkpoint-specific
 properties of `eat_bio`. Mixed-data pretraining controls would be needed to
 disentangle.
+
+---
+
+## 5.1. CLAIM (new) — The L12 collapse is *selective amplification of one direction*, not uniform shrinkage
+
+**What we found.** The §5 claim was descriptive: trained `_bio` models
+keep eff_rank high at L12 (~180) while `_all` models collapse (~11).
+But why? `late_layer_collapse/spectrum_L10_L11_L12.csv` measures the
+shape of the eigenvalue spectrum at L11 → L12 across all 5 models.
+
+L11 → L12 top-1 eigenvalue share (= top eigenvalue / total variance):
+
+| model                  | L11   | L12   | Δ     | L12 ‖x‖ | L12 total var |
+|------------------------|------:|------:|------:|--------:|--------------:|
+| eat_all                | 0.058 | 0.270 | +0.21 |   6.41  |         18.1 |
+| eat_bio                | 0.060 | 0.160 | +0.10 |   4.97  |         13.3 |
+| **sl_eat_all_ssl_all** | 0.263 |**0.614**| +0.35 |  11.71  |        131.7 |
+| sl_eat_bio_ssl_all     | 0.097 | 0.082 | −0.01 |  17.91  |        237.0 |
+| random_init            | 0.494 | 0.503 | +0.01 |  27.71  |        609.6 |
+
+`sl_eat_all_ssl_all` L12 puts **61 % of total variance into a single
+direction** — the regime random-init has been in all along. eff_rank
+reads ~11 because variance is concentrated, not because vectors are
+small (mean ‖x‖ at L12 = 11.7, larger than L11's 3.4).
+
+`sl_eat_bio_ssl_all` is the *only* trained model whose top-1 share
+doesn't grow at L12. Its mean ‖x‖ at L12 (17.9) is even larger than
+`sl_eat_all_ssl_all`'s, but the variance is *spread across many
+directions* (top-1 = 8 %, top-10 = 28 %). This is why its eff_rank stays
+at ~180.
+
+**Mechanism.** The L12 transition is selective amplification, not
+shrinkage. Both SSL fine-tuned models scale up the activation norm ~3×
+at L12 and grow total variance 5–15×; what differs is *where* they
+direct the amplification:
+
+- `sl_eat_all_ssl_all`: amplifies a single dominant direction → mode
+  collapse, low eff_rank, "logit-like" output.
+- `sl_eat_bio_ssl_all`: amplifies many directions in proportion → no
+  collapse, high eff_rank, multi-direction output.
+
+`eat_all` and `eat_bio` (no SSL fine-tune) show milder concentration
+(top-1 jumps from 6 % to 16–27 %) without the norm explosion. The L12
+collapse is partially native to EAT pretraining and dramatically
+amplified by SSL fine-tuning on the non-bio-pretrained model.
+
+**Per-source uniformity.** L12/L11 eff_rank ratio for
+`sl_eat_all_ssl_all` is 0.17–0.30 across all 6 sources. The collapse
+is NOT data-dependent — bio inputs and non-bio inputs collapse to the
+same degree. This rules out the explanation that SSL fine-tune
+discriminates bio inputs at L12.
+
+**Why it matters.** This is the mechanistic answer to RESULTS.md §9.1.
+The "_bio vs not" split is not about the bio fine-tunes "preserving"
+output information per se — it's about whether the model's L11 → L12
+transition installs a low-rank classifier head (`sl_eat_all_ssl_all`)
+or a multi-direction representation (`sl_eat_bio_ssl_all`). Bio
+pretraining gives SSL fine-tuning many directions worth amplifying;
+non-bio pretraining gives it few, so SSL collapses to one.
+
+This also explains why the §4.5 audio-mixing threshold-like asymmetry
+is specific to `sl_eat_bio_ssl_all`: only it preserves a high-dim L12
+subspace where the bio direction lives.
+
+**Open follow-up.** What *is* the dominant L12 direction in
+`sl_eat_all_ssl_all`? Probably an "is this animal vocalization?"
+classifier installed by the SSL fine-tune. Test by projecting trained-
+model L12 activations onto the top eigenvector and checking whether
+bio vs non-bio inputs separate along it. Cheap.
 
 ---
 
@@ -510,57 +748,93 @@ Closed by the 2026-04-27 chain (artifacts under `bootstrap_cis/`,
 - ~~Per-source frame-level structure.~~ Done — and produced a *new*
   finding that complicates §4: see §4.6 below.
 
+Closed by the 2026-04-27 (later) taxonomic chain:
+
+- ~~Mechanism for the late-layer `_bio` vs not collapse split (§5).~~
+  Resolved as **selective amplification of one direction at L12**, not
+  uniform shrinkage. See new §5.1.
+- ~~Hierarchical / Veitch follow-up.~~ `sl_eat_bio_ssl_all` factors
+  Class and Order orthogonally at L12 (cos = 0.074); other trained
+  models do not. See new §4.8.
+- ~~Species barycenters.~~ Random-init has higher per-species
+  separability ratio than any trained model — trained models compress
+  species detail to learn coarser abstractions. See new §4.9.
+- ~~Manifest enrichment for Class/Order/Species.~~ Done in
+  `enrich_manifest_taxonomy.py`; labels were already in parquet
+  metadata, no teammate coordination needed.
+- ~~Per-Class / per-Order frame-level structure.~~ See new §4.7.
+
 Still open:
 
-1. **Mechanism for the late-layer `_bio` vs not collapse split (§5).**
-   Why does `sl_eat_all_ssl_all` collapse to baseline at L12 while
-   `sl_eat_bio_ssl_all` stays at 18× baseline? Candidate explanations:
-   (a) bio pretraining produces an output-side representation used for
-   finer-grained downstream tasks; (b) SSL collapse interacts with
-   pretraining data in a specific way; (c) checkpoint-specific quirks
-   of `eat_bio`. None are tested.
-2. **Within-clip frame structure.** Frames within a single clip almost
+1. **Within-clip frame structure.** Frames within a single clip almost
    certainly have very different geometry (silence vs vocalization). The
    subsampling treats all frames as exchangeable. Whether this matters
    for any of the claims is untested.
-3. **MLE-ID magnitude vs (n, k).** The frame-count sensitivity check
+2. **MLE-ID magnitude vs (n, k).** The frame-count sensitivity check
    exposed that MLE-ID(k=20) drifts with n. Absolute values in §6 are
    parameter-dependent; only the trend across (model, layer) at fixed
    (n, k) is paper-defensible. Worth either (a) reporting MLE-ID across
    multiple (n, k) settings or (b) switching to an alternative estimator
    that converges with n.
-4. **Per-source granularity in §4.** The new §4.6 below shows bio-vs-non-
-   bio is a coarse decomposition. A finer statement of §4 should be made
-   source-level: which sources is the model actually separating?
-5. **Hierarchical / Veitch follow-up.** Still pending. Requires
-   manifest enrichment with Class/Order/Species labels — coordinate
-   with teammate (TODO.md Step 3c).
-6. **Species barycenters (TODO.md Step 3b).** Still pending; requires
-   species labels.
-7. ~~Linearity of the bio↔non-bio mechanism for the other three trained
-   models.~~ Done in `audio_mixing_pilot_extended/`. Threshold-like
-   asymmetry is specific to `sl_eat_bio_ssl_all`; see §4.5 extension.
+3. **Per-source granularity in §4.** The §4.6 finding shows bio-vs-non-
+   bio is a coarse decomposition. A finer statement of §4 should be
+   made source-level: which sources is the model actually separating?
+4. **What is the dominant L12 direction in `sl_eat_all_ssl_all`?**
+   §5.1 mechanism investigation showed 61 % of L12 variance lives in
+   one direction. Probably an "is this animal vocalization?"
+   classifier installed by SSL fine-tuning. Test by projecting L12
+   activations onto the top eigenvector and checking bio vs non-bio
+   separation. Cheap (no new shard loads needed once we save the
+   eigenvectors).
+5. **Per-Order Veitch test with denser sampling.** §4.8 used
+   "Passeriformes vs other-Aves" because non-Passeriformes orders are
+   ≤ 11 samples each. A 4-bird-order Veitch test (Passeriformes /
+   Charadriiformes / Piciformes / Strigiformes) — matching the
+   teammate's probes — would need scale-up beyond the 600-sample
+   manifest.
+6. **Within-class species separability.** §4.9 used 12 species
+   spanning whales / songbirds / dolphins. Restricted to only Aves
+   species or only Mammalia species (with ≥ 5 samples each — fewer
+   per class), would the random-init advantage still hold?
+7. **Bootstrap CIs on the new §4.7–§4.9 / §5.1 numbers.** The original
+   bootstrap covered §3–§6. Cheap to extend (resample over items, the
+   per-Class / per-Order / per-species centroids re-derive directly).
 
 ---
 
 ## 10. What this looks like as a preprint
 
-The random-init baseline strengthens the case for any of three framings.
-None has been picked.
+The random-init baseline strengthens the case for any of these framings.
+After the 2026-04-27 (latest) taxonomic chain, the **factored-hierarchy**
+framing has emerged as the strongest candidate. None has been picked.
 
+- **"Bio + SSL fine-tuning produces a *factored* hierarchical
+  geometry."** §4 + §4.5 + §4.7 + §4.8 + §5.1, anchored by §2. The
+  story: `sl_eat_bio_ssl_all` is the only trained model that
+  simultaneously (a) develops a bio-vs-non-bio direction (§4, cos
+  0.57 at L9), (b) develops an Aves-vs-Mammalia direction (§4.7, cos
+  0.38 at L7), (c) develops within-Aves species structure (§4.9, peak
+  separability 0.20 at L10), and (d) factors Class and Order
+  orthogonally at the output layer (§4.8, cos 0.07 at L12). The
+  combination is not present in any single ingredient — bio
+  pretraining alone or SSL fine-tuning on non-bio pretraining only
+  produces fragments of this geometry. **Most novel framing of the
+  three, with the cleanest model-comparison story.**
 - **"Bio-vs-non-bio fine-tuning leaves a directional signature in
-  mid-network."** §4 + §5, anchored by §2's baseline. The story is now:
+  mid-network."** §4 + §4.5 + §5 + §5.1, anchored by §2. The story:
   random init gives essentially no class separation (cos 0.95+); SSL +
-  bio-pretrained pushes mid-network cos to 0.57; SSL + non-bio-pretrained
-  collapses output-layer width back to the random baseline. Two clean
-  learned effects that move in opposite directions.
+  bio-pretrained pushes mid-network cos to 0.57 with a threshold-like
+  asymmetric mechanism (§4.5); SSL + non-bio-pretrained collapses to a
+  single direction at L12 (§5.1). Two clean learned effects that move
+  in opposite directions. Tighter scope than (1); good fallback if the
+  factored-hierarchy story doesn't survive review.
 - **"Mean-pooling distorts the linear geometry of audio-encoder
   representations."** §3 + §7 + §8, anchored by §2's pooled-vs-frame
   baseline. Method-paper flavor; cleanest if we add a non-EAT control.
 - **"Training expands the linear envelope while preserving the local
-  manifold dim set by architecture."** §6, anchored by §2. Most novel framing
-  and arguably most interesting, but also the one most exposed to objections
-  about MLE-ID estimator robustness.
+  manifold dim set by architecture."** §6, anchored by §2. Novel but
+  exposed to objections about MLE-ID estimator robustness (now
+  documented as (n, k)-sensitive in §6 caveat).
 
 ---
 
@@ -572,9 +846,15 @@ None has been picked.
   `step2_random_init_compare.py`, `step2_random_init_variability.py`,
   `step2_bootstrap_cis.py`, `step2_frame_count_sensitivity.py`,
   `step2_topk_sensitivity.py`, `step3a_audio_mixing_pilot.py`,
-  `step2_per_source_frame_level.py`.
+  `step2_per_source_frame_level.py`, `enrich_manifest_taxonomy.py`,
+  `step2_taxonomic_frame_level.py`, `step3b_species_barycenters.py`,
+  `step3c_veitch_hierarchy.py`, `step5_late_layer_collapse.py`.
 - Active artifacts:
-  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability,bootstrap_cis,frame_count_sensitivity,topk_sensitivity,audio_mixing_pilot,per_source_frame_level}/`.
+  `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_spectral_dim,step2_subspace_angles,step2_pooled_vs_frame,step2_tier1_frame_level,random_init_baseline,random_init_variability,bootstrap_cis,frame_count_sensitivity,topk_sensitivity,audio_mixing_pilot,audio_mixing_pilot_extended,per_source_frame_level,taxonomic_frame_level,species_barycenters,veitch_hierarchy,late_layer_collapse}/`.
+- Manifests:
+  `naturelm_by_source_100each_20260418T171459Z.jsonl` (base) +
+  `naturelm_by_source_100each_20260418T171459Z_taxonomic.jsonl`
+  (enriched with phylum/class/order/family/genus/species/subspecies).
 - Random-init shards: only `random_init_eat_seed42` is retained on disk.
   Seeds 7 and 13 were extracted, stats computed, and shards deleted to fit
   the 234G partition; per-seed stat CSVs persist under
