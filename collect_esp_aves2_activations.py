@@ -55,10 +55,11 @@ DEFAULT_LAYER_NAMES = ["model.pos_drop"] + [f"model.blocks.{i}" for i in range(N
 
 @dataclass(frozen=True)
 class ModelSpec:
-    hf_repo: str
-    checkpoint_filename: str
+    hf_repo: str | None
+    checkpoint_filename: str | None
     norm_mean: float
     norm_std: float
+    random_init_seed: int | None = None
 
 
 MODEL_SPECS: Dict[str, ModelSpec] = {
@@ -85,6 +86,13 @@ MODEL_SPECS: Dict[str, ModelSpec] = {
         checkpoint_filename="esp-aves2-sl-eat-bio-ssl-all.safetensors",
         norm_mean=-5.553,
         norm_std=4.606,
+    ),
+    "random_init_eat_seed42": ModelSpec(
+        hf_repo=None,
+        checkpoint_filename=None,
+        norm_mean=-5.553,
+        norm_std=4.606,
+        random_init_seed=42,
     ),
 }
 
@@ -307,9 +315,75 @@ def _remap_checkpoint_keys(state: Dict[str, torch.Tensor]) -> Dict[str, torch.Te
     return out
 
 
+def _reinitialize_random(model: torch.nn.Module, seed: int) -> None:
+    """Replace every parameter in `model` with random values using a fixed seed.
+
+    Strategy: snapshot every parameter's mean, then run the model's own
+    `init_weights`, then call `reset_parameters` on every submodule that has it,
+    then for any parameter whose mean is unchanged from the original loaded
+    weights apply a normal(0, 0.02) fallback (transformer-standard init) so no
+    parameter retains its pretrained value.
+    """
+    pre_means = {name: float(p.detach().mean().item()) for name, p in model.named_parameters()}
+
+    torch.manual_seed(seed)
+    if hasattr(model, "init_weights"):
+        model.init_weights()
+    for name, module in model.named_modules():
+        if module is model:
+            continue
+        reset = getattr(module, "reset_parameters", None)
+        if callable(reset):
+            try:
+                reset()
+            except Exception:
+                pass
+
+    fallback_count = 0
+    fallback_names: list[str] = []
+    g = torch.Generator(device="cpu").manual_seed(seed + 1)
+    for name, p in model.named_parameters():
+        post_mean = float(p.detach().mean().item())
+        if post_mean == pre_means[name]:
+            with torch.no_grad():
+                noise = torch.empty(p.shape).normal_(mean=0.0, std=0.02, generator=g)
+                p.copy_(noise.to(dtype=p.dtype, device=p.device))
+            fallback_count += 1
+            fallback_names.append(name)
+
+    n_total = sum(1 for _ in model.named_parameters())
+    print(
+        f"  random reinit complete: {n_total} parameters total, "
+        f"{fallback_count} required normal(0, 0.02) fallback "
+        f"({fallback_names[:5]}{'...' if fallback_count > 5 else ''})",
+        flush=True,
+    )
+
+    # Final verification: at least one parameter must have changed from its loaded value.
+    changed = sum(
+        1 for name, p in model.named_parameters()
+        if float(p.detach().mean().item()) != pre_means[name]
+    )
+    if changed == 0:
+        raise RuntimeError("Random reinit did not change any parameter.")
+    print(f"  random reinit verified: {changed}/{n_total} parameters changed from pretrained values", flush=True)
+
+
 def load_eat_model(model_key: str, device: str) -> torch.nn.Module:
     spec = MODEL_SPECS[model_key]
     model = AutoModel.from_pretrained(BASE_EAT_MODEL_ID, trust_remote_code=True).to(device)
+
+    if spec.random_init_seed is not None:
+        print(f"  reinitializing {model_key} with random weights (seed={spec.random_init_seed})", flush=True)
+        _reinitialize_random(model, seed=spec.random_init_seed)
+        model.eval()
+        return model
+
+    if spec.hf_repo is None or spec.checkpoint_filename is None:
+        raise ValueError(
+            f"Model spec for {model_key} has no hf_repo/checkpoint_filename and no random_init_seed."
+        )
+
     checkpoint_path = Path(hf_hub_download(spec.hf_repo, spec.checkpoint_filename))
 
     if checkpoint_path.stat().st_size < 1024:
@@ -430,6 +504,7 @@ def write_summary(
         "model_key": model_key,
         "hf_repo": spec.hf_repo,
         "checkpoint_filename": spec.checkpoint_filename,
+        "random_init_seed": spec.random_init_seed,
         "total_samples": total_samples,
         "counts_by_source": counts_by_source,
         "layer_names": DEFAULT_LAYER_NAMES,
@@ -531,6 +606,19 @@ def collect_for_model(
             stacked = torch.stack(activations)
             if stacked.shape != (13, TOKENS_PER_SAMPLE, EMBED_DIM):
                 raise RuntimeError(f"Unexpected stacked shape: {tuple(stacked.shape)}")
+            if not torch.isfinite(stacked).all():
+                raise RuntimeError(
+                    f"{model_key} produced non-finite activations on row "
+                    f"{manifest_record.get('row_index')} (NaN or Inf in stacked tensor)."
+                )
+            if total_samples == 0:
+                # One-time activation-magnitude sanity log per model
+                norms = stacked.float().norm(dim=-1).mean(dim=-1)  # mean over tokens, per layer
+                print(
+                    f"  first-sample mean L2 token norms — L0={norms[0]:.2f}  "
+                    f"L6={norms[6]:.2f}  L12={norms[12]:.2f}",
+                    flush=True,
+                )
 
             sample_record = dict(manifest_record)
             sample_record.update(
