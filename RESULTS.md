@@ -334,6 +334,19 @@ convergent in any meaningful sense.
    certainly have very different geometry (silence vs vocalization). The
    subsampling treats all frames as exchangeable. Whether this matters for
    any of the claims is untested.
+7. **Audio mixing along the bio↔non-bio direction (§4 follow-up).** Take a
+   bio clip A and a non-bio clip B, generate audio mixtures
+   `M(α) = (1-α)·A + α·B` for α ∈ {0, 0.25, 0.5, 0.75, 1}, run each through
+   `sl_eat_bio_ssl_all`, project onto the top-10 bio-only and non-bio-only
+   subspaces from §4. Three diagnostic outcomes: (a) **smooth linear
+   interpolation** of cos angles in α — bio-vs-non-bio is implemented as a
+   linear feature; (b) **sharp threshold** — gating/attention mechanism, not
+   a continuous feature; (c) **off-manifold excursion** at intermediate α
+   (MLE-ID jumps) — model treats mixtures as out-of-distribution. Converts
+   §4 from a descriptive observation to a mechanistic claim. Requires the
+   HF NatureLM-audio-training parquet cache (raw audio waveforms) — *do not
+   delete* until this is run. Compute is small (~50-100 mixed clips × 1
+   model × 13 layers, ~10 minutes once scripted).
 
 ---
 
