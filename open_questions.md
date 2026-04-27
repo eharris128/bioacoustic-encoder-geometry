@@ -76,21 +76,25 @@ The placeholder issue is tracked by [earthspecies/avex#181](https://github.com/e
 
 Revisit only if the ESP-AVES2 `eat` sweep raises a question that requires comparing against the legacy training recipes.
 
-## 3. Storage for activations
+## 3. Storage for activations — RESOLVED 2026-04-27
 
-The roadmap asks: "Where do we store activations?"
-- Local disk? (fine for prototyping)
-- Shared storage accessible by the team?
-- Format: .npy, .pt, or HDF5?
+The roadmap asks: "Where do we store activations?" **Answer for the
+pilot: local disk only.** Re-evaluate if/when we scale beyond the
+600-sample manifest or invite collaborators who need direct activation
+access. Until then, the cost of moving to shared storage outweighs the
+benefit.
 
-### Current pilot decision
+### Current pilot decision (in effect)
 
 - Frozen sample manifests live in `artifacts/manifests/`
 - Raw activation shards live in `artifacts/roadmap_part1/<manifest_id>/<model>/shards/`
 - Shards are `.pt` files containing:
-  - `activations`: `(N, 13, 513, 768)` tensors
+  - `activations`: `(N, 13, 513, 768)` tensors in float16
   - `samples`: manifest metadata plus extraction metadata (`row_index`, `source_dataset`, `valid_token_count`, etc.)
-- Keep raw activations private and out of git; only commit code, manifests if useful, and summaries
+- Keep raw activations private and out of git; only commit code, manifests if useful, and summaries.
+- Five models on disk now (4 trained + `random_init_eat_seed42`); seeds 7
+  and 13 were extracted, stats committed, shards deleted to fit the
+  234 GB partition.
 
 ### Model coverage status
 
