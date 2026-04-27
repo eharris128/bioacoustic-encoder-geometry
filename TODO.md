@@ -2,7 +2,9 @@
 
 ## Roadmap Section 1 — ESP-AVES2 Activations (active)
 
-Scope: ESP-AVES2 `eat`-family only (see `open_questions.md` §2). Roadmap Section 3 (noise dynamics, audio mixing, barycenters) is **out of scope** for the pilot.
+Scope: ESP-AVES2 `eat`-family only (see `open_questions.md` §2). Step 1 +
+Step 2 + selected Step 3 items (audio mixing, species barycenters,
+hierarchical/Veitch). **Noise dynamics is the teammate's; do not duplicate.**
 
 ### Step 1 — collection (DONE)
 
@@ -53,15 +55,44 @@ Done in `step2_tier1_frame_level.py` (output: `step2_tier1_frame_level/`):
 
 - [ ] **Late-layer collapse splits the family by `_bio` vs not.** Frame-level L12 eff_rank: `eat_all` 62.6, `sl_eat_all_ssl_all` **11.2**, vs `eat_bio` 180.4, `sl_eat_bio_ssl_all` 188.7. The two non-bio models collapse hard at the output; the two bio fine-tunes retain rich variance through to L12. SSL on top of `eat_all` (i.e. `sl_eat_all_ssl_all`) collapses harder than `eat_all` alone. Worth a follow-up: is this saying the bio pretrain leaves the output-side representation usable for downstream tasks while the non-bio + SSL combo over-compresses?
 - [ ] **Frame-level model rank order at the eff_rank peak is `sl_eat_bio_ssl_all` > `eat_all` ≈ `sl_eat_all_ssl_all` > `eat_bio`.** Pooled said `sl_eat_bio_ssl_all` ≫ `eat_bio` ≈ `sl_eat_all` > `eat_all`. The relative position of `eat_bio` vs the other two flips between pooled and frame-level — pooled overstates `eat_bio`'s linear subspace width relative to `eat_all` and `sl_eat_all_ssl_all`. Worth restating any claims that ranked `eat_bio` high on linear width.
-- [ ] **MLE-ID(k=20) frame-level intrinsic dim sits at 7–14 across all (model, layer)** vs eff_rank swings of 11–348. Confirms the curved-low-dim-manifold-inside-wide-linear-subspace story holds for every model in the family, not just `sl_eat_bio_ssl_all`. The intrinsic dim is fairly conserved across models; the linear envelope is what differentiates them.
+- [ ] **MLE-ID(k=20) frame-level intrinsic dim sits at 7–14 across all (model, layer)** vs eff_rank swings of 11–348. Confirms the curved-low-dim-manifold-inside-wide-linear-subspace story holds for every model in the family, not just `sl_eat_bio_ssl_all`. **Reframed in RESULTS.md §6 after the random-init baseline:** trained 7–14 is at-or-below the random-init baseline of 11–15. The interesting learned property is the eff_rank/MLE-ID *ratio* (random ≈ 1, trained 17–43), not the absolute manifold dim.
+
+### Step 2 outstanding — taxonomic resolution of "nature vs other"
+
+The roadmap's Step 2 explicitly asked us to "compare nature sounds to other sound." We covered this coarsely (bio-vs-non-bio in §4 of `RESULTS.md`) but not at finer taxonomic resolution. The teammate's Class/Order probes (PNGs from 2026-04-11 conversation) show Aves vs Amphibia vs Mammalia is decodable at L5 (82.5%) and bird Order at L9 (70.3%) — that's *behavioral* hierarchy. Our complement is the *geometric* version:
+
+- [ ] **Per-Class (Aves / Amphibia / Mammalia / …) frame-level eff_rank, MLE-ID, and pairwise top-10 subspace overlap.** Same metrics as §3–§5 of `RESULTS.md` but sliced by taxonomic Class. Tells us where Class-level distinctions live in the network (L5 per probes — does eff_rank or subspace direction separate at the same layer?).
+- [ ] **Per-Order frame-level versions of the same metrics within Aves.** Probe peak is L9 — does the directional-separation peak match?
+- [ ] **Manifest enrichment.** Add Class / Order / Species columns to `naturelm_by_source_100each_20260418T171459Z` (or a new manifest variant). The teammate already has these labels; ingesting them is the prerequisite for both this and the §3 Step-3 hierarchical work below. Coordinate with teammate.
+
+## Roadmap Section 1 Step 3 — specific cases (now partially in scope)
+
+Original Step 3 had three items. We're picking up two; the teammate has the third.
+
+### Step 3a — Audio mixing along bio↔non-bio (§9.7 in RESULTS.md)
+
+- [ ] **Linear bio↔non-bio mixing.** Take a bio clip A and non-bio clip B, generate audio mixtures `M(α) = (1-α)·A + α·B` for α ∈ {0, 0.25, 0.5, 0.75, 1}, run each through `sl_eat_bio_ssl_all`, project onto the §4 top-10 bio-only and non-bio-only subspaces. Three diagnostic outcomes: (a) **smooth linear interpolation** of cos angles in α (linear feature); (b) **sharp threshold** (gating mechanism); (c) **off-manifold excursion** (model treats mixtures as OOD). Converts §4 from descriptive to mechanistic. Requires the HF NatureLM-audio-training parquet cache — *do not delete*. Compute is small (~50–100 mixtures × 1 model × 13 layers).
+
+### Step 3b — Species barycenters
+
+- [ ] **Per-species centroids in the 768-dim activation space, per layer, per model.** Roadmap idea: "barycenter of each species." Useful on its own (does the bio fine-tune cluster species more tightly?) and as the input to the Step 3c hierarchical test below. Requires species labels in the manifest (see Step 2 manifest enrichment above). Compute is trivial once labels exist.
+- [ ] **Within-species vs between-species variance.** Per (model, layer), compare the spread of frames around their species centroid vs the spread of species centroids around the global centroid. Yields a layer-resolved "species separability" curve we can put alongside the teammate's probe accuracy.
+
+### Step 3c — Hierarchical representations (Veitch)
+
+The roadmap's "do we see hierarchical representations? See Victor Veitch paper" item, owned by us. **Does not require probes** — Veitch-style geometric tests work on centroids + subspace angles, which we already compute.
+
+- [ ] **Class-direction vs Order-direction orthogonality.** Compute the centroid for Aves vs Amphibia vs Mammalia at L5 (probe-peak layer for Class). Compute the centroid for Passeriformes / Charadriiformes / Piciformes / Strigiformes at L9 (probe-peak for Order, all within Aves). Test whether the L9 within-Aves Order-directions are orthogonal to the L5 Aves-vs-other-class direction. Veitch predicts they should be (orthogonal Cartesian product of independent concepts). Pass/fail is publishable either way.
+- [ ] **Nested-subspace test.** Stronger Veitch claim: the Order centroids should live in an affine subspace whose origin is roughly the Aves centroid. Compute Order-centroid - Aves-centroid vectors and check whether they span a low-dim subspace within the Aves cluster.
+- [ ] **Layer-resolved hierarchy.** Repeat the orthogonality test across all layers L0…L12. Predicts which layer "factors" the hierarchy (likely between L5 and L9 based on the probe peaks).
 
 ## Roadmap Section 2 — owned by teammate
 
-Probes + attribution work is being pursued by a teammate. Out of scope for this thread; do not duplicate.
+Probes + attribution work is being pursued by a teammate. Out of scope for this thread; do not duplicate. **Coordinate on:** the manifest enrichment (Class / Order / Species labels) needed by Step 2 taxonomic resolution and Step 3b/c.
 
 ## Out of scope for the current pilot
 
-- Roadmap Section 1 Step 3 (noise dynamics, audio mixing, species barycenters).
+- **Roadmap Section 1 Step 3 noise dynamics** (white/pink noise + "noise subspace") — the teammate's, do not duplicate.
 - Roadmap Section 3 (dictionary learning / SAEs) — explicitly low priority in the roadmap.
 - Original AVES + BirdAVES (`open_questions.md` §2).
 - Cross-species call type transfer, RSA with CRCNS zebra-finch, unsupervised syllable segmentation, and the call-type discovery work from earlier exploratory phases. Revisit only after the roadmap pilot is complete.
