@@ -2,52 +2,57 @@
 
 ## Roadmap Section 1 — ESP-AVES2 Activations (active)
 
-Scope: ESP-AVES2 `eat`-family only (see `open_questions.md` §2). Section 3 of the roadmap (noise dynamics, audio mixing, barycenters, hierarchy probes) is **out of scope**.
+Scope: ESP-AVES2 `eat`-family only (see `open_questions.md` §2). Roadmap Section 3 (noise dynamics, audio mixing, barycenters) is **out of scope** for the pilot.
 
-### Step 1 gaps — collection
+### Step 1 — collection (DONE)
 
-- [ ] Verify the freshly re-uploaded HF safetensors for `esp-aves2-eat-all` and `esp-aves2-eat-bio` (2026-04-20 re-publish) load with non-zero weights. Download in flight 2026-04-26.
-- [ ] Run `collect_esp_aves2_activations.py` for `esp-aves2-eat-all` and `esp-aves2-eat-bio` against the existing frozen manifest `naturelm_by_source_100each_20260418T171459Z`. No code change required — the extraction script and manifest already exist, this just produces two more `<model>/shards/` directories alongside the two `sl-*` runs we already have.
-- [ ] Decide whether the pilot is sufficient at 100 samples × 7 sources × 4 models or if we want to scale up before moving on. Tied to the storage question below.
-- [ ] Resolve the "where do we store activations?" open question — capture the answer in `open_questions.md` §3 even if it's just "local disk for the pilot." Gating any scale-up.
-- [ ] Commit the currently-untracked `compare_esp_aves2_models.py` and `app_esp_aves2_compare.py` so Step 2 work has a tracked baseline.
+All four EAT-family models extracted against the frozen manifest `naturelm_by_source_100each_20260418T171459Z`. Shards live under `artifacts/roadmap_part1/<manifest_id>/<model>/shards/`:
 
-### Step 2 gaps — statistics across layers and models
+- [x] `esp-aves2-sl-eat-bio-ssl-all`, `esp-aves2-sl-eat-all-ssl-all` (since 2026-04-18).
+- [x] `esp-aves2-eat-all`, `esp-aves2-eat-bio` (after the 2026-04-20 HF re-publish + the fairseq-key loader fix in `a6498aa`).
+- [x] `compare_esp_aves2_models.py`, `app_esp_aves2_compare.py`, and `nway_compare_eat_models.py` are tracked.
 
-Required by the roadmap, not yet produced for any of the four models:
+### Step 1 — outstanding decisions
 
-- [ ] **L2-norm distributions** per `(model, layer)` — currently we only compute cross-model norm deltas. Need within-model norm histograms so the deltas are interpretable.
-- [ ] **Singular-value spectra** of the pooled-embedding matrix per `(model, layer)`, plus effective rank / spectral entropy as a single-number summary.
-- [ ] **PCA alignment** across layers (within a model) and across models (within a layer) — subspace angles or top-k overlap. CKA is a good first pass for the cross-model version.
-- [ ] **Intrinsic dimensionality** per `(model, layer)` — TwoNN as a fast first estimator; participation ratio as a sanity cross-check.
-- [ ] Compare each statistic across the seven `source_dataset` slices ("nature sounds vs other sound" — the roadmap's explicit ask).
-- [ ] Decide pooled vs frame-level for the spectral / intrinsic-dim measurements. Pooling is what we have today; frame-level over a few hundred items would give richer SV / dim estimates without a storage blow-up. Worth a quick pooled-vs-frame comparison on one model before committing.
-- [ ] Once `eat_all` and `eat_bio` extractions land, extend `compare_esp_aves2_models.py` from pairwise to 4-way (or run it pairwise across all 6 pairs and aggregate). No schema change needed — the extraction layout already supports this.
+- [ ] Decide whether to scale beyond 100 samples × 7 sources × 4 models. Tied to the storage question.
+- [ ] Resolve the "where do we store activations?" open question (capture the answer in `open_questions.md` §3 even if it's just "local disk for the pilot"). Gating any scale-up.
 
-## Deepening the Mechanism
+### Step 2 — statistics across layers and models
 
-### Sparse Autoencoders (SAEs) on layer embeddings
-Train a sparse autoencoder on layer 11 embeddings to decompose the 768-dim space into thousands of sparse, interpretable directions. Each direction might correspond to something specific: "rising pitch contour," "harsh broadband onset," "silence after call." Moves us from "the model has clusters" to "here are the individual features the model uses to build those clusters." Linear probes showed the representation is nonlinear — SAEs are designed to crack open exactly that kind of structure.
+Done (all four models, mean-pooled, in `artifacts/comparisons/.../nway_eat_all4/step2_spectral_dim/`):
 
-**Priority: High — builds directly on existing embeddings, clusters, and acoustic profiles.**
+- [x] Singular-value spectra per `(model, layer)`.
+- [x] Effective rank + participation ratio per `(model, layer)`.
+- [x] TwoNN intrinsic dimensionality per `(model, layer)`.
+- [x] Effective rank sliced by the seven `source_dataset` values + a nature-vs-non-nature split.
+- [x] Cross-model CKA heatmap (in the parent `nway_eat_all4/` dir).
 
-### Attention head ablation
-Zero out individual heads (or pairs) and measure what changes — does species separability collapse? Do the late-layer clusters dissolve? Identifies which heads are load-bearing vs redundant, and tests whether the functional specialization we observed (local vs global heads) is real or a visualization artifact.
+Outstanding:
 
-## Connecting to Biology
+- [ ] **Within-model L2-norm distributions** per `(model, layer)`. We have `norm_by_layer_source.csv` (cross-model deltas) but no within-model histograms, so the deltas are still uninterpretable on their own.
+- [ ] **PCA / subspace alignment** across layers (within a model) and across models (within a layer). CKA covers cross-model similarity but not subspace angles or top-k overlap. Doubles as the natural test for the bio-vs-non-bio subspace question (see Step 2 follow-ups below).
+- [ ] **Pooled vs frame-level** sanity check on one model. Everything so far is mean-pooled; the TwoNN-vs-effective-rank gap suggests pooling understates manifold curvature. Worth a quick comparison on a few hundred items before deciding whether to commit to frame-level for any later step.
 
-### RSA with zebra finch neural recordings
-The CRCNS aa-4 dataset contains 914 neurons from zebra finch auditory brain regions (Field L, CLM/CMM, NCM) — a known hierarchy from acoustic to abstract. Present the same stimuli to both AVES and the neural data, compute pairwise distance matrices at each layer, then correlate (Representational Similarity Analysis). The layer with highest RSA to each brain region tells us which part of the model most resembles which part of the biological auditory system. Most publishable direction — directly tests "artificial network as model of biological processing."
+### Step 2 follow-ups motivated by current findings
 
-**Priority: High — most impactful, but requires obtaining and aligning the CRCNS dataset.**
+From the `dd24541` Step 2 results:
 
-### Cross-species call type transfer
-Train k-means on Bullfinch late-layer embeddings, apply to Hawfinch. If clusters transfer meaningfully, the model has discovered universal acoustic categories. If they fail, the organization is species-specific. Either result is informative.
+- [ ] **`sl_eat_bio_ssl_all` uses a 2–3× wider linear subspace** (eff. rank ~148 at L9 vs ~75 next-best) **and shows the largest nature-vs-non-nature gap.** Test directly with subspace angles between the bio-only and non-bio-only embedding subspaces, per layer. This is the same script as the missing PCA-alignment item above — bundle them.
+- [ ] **TwoNN ID stays ~8–12 everywhere** while linear effective rank swings 3–148. Curved low-dim manifold inside a wide linear subspace; motivates the pooled-vs-frame comparison above on `sl_eat_bio_ssl_all` specifically.
+- [ ] **L0 effective rank ≈ 3 across all four models.** Likely shared input tokenizer; confirm with a subspace-angle check at L0 specifically (cheap once the subspace-angle script exists).
 
-## Toward Application
+## Roadmap Section 2 — Probes + attribution (next)
 
-### Unsupervised syllable segmentation
-Cluster transitions (where the frame-level cluster label changes) are candidate syllable boundaries. Compare to spectrogram-derived segmentation to test if the model discovers syllable structure without supervision. If so, AVES becomes a zero-shot syllable segmenter — useful for bioacoustics researchers who currently label syllables by hand.
+Begin once Step 2 outstanding items are closed.
 
-### Call type discovery at scale
-Run the pipeline on 500+ Bullfinch recordings from xeno-canto. Cluster late-layer embeddings and build a data-driven taxonomy of call types. Characterize each type with acoustic profile, temporal statistics (duration, repetition rate), and attention patterns. Becomes a tool for ornithologists.
+- [ ] **Step 2.1** — identify two (or more) species in `NatureLM-audio-training` with substantial sample counts. Probably draw from the Xeno-canto slice of the existing manifest first; expand the manifest if counts are too thin.
+- [ ] **Step 2.2** — train per-layer linear probes for one-vs-one species separation across all four models. Reuse the PCA-to-50 + logistic-regression pattern from the existing `probe_species.py`.
+- [ ] **Step 2.4** — add hierarchical probes: Class (Aves vs Mammalia), Order (Passeriformes / Charadriiformes / Piciformes / Strigiformes), Species. Test for hierarchical geometry — gaussian blob fit on activation centroids is the roadmap's suggested cheap version.
+- [ ] **Step 2.3** — attribution methods to recover which input patches the probes rely on. Roadmap says "more details coming soon" — defer until Step 2.2/2.4 are landed and we have a concrete probe to attribute through.
+
+## Out of scope for the current pilot
+
+- Roadmap Section 1 Step 3 (noise dynamics, audio mixing, species barycenters).
+- Roadmap Section 3 (dictionary learning / SAEs) — explicitly low priority in the roadmap.
+- Original AVES + BirdAVES (`open_questions.md` §2).
+- Cross-species call type transfer, RSA with CRCNS zebra-finch, unsupervised syllable segmentation, and the call-type discovery work from earlier exploratory phases. Revisit only after the roadmap pilot is complete.
