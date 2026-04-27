@@ -26,10 +26,17 @@ cd sentient-futures
 python3 -m venv venv
 source venv/bin/activate
 
-# CUDA-enabled torch (default index works for A10 / sm_86)
-pip install torch torchaudio
-pip install transformers huggingface_hub safetensors pyarrow \
-            matplotlib scikit-learn scipy timm duckdb
+# CUDA-enabled torch (default index works for A10 / sm_86).
+# torchcodec is required by torchaudio>=2.4 for torchaudio.load — without
+# it, every extraction fails with ModuleNotFoundError. Pin transformers
+# at 4.57.6 because newer versions break EAT custom-model loading.
+pip install torch torchaudio torchcodec
+pip install "transformers==4.57.6" huggingface_hub safetensors pyarrow \
+            matplotlib scikit-learn scipy timm duckdb pandas
+
+# HF downloads have no read timeout by default, which can cause indefinite
+# CLOSE-WAIT hangs on throttled connections. Force a 120s timeout.
+echo 'export HF_HUB_DOWNLOAD_TIMEOUT=120' >> venv/bin/activate
 ```
 
 Verify GPU is visible:
