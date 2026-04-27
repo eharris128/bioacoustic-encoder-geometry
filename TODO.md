@@ -94,20 +94,19 @@ Watkins) have populated taxonomic fields; non-bio sources (WavCaps,
 NatureLM/NSynth) carry empty/placeholder values for those fields. We
 can write a small script ourselves; no teammate coordination needed.
 
-- [ ] **Manifest enrichment script.** Walk the 600-sample manifest, pull
-  `metadata` JSON from the cached parquet shards, parse the taxonomic
-  fields, write an enriched manifest variant with explicit class /
-  order / family / genus / species columns. Verify coverage per source
-  (especially: how many of the bio samples have non-empty class/order;
-  what's the distribution).
-- [ ] **Per-Class (Aves / Amphibia / Mammalia / …) frame-level eff_rank,
-  MLE-ID, and pairwise top-10 subspace overlap.** Same metrics as §3–§5
-  of `RESULTS.md` but sliced by taxonomic Class. Tells us where
-  Class-level distinctions live in the network (the teammate's probes
-  peak at L5 — does eff_rank or subspace direction separate at the same
-  layer?).
-- [ ] **Per-Order frame-level versions within Aves.** Probe peak is L9
-  — does the directional-separation peak match?
+- [x] **Manifest enrichment script** (commit `d88687e`). All 600
+  samples enriched with phylum / class / order / family / genus /
+  species / subspecies. Coverage: bio sources 99–100% populated,
+  non-bio sources empty (expected). Aves 271, Mammalia 119, Amphibia
+  6, Insecta 2.
+- [x] **Per-Class frame-level metrics** (commit `acbb774`).
+  `sl_eat_bio_ssl_all` L7 hits Aves-vs-Mammalia cos = 0.379 — the
+  strongest learned direction in the family, beating the §4
+  bio-vs-nonbio L9 minimum of 0.580. Documented as RESULTS.md §4.7.
+- [x] **Per-Order frame-level within Aves** (commit `acbb774`).
+  Passeriformes vs other-Aves; `sl_eat_bio_ssl_all` L9 cos = 0.729.
+  Order-level structure lives in many fewer dimensions than
+  Class-level. Geometric peak L9 = teammate's probe peak L9.
 
 ## Roadmap Section 1 Step 3 — specific cases (now partially in scope)
 
@@ -133,17 +132,18 @@ Unblocked: species labels are already in the parquet `metadata` JSON
 (see Step 2 manifest enrichment above). Compute is trivial once the
 enrichment script lands.
 
-- [ ] **Per-species centroids in the 768-dim activation space, per
-  layer, per model.** Roadmap idea: "barycenter of each species."
-  Useful on its own (does the bio fine-tune cluster species more
-  tightly?) and as the input to the Step 3c hierarchical test below.
-  Filter to species with a minimum sample count (probably ≥10 per
-  species; check what the manifest gives us).
-- [ ] **Within-species vs between-species variance.** Per (model,
-  layer), compare the spread of frames around their species centroid
-  vs the spread of species centroids around the global centroid.
-  Yields a layer-resolved "species separability" curve we can put
-  alongside the teammate's probe accuracy.
+- [x] **Per-species centroids per (model, layer)** (commit `98d924e`).
+  12 species clear the 5-sample threshold; centroids saved per
+  (model, layer, species) under `species_barycenters/species_per_layer.csv`.
+- [x] **Within-species vs between-species variance** (commit
+  `98d924e`). Separability ratio = between / (within + between).
+  Surprising result: random_init has the HIGHEST separability ratio
+  at every layer (0.33 at L12) — trained models *compress* fine
+  species detail to learn coarser abstractions. `sl_eat_bio_ssl_all`
+  is the only trained model with substantial species structure (0.20
+  peak at L10). Documented as RESULTS.md §4.9. Bootstrap-confirmed
+  in commit `63eb676` (random L10 [0.286, 0.381] vs sl_eat_bio L10
+  [0.206, 0.239] — no CI overlap).
 
 ### Step 3c — Hierarchical representations (Veitch)
 
@@ -152,21 +152,28 @@ Veitch paper" item. **Does not require probes** — Veitch-style geometric
 tests work on centroids + subspace angles, which we already compute.
 Unblocked once Step 2 manifest enrichment lands.
 
-- [ ] **Class-direction vs Order-direction orthogonality.** Compute the
-  centroid for Aves vs Amphibia vs Mammalia at L5 (the teammate's
-  probe-peak layer for Class). Compute the centroid for Passeriformes /
-  Charadriiformes / Piciformes / Strigiformes at L9 (probe-peak for
-  Order, all within Aves). Test whether the L9 within-Aves
-  Order-directions are orthogonal to the L5 Aves-vs-other-class
-  direction. Veitch predicts they should be (orthogonal Cartesian
-  product of independent concepts). Pass/fail is publishable either way.
-- [ ] **Nested-subspace test.** Stronger Veitch claim: the Order
-  centroids should live in an affine subspace whose origin is roughly
-  the Aves centroid. Compute Order-centroid − Aves-centroid vectors and
-  check whether they span a low-dim subspace within the Aves cluster.
-- [ ] **Layer-resolved hierarchy.** Repeat the orthogonality test across
-  all layers L0…L12. Predicts which layer "factors" the hierarchy
-  (likely between L5 and L9 based on the probe peaks).
+- [x] **Class-direction vs Order-direction orthogonality** (commit
+  `5eb044e`). Done with Aves vs Mammalia at the Class level and
+  Passeriformes vs other-Aves at the Order level (within Aves).
+  `sl_eat_bio_ssl_all` is the only trained model that factors the
+  hierarchy: L9 cos = 0.136, **L12 cos = 0.074** (essentially
+  perpendicular). None of the other trained models drop below 0.30.
+  Documented as RESULTS.md §4.8. Bootstrap-confirmed in commit
+  `63eb676` (sl_eat_bio L12 = 0.081 [0.021, 0.155], no CI overlap
+  with any other trained model).
+- [x] **Layer-resolved hierarchy** (commit `5eb044e`). Computed at
+  every layer L0..L12; sl_eat_bio_ssl_all hits two minima — L9 (0.14)
+  coincides with §4 / §4.5 / §4.7 / §4.9 peaks; L12 (0.07) is the
+  cleanest factoring layer.
+- [ ] **Stronger nested-subspace test (deferred — needs scale-up).**
+  The Veitch claim's stronger form is that the Order centroids span
+  a low-dim affine subspace anchored at the Aves centroid. With only
+  2 subgroups (Passer + other-Aves), the within-Aves "subspace" is
+  1-dimensional by construction — uninformative at our current
+  resolution. Need ≥4 individual bird Orders × ~50 samples each,
+  which the current 600-sample manifest does not have (non-Passer
+  orders ≤ 11 samples each). Requires a scale-up; see "Step 1
+  outstanding decisions" above.
 
 ## Roadmap Section 2 — owned by teammate
 
