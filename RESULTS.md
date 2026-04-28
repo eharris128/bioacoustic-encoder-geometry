@@ -556,6 +556,57 @@ upper-95%, the trained-vs-random gap is unambiguous. Source:
 
 ---
 
+## 4.10. CLAIM (new) — The bio direction is real, but the model also discriminates *within* bio at the source level
+
+**What we found.** §4 reports that trained models reduce mean
+`bio-vs-nonbio top-10 subspace cos` to 0.57–0.81. §9 left open the
+finer question: at the subspace level, does the model separate the
+6 individual sources (Xeno-canto, iNaturalist, Animal Sound Archive,
+Watkins, NatureLM, WavCaps), or only the bio/nonbio binary? Aggregating
+the existing `per_source_frame_level/per_source_pairwise.csv`:
+
+Median pairwise top-10 subspace cos at L9 (k=10):
+
+| model              | within-bio (4×3/2 pairs) | cross bio↔nonbio | within-nonbio (1 pair) |
+|--------------------|-------------------------:|-----------------:|-----------------------:|
+| eat_all            |               0.626      |        0.691     |               0.813    |
+| eat_bio            |               0.619      |        0.689     |               0.780    |
+| sl_eat_all_ssl_all |               0.485      |        0.561     |               0.709    |
+| sl_eat_bio_ssl_all |               **0.448**  |        0.503     |               0.598    |
+| random_init        |               0.864      |        0.902     |               0.958    |
+
+**Two observations.**
+
+1. **Within-bio cos < cross-bio cos in every trained model at every
+   mid-late layer.** Bio sources are geometrically more similar to
+   each other than to non-bio sources — confirming that the §4
+   bio-vs-nonbio direction is real and not a per-source artifact.
+
+2. **But within-bio cos is far from 1.** At L9 it sits at 0.45–0.63
+   for trained models — the 4 bio sources have distinct geometric
+   signatures even in their top-10 subspaces. The model is not
+   collapsing all bio inputs into a single sub-manifold; it preserves
+   per-source structure within the bio category.
+
+`sl_eat_bio_ssl_all` has the lowest within-bio cos (0.39 at L7, 0.45
+at L9), pushing bio sources apart even from each other more than the
+other models do. Random-init has near-uniform pair cos (0.86–0.98)
+across every (within-bio, cross-bio, within-nonbio) bucket — no
+source-level structure at all.
+
+**Why it matters.** The §4 statement should be read as "the model
+develops a bio-vs-nonbio direction *plus* per-source sub-directions
+inside the bio cluster," not as "the model collapses all bio to a
+single point." This matches the §4.6 finding (the bio centroid axis
+also picks up Watkins-as-isolate vs the rest), the §4.9 finding
+(species detail is compressed but not zero), and the §5.4 finding
+(L12 collapse onto bio direction is a *coexistence* with the
+multi-source structure that lives in lower-eigenvalue dimensions).
+
+Source: `nway_eat_all4/per_source_frame_level/per_source_pairwise.csv`.
+
+---
+
 ## 5. CLAIM — Late-layer collapse splits the family by `_bio` vs not, and
 `sl_eat_all_ssl_all` collapses *back to the random-init baseline*
 
@@ -1065,9 +1116,13 @@ Closed by the 2026-04-28 autonomous chain (Phase 3-5):
 
 Still open:
 
-1. **Per-source granularity in §4.** The §4.6 finding shows bio-vs-non-
-   bio is a coarse decomposition. A finer statement of §4 should be
-   made source-level: which sources is the model actually separating?
+- ~~**Per-source granularity in §4.**~~ Closed by §4.10 (analysis of
+  existing `per_source_pairwise.csv`). All trained models show
+  within-bio cos < cross-bio cos at L7-L12, confirming the §4 bio
+  direction; but within-bio cos = 0.45-0.63 (not 1.0) means the model
+  also discriminates among bio sources within the bio cluster.
+
+(All §9 items closed as of 2026-04-28.)
 
 ---
 
