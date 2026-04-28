@@ -800,6 +800,57 @@ Source: `nway_eat_all4/within_clip/within_clip_summary.csv`,
 
 ---
 
+## 5.4. CLAIM (new) — The bio classifier in `sl_eat_all_ssl_all` is *installed at L12*, not built up gradually
+
+**What we found.** §5.2 measured `|cos(top1, bio_axis)|` only at L12.
+`step5_layer_direction.py` extends to all 13 layers per (model). For
+`sl_eat_all_ssl_all`:
+
+| layer | top1_share | \|cos(top1, bio_axis)\| | d on top1 | d on bio_axis |
+|------:|-----------:|------------------------:|----------:|--------------:|
+| 0     |   0.163    |              **0.838**  |    +0.46  |        +0.59  |
+| 1     |   0.078    |              0.529      |    −0.40  |        +0.90  |
+| 2     |   0.059    |              0.402      |    −0.40  |        +1.10  |
+| 3     |   0.050    |              0.215      |    +0.25  |        +1.14  |
+| 4     |   0.057    |              0.085      |    +0.07  |        +1.21  |
+| 5     |   0.061    |              0.026      |    +0.02  |        +1.35  |
+| 6     |   0.059    |              0.074      |    +0.06  |        +1.41  |
+| 7     |   0.056    |              0.134      |    −0.11  |        +1.59  |
+| 8     |   0.060    |              0.150      |    −0.12  |        +1.58  |
+| 9     |   0.047    |              0.362      |    −0.38  |        +1.63  |
+| 10    |   0.070    |              0.175      |    +0.51  |        +1.73  |
+| 11    |   0.269    |              0.155      |    +0.11  |        +1.89  |
+| 12    | **0.625**  |          **0.741**      |  **+0.52**|        +0.82  |
+
+**The bio classifier is installed by the final transformer block.** The
+top eigenvector aligns with the bio axis only at L12 (0.74); through
+L4–L11 the cosine is bouncing between 0.03 and 0.36 with random sign on
+Cohen's d. L11 → L12 is where both top1 share (0.27 → 0.62) AND the
+bio-axis alignment (0.16 → 0.74) jump together. The same single
+transformer block does mode collapse AND bio classification.
+
+**The high cos at L0 is a separate pre-block phenomenon.** L0 is the
+EAT tokenizer + positional embedding, before any transformer block.
+Its top1 happens to align with the bio axis there (cos 0.84) but only
+explains 16 % of variance. Through L1–L11 the model redistributes that
+bio information across many directions (Cohen's d on bio_axis grows
+from 0.59 at L0 to 1.89 at L11 — bio is *better* separated, just not
+along the top eigenvector). Then L12 collapses everything back onto
+one direction *plus* re-aligns it with the bio centroid axis.
+
+**Comparison to `sl_eat_bio_ssl_all`.** That model never does this
+collapse — its L12 |cos(top1, bio_axis)| is 0.041 and top1 share is
+0.08. Bio is encoded in the bio centroid axis (Cohen's d = 2.77 at
+L12) but spread across many top-eigenvalue directions, never
+amplified into a single one. SSL fine-tuning on the all-pretrained
+model installs a logit-head-like classifier at L12; SSL on the
+bio-pretrained model leaves the multi-direction bio code intact.
+
+Source: `nway_eat_all4/layer_direction/layer_direction_summary.csv`,
+`layer_direction.png`.
+
+---
+
 ## 6. CLAIM — Training expands the linear envelope by ~30×, while keeping
 the local manifold dim at or below the random-init baseline
 
