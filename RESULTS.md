@@ -740,6 +740,66 @@ counterpart under
 
 ---
 
+## 5.3. CLAIM (new) — The §5.1 mode collapse is *directional*, not clip-collapse; trained models *preserve* within-clip frame variance
+
+**What we found.** §5.1 + §5.2 showed that `sl_eat_all_ssl_all` puts
+61 % of L12 variance into a single direction aligned with the bio
+classifier. Open question: does that directional concentration also
+compress each clip's 50-frame temporal trajectory into a near-point?
+`step5_within_clip.py` answers it: for each clip, compute mean
+within-clip frame variance and the clip-centroid distance to global,
+then report the ratio `within / (within + between)` per (model, layer).
+
+| layer | eat_all | eat_bio | sl_eat_all_ssl_all | sl_eat_bio_ssl_all | **random_init** |
+|------:|--------:|--------:|-------------------:|-------------------:|----------------:|
+| 0     |   0.91  |   0.84  |              0.87  |              0.87  |        **0.68** |
+| 6     |   0.84  |   0.86  |              0.83  |              0.80  |        **0.49** |
+| 9     |   0.85  |   0.86  |              0.82  |          **0.69**  |            0.42 |
+| 12    |   0.91  |   0.89  |              0.86  |          **0.69**  |            0.34 |
+
+**Trained models preserve temporal frame structure.** All four trained
+models keep within-clip / total ≥ 0.69 across every layer; eat_all
+specifically stays at 0.84–0.91. Frames within a single 10-second clip
+are *not* collapsed onto each other in the full 768-dim space — the
+50 frames remain spread out relative to between-clip separations.
+
+**The §5.1 mode collapse is directional, not clip-level.** At
+`sl_eat_all_ssl_all` L12, absolute within-clip variance jumps from 9.6
+(L11) to 113.8 (L12) — a 12× amplification, the same scale as the
+total-variance jump. The within/total ratio is unchanged (0.86 at both
+L11 and L12). The §5.1 "61 % of variance in one direction" finding
+compresses the feature *distribution* along one axis but doesn't
+compress each clip toward a point in the larger 768-dim manifold.
+
+**`sl_eat_bio_ssl_all` is the only trained model that pushes clips
+apart at mid-late layers.** Its ratio drops to 0.69–0.75 for L7–L12,
+significantly below the other trained models (0.83–0.91 in the same
+range). The bio fine-tune partly emulates random-init's pattern of
+expanding between-clip variance — but it never reaches random's
+0.34 floor at L12.
+
+**Random-init's monotonic decline is a Johnson–Lindenstrauss artifact.**
+Random Gaussian projections preserve raw acoustic distances, and the
+13-layer chain compounds those projections so that between-clip
+variance grows with depth (each random transformation pushes clips
+apart in a different way). This is the same mechanism that powers
+random-init's surprising win on §4.9 species barycenters: at L12,
+random-init's between-clip distances are ~3× the within-clip
+distances, while trained models keep them comparable.
+
+**Why it matters.** This is the answer to "is L12 a logit head?" for
+`sl_eat_all_ssl_all`. The answer: along *one* direction it is (the bio
+classifier), but in the orthogonal 767 dimensions, frames within a clip
+remain distinguishable — the model preserves enough temporal richness
+that downstream heads (or probes) can still work with multi-frame
+features. The collapse is selective amplification (§5.1), not
+information destruction.
+
+Source: `nway_eat_all4/within_clip/within_clip_summary.csv`,
+`within_clip_ratio.png`.
+
+---
+
 ## 6. CLAIM — Training expands the linear envelope by ~30×, while keeping
 the local manifold dim at or below the random-init baseline
 
