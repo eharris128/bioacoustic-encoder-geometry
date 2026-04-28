@@ -185,6 +185,78 @@ for this thread; do not duplicate.
 been retracted — those labels are already in the parquet `metadata`
 JSON and we can derive them ourselves; see Step 2 manifest enrichment.)
 
+## Reviewer-driven follow-ups (preprint v0 round 1) — attend to today
+
+Triggered by Opus 4.7 extended-thinking review of the v0 preprint draft.
+Concern numbering tracks the review.
+
+### Compute (run on `sentient` 129.213.131.108 once GPU is free)
+
+- [ ] **§4.8 INLP probe** — `step6_inlp_class_order.py` (committed). Trains
+  Class probe (Aves vs Mammalia), iteratively nulls its row-space, then
+  trains Order probe (Passeriformes vs other-Aves) on Class-nullspace
+  activations. Survival ratio ≈ 1.0 = factored; ≈ 0.0 = entangled.
+  Default layers L5/L7/L9/L12 across all 5 models. ~hours on the A10.
+  Resolves reviewer concerns (1) "geometry-as-semantics" and (6)
+  "Veitch test indistinguishable from random orthogonality."
+- [ ] **Manifest-resampling sensitivity** (concern (4)). Redraw the
+  600-sample manifest at 5 different seeds (keep the 100-per-source
+  stratification), re-extract activations for the trained models,
+  re-run §4.7 / §4.8 / §4.9 numbers. Report across-manifest spread
+  alongside within-manifest bootstrap CIs. Reviewer's prediction: the
+  across-manifest spread for §4.8 L12 cos is several × the [0.004, 0.110]
+  CI shown — confirm or refute.
+
+### Prose-only revisions (no compute) — preprint draft v1
+
+- [ ] **Concern (1) — soften semantic vocabulary.** Replace "develops [a
+  feature]" with "exhibits [a geometric property]" throughout §4.7,
+  §5.2, §5.4 unless INLP supports the stronger reading. Specific
+  flagged phrases: §5.2 "the model has thrown out everything except
+  its bio classifier," §5.4 "the bio classifier is installed at L12,"
+  §4.7 "strongest learned direction."
+- [ ] **Concern (1) — §4.5 threshold-vs-linear is a single point.**
+  Either run a mixing-ratio sweep (5%, 10%, 25%, 50%, 75%) on
+  `sl_eat_bio_ssl_all` L9 to actually distinguish linear / saturating /
+  threshold, or downgrade the §4.5 claim to "asymmetric response" with
+  one data point.
+- [ ] **Concern (2) — random-init is a "preserves input acoustics"
+  control, not a "no structure" control.** Flag in §2 and §5/§6 where
+  random-init eff_rank L12 ≈ trained `sl_eat_all_ssl_all` L12 (9.8 vs
+  11.2): the equality is misleading because they got there by opposite
+  routes. Optionally add one stronger control: shuffled-label SSL,
+  frequency-PCA init, or non-audio-pretrained EAT-base.
+- [ ] **Concern (3) — the SSL-axis is confounded with new-data-domain
+  exposure.** SSL is on the bio+non-bio union for both variants, which
+  means `sl_eat_bio_ssl_all` sees a *new* data domain at fine-tune
+  while `sl_eat_all_ssl_all` does not. Add an explicit paragraph in
+  §1 or §8 calling this out as a confound the n=4 design cannot
+  resolve.
+- [ ] **Concern (5) — reframe §3.** Currently framed as "pooling
+  distorts geometry." Soften to "frame-level and pooled views diverge
+  heterogeneously across (model, layer); we choose frame-level
+  because the geometric primitives in §2 are defined on the
+  unaggregated distribution." Drop the "distortion" / "pathology"
+  language.
+- [ ] **Concern (6) — fix the Veitch null-distribution comparison.**
+  In 768-d, expected |cos| of two independently-chosen unit vectors
+  is √(2/(πd)) ≈ 0.029. The §4.8 headline 0.033 is at that floor;
+  random-init's 0.93 is the anomalously *aligned* number. Reframe:
+  "random-init produces aligned Class/Order displacements at cos ≈
+  0.94; trained models drift toward the random-orthogonality floor;
+  `sl_eat_bio_ssl_all` reaches it most cleanly." The "factored
+  hierarchy" framing is contingent on whether INLP supports it; if
+  not, fall back to the directional-signature framing.
+
+### Framing decision (after INLP completes)
+
+- [ ] If INLP-Order survives in `sl_eat_bio_ssl_all` and not in the
+  other trained models → keep factored-hierarchy framing; §4.8
+  becomes "geometric evidence triangulated by INLP-Order survival."
+- [ ] If INLP-Order does not survive → pivot to the directional-
+  signature framing (RESULTS.md §10 option 2), demote §4.8 to a
+  methodological note about random-init's anomalous alignment.
+
 ## Out of scope for the current pilot
 
 - **Roadmap Section 1 Step 3 noise dynamics** (white/pink noise + "noise subspace") — the teammate's, do not duplicate.
