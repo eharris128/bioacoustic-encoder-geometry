@@ -1037,43 +1037,37 @@ Closed by the 2026-04-27 (later) taxonomic chain:
   metadata, no teammate coordination needed.
 - ~~Per-Class / per-Order frame-level structure.~~ See new §4.7.
 
+Closed by the 2026-04-28 autonomous chain (Phase 3-5):
+
+- ~~**Within-clip frame structure.**~~ Closed by §5.3 (`within_clip/`).
+  Trained models keep within/total ≥ 0.69 across every layer; §5.1
+  mode collapse is purely directional, not clip-level.
+- ~~**MLE-ID magnitude vs (n, k).**~~ Closed by §6 (n, k) qualifier
+  (`mle_id_sensitivity/`). MLE-ID grows monotonically with k; the §6
+  ratio claim is robust, the absolute claim is estimator-conditional.
+- ~~**What is the dominant L12 direction in `sl_eat_all_ssl_all`?**~~
+  Closed by §5.2 (`direction/l12_summary.csv`) — it IS the bio
+  classifier (|cos|=0.74 with bio centroid axis, Cohen's d 0.52).
+  §5.4 further shows the direction is installed specifically at L12,
+  not built up gradually (`layer_direction/`).
+- ~~**Per-Order Veitch test with denser sampling.**~~ Closed by Phase
+  3 `step3c_veitch_4order` and the new per-Order manifest. Tests 4
+  Aves Orders × 100 samples each; sl_eat_bio_ssl_all factors all 4
+  orders against the Class direction at cos 0.03–0.08 by L7.
+- ~~**Within-class species separability.**~~ Closed by §4.9 within-Aves
+  / within-Mammalia extension (`class/within_class_separability.csv`).
+  Random-init still has highest separability inside both Classes.
+- ~~Bootstrap CIs on the new §4.7–§4.9 / §5.1 numbers.~~ Done in
+  `bootstrap_taxonomic_cis/`. All claims survive. CIs on the §5.2
+  L12 bio-classifier finding added in `bootstrap_l12_direction/`:
+  sl_eat_all_ssl_all 0.74 [0.67, 0.80], no CI overlap with other
+  trained models.
+
 Still open:
 
-1. **Within-clip frame structure.** Frames within a single clip almost
-   certainly have very different geometry (silence vs vocalization). The
-   subsampling treats all frames as exchangeable. Whether this matters
-   for any of the claims is untested.
-2. **MLE-ID magnitude vs (n, k).** The frame-count sensitivity check
-   exposed that MLE-ID(k=20) drifts with n. Absolute values in §6 are
-   parameter-dependent; only the trend across (model, layer) at fixed
-   (n, k) is paper-defensible. Worth either (a) reporting MLE-ID across
-   multiple (n, k) settings or (b) switching to an alternative estimator
-   that converges with n.
-3. **Per-source granularity in §4.** The §4.6 finding shows bio-vs-non-
+1. **Per-source granularity in §4.** The §4.6 finding shows bio-vs-non-
    bio is a coarse decomposition. A finer statement of §4 should be
    made source-level: which sources is the model actually separating?
-4. **What is the dominant L12 direction in `sl_eat_all_ssl_all`?**
-   §5.1 mechanism investigation showed 61 % of L12 variance lives in
-   one direction. Probably an "is this animal vocalization?"
-   classifier installed by SSL fine-tuning. Test by projecting L12
-   activations onto the top eigenvector and checking bio vs non-bio
-   separation. Cheap (no new shard loads needed once we save the
-   eigenvectors).
-5. **Per-Order Veitch test with denser sampling.** §4.8 used
-   "Passeriformes vs other-Aves" because non-Passeriformes orders are
-   ≤ 11 samples each. A 4-bird-order Veitch test (Passeriformes /
-   Charadriiformes / Piciformes / Strigiformes) — matching the
-   teammate's probes — would need scale-up beyond the 600-sample
-   manifest.
-6. **Within-class species separability.** §4.9 used 12 species
-   spanning whales / songbirds / dolphins. Restricted to only Aves
-   species or only Mammalia species (with ≥ 5 samples each — fewer
-   per class), would the random-init advantage still hold?
-7. ~~Bootstrap CIs on the new §4.7–§4.9 / §5.1 numbers.~~ Done in
-   `bootstrap_taxonomic_cis/`. All claims survive: §4.8 L12 cos
-   0.081 [0.021, 0.155] (no overlap with other trained models); §5.1
-   L12 top-1 share CIs are ~0.005 wide (sample-stable spectrum); §4.9
-   random-init advantage holds with no CI overlap.
 
 ---
 
