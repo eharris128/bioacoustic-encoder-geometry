@@ -1,0 +1,35 @@
+{
+  "timestamp": "20260427T222756Z",
+  "rows_scanned": 10000,
+  "samples_per_order": 100,
+  "samples_mammalia": 200,
+  "samples_nonbio": 200,
+  "target_orders": [
+    "Charadriiformes",
+    "Passeriformes",
+    "Piciformes",
+    "Strigiformes"
+  ],
+  "nonbio_sources": [
+    "NatureLM",
+    "WavCaps"
+  ],
+  "buckets_filled": {
+    "order:Charadriiformes": 100,
+    "order:Piciformes": 100,
+    "order:Strigiformes": 100,
+    "order:Passeriformes": 100,
+    "class:Mammalia": 200,
+    "nonbio": 200
+  },
+  "buckets_unfilled": {
+    "order:Charadriiformes": 0,
+    "order:Piciformes": 0,
+    "order:Strigiformes": 0,
+    "order:Passeriformes": 0,
+    "class:Mammalia": 0,
+    "nonbio": 0
+  },
+  "total_samples": 800,
+  "parquet_revision": "e98500754629b63dd8d2400c1a20798337da92f5"
+}
