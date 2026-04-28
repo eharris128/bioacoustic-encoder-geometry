@@ -86,16 +86,17 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def fit_probe(X: np.ndarray, y: np.ndarray, C: float, seed: int) -> tuple[LogisticRegression, float, np.ndarray]:
-    """Fit a linear probe; return (model, test-acc, coefficient row vector)."""
-    Xtr, Xte, ytr, yte = train_test_split(
-        X, y, test_size=0.2, random_state=seed, stratify=y,
-    )
+def fit_probe(
+    X_tr: np.ndarray, y_tr: np.ndarray,
+    X_te: np.ndarray, y_te: np.ndarray,
+    C: float, seed: int,
+) -> tuple[LogisticRegression, float, np.ndarray]:
+    """Fit a linear probe on a pre-split (X_tr, X_te); return (model, test-acc, coef row)."""
     clf = LogisticRegression(
         penalty="l2", C=C, solver="liblinear", max_iter=2000, random_state=seed,
     )
-    clf.fit(Xtr, ytr)
-    acc = float(clf.score(Xte, yte))
+    clf.fit(X_tr, y_tr)
+    acc = float(clf.score(X_te, y_te))
     return clf, acc, clf.coef_.copy()
 
 
@@ -111,33 +112,66 @@ def nullspace_projection(W: np.ndarray) -> np.ndarray:
     return np.eye(W.shape[1]) - row_basis.T @ row_basis
 
 
+def stratified_clip_split(
+    clip_y: np.ndarray, test_size: float, seed: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Stratified train/test split at the *clip* level.
+
+    Returns (train_clip_positions, test_clip_positions) — positions are
+    indices into the clip_y array (i.e. positions within the masked
+    subset, not original-manifest indices).
+    """
+    rng = np.random.default_rng(seed)
+    train_pos: list[int] = []
+    test_pos: list[int] = []
+    for label in np.unique(clip_y):
+        idx = np.where(clip_y == label)[0]
+        rng.shuffle(idx)
+        n_test = max(1, int(round(idx.size * test_size)))
+        test_pos.extend(idx[:n_test].tolist())
+        train_pos.extend(idx[n_test:].tolist())
+    return np.array(sorted(train_pos)), np.array(sorted(test_pos))
+
+
+def expand_clip_positions_to_frames(
+    clip_positions: np.ndarray, frames_per_item: int,
+) -> np.ndarray:
+    """Expand a (n_clip,) position array into a (n_clip * fpi,) frame index
+    array, where each clip i contributes rows [i*fpi : (i+1)*fpi]."""
+    return np.concatenate(
+        [np.arange(p * frames_per_item, (p + 1) * frames_per_item)
+         for p in clip_positions]
+    )
+
+
 def run_inlp_for_target(
-    X: np.ndarray,
-    y: np.ndarray,
+    X_tr: np.ndarray, y_tr: np.ndarray,
+    X_te: np.ndarray, y_te: np.ndarray,
     *,
     max_iters: int,
     acc_floor: float,
     C: float,
     seed: int,
 ) -> tuple[np.ndarray, list[dict]]:
-    """Iteratively null the linear probe direction until acc <= acc_floor.
+    """Iteratively null the linear-probe direction on the (pre-split) train
+    set, evaluate test accuracy each iteration, until test acc reaches
+    acc_floor or we hit max_iters. Train/test split is fixed across iters.
 
-    Returns (final_projection (d,d), per-iteration log).
+    Returns (final_projection (d, d), per-iteration log).
     """
-    d = X.shape[1]
+    d = X_tr.shape[1]
     P = np.eye(d, dtype=np.float64)
     log: list[dict] = []
-    baseline = majority_baseline(y)
+    baseline = majority_baseline(y_te)
 
-    Xcur = X.copy()
     for it in range(max_iters):
-        _, acc, coef = fit_probe(Xcur, y, C=C, seed=seed + it)
+        Xtr_cur = X_tr @ P.T
+        Xte_cur = X_te @ P.T
+        _, acc, coef = fit_probe(Xtr_cur, y_tr, Xte_cur, y_te, C=C, seed=seed)
         log.append({"iter": it, "acc": acc, "majority_baseline": baseline})
         if acc <= max(acc_floor, baseline + 0.01):
             break
-        Pi = nullspace_projection(coef)
-        P = Pi @ P
-        Xcur = X @ P.T  # apply cumulative projection from the original X
+        P = nullspace_projection(coef) @ P
     return P, log
 
 
@@ -206,37 +240,75 @@ def main() -> None:
             )
             d = per_item.shape[-1]
 
-            # Class probe inputs: all Aves + Mammalia frames.
+            # ---- Class probe ----
+            # Build per-clip arrays (one row per clip), then split at the
+            # clip level so train and test never share clips. Frame
+            # leakage was an issue in the v1 of this script.
             mask_class_clips = mask_aves | mask_mammalia
-            class_X = per_item[mask_class_clips].reshape(-1, d).astype(np.float64)
-            class_y = np.repeat(
-                (cls[mask_class_clips] == "Aves").astype(np.int64),
-                args.frames_per_item,
+            class_clip_y = (cls[mask_class_clips] == "Aves").astype(np.int64)
+            class_clip_frames = per_item[mask_class_clips]  # (n_clip, fpi, d)
+            class_X = class_clip_frames.reshape(-1, d).astype(np.float64)
+            class_y = np.repeat(class_clip_y, args.frames_per_item)
+
+            class_train_pos, class_test_pos = stratified_clip_split(
+                class_clip_y, test_size=0.2, seed=BASE_SEED,
+            )
+            class_train_frame_idx = expand_clip_positions_to_frames(
+                class_train_pos, args.frames_per_item,
+            )
+            class_test_frame_idx = expand_clip_positions_to_frames(
+                class_test_pos, args.frames_per_item,
             )
 
-            # Order probe inputs: Passer vs other-Aves (within Aves only).
+            # ---- Order probe ----
             mask_order_clips = mask_passer | mask_other_aves
-            order_X = per_item[mask_order_clips].reshape(-1, d).astype(np.float64)
-            order_y = np.repeat(
-                (ord_[mask_order_clips] == PASSERIFORMES).astype(np.int64),
-                args.frames_per_item,
+            order_clip_y = (ord_[mask_order_clips] == PASSERIFORMES).astype(np.int64)
+            order_clip_frames = per_item[mask_order_clips]
+            order_X = order_clip_frames.reshape(-1, d).astype(np.float64)
+            order_y = np.repeat(order_clip_y, args.frames_per_item)
+
+            order_train_pos, order_test_pos = stratified_clip_split(
+                order_clip_y, test_size=0.2, seed=BASE_SEED,
+            )
+            order_train_frame_idx = expand_clip_positions_to_frames(
+                order_train_pos, args.frames_per_item,
+            )
+            order_test_frame_idx = expand_clip_positions_to_frames(
+                order_test_pos, args.frames_per_item,
             )
 
-            # Standardize on the union (one scaler, applied to both probes).
-            scaler = StandardScaler().fit(class_X)
+            # ---- Standardize using only the train portion of the class probe
+            # to avoid any test-set statistics leaking into the scaler. ----
+            scaler = StandardScaler().fit(class_X[class_train_frame_idx])
             class_Xs = scaler.transform(class_X)
             order_Xs = scaler.transform(order_X)
 
-            # Pre-INLP probes.
-            _, pre_class_acc, _ = fit_probe(class_Xs, class_y, C=args.c_reg, seed=BASE_SEED)
-            _, pre_order_acc, _ = fit_probe(order_Xs, order_y, C=args.c_reg, seed=BASE_SEED)
-            class_baseline = majority_baseline(class_y)
-            order_baseline = majority_baseline(order_y)
+            class_Xs_tr = class_Xs[class_train_frame_idx]
+            class_Xs_te = class_Xs[class_test_frame_idx]
+            class_y_tr = class_y[class_train_frame_idx]
+            class_y_te = class_y[class_test_frame_idx]
 
-            # INLP on the Class probe (using only Class data to fit the
-            # nullspace; then apply the same projection to Order data).
+            order_Xs_tr = order_Xs[order_train_frame_idx]
+            order_Xs_te = order_Xs[order_test_frame_idx]
+            order_y_tr = order_y[order_train_frame_idx]
+            order_y_te = order_y[order_test_frame_idx]
+
+            class_baseline = majority_baseline(class_y_te)
+            order_baseline = majority_baseline(order_y_te)
+
+            # Pre-INLP probes (clip-level test).
+            _, pre_class_acc, _ = fit_probe(
+                class_Xs_tr, class_y_tr, class_Xs_te, class_y_te,
+                C=args.c_reg, seed=BASE_SEED,
+            )
+            _, pre_order_acc, _ = fit_probe(
+                order_Xs_tr, order_y_tr, order_Xs_te, order_y_te,
+                C=args.c_reg, seed=BASE_SEED,
+            )
+
+            # INLP on the Class probe (fixed train/test split across iters).
             P, log = run_inlp_for_target(
-                class_Xs, class_y,
+                class_Xs_tr, class_y_tr, class_Xs_te, class_y_te,
                 max_iters=args.max_iters,
                 acc_floor=args.class_acc_floor,
                 C=args.c_reg,
@@ -250,10 +322,18 @@ def main() -> None:
                 })
 
             # Post-INLP probes: apply P to both Class (sanity) and Order.
-            class_Xs_post = class_Xs @ P.T
-            order_Xs_post = order_Xs @ P.T
-            _, post_class_acc, _ = fit_probe(class_Xs_post, class_y, C=args.c_reg, seed=BASE_SEED)
-            _, post_order_acc, _ = fit_probe(order_Xs_post, order_y, C=args.c_reg, seed=BASE_SEED)
+            class_Xs_post_tr = class_Xs_tr @ P.T
+            class_Xs_post_te = class_Xs_te @ P.T
+            order_Xs_post_tr = order_Xs_tr @ P.T
+            order_Xs_post_te = order_Xs_te @ P.T
+            _, post_class_acc, _ = fit_probe(
+                class_Xs_post_tr, class_y_tr, class_Xs_post_te, class_y_te,
+                C=args.c_reg, seed=BASE_SEED,
+            )
+            _, post_order_acc, _ = fit_probe(
+                order_Xs_post_tr, order_y_tr, order_Xs_post_te, order_y_te,
+                C=args.c_reg, seed=BASE_SEED,
+            )
 
             order_survival = (
                 (post_order_acc - order_baseline)
