@@ -925,6 +925,34 @@ robust statement; the numbers themselves are convention-dependent. This
 should be noted in any paper draft. Source:
 `frame_count_sensitivity/frame_count_sensitivity_sl_eat_bio_ssl_all.csv`.
 
+**(n, k) joint sweep (added 2026-04-28).** `step5_mle_id_sensitivity.py`
+runs MLE-ID over k ∈ {5, 10, 20, 40, 80} × n ∈ {2500, 5000, 10000, 20000}
+for focal layers and all 5 models. Two structural patterns:
+
+- **At fixed n, MLE-ID grows monotonically with k.** Example, eat_all L4
+  at n=10000: k=5 → 6.8, k=10 → 10.0, k=20 → 12.8, k=40 → 14.3,
+  k=80 → 15.9. The estimator picks up larger-scale manifold structure
+  as the neighborhood widens. The §6 default k=20 is on the low side
+  of this curve.
+- **At fixed k, MLE-ID drops as n grows.** Same pattern as the
+  frames-per-item sweep above: denser sampling reveals finer (lower-dim)
+  local manifold structure.
+
+Most importantly, **the trained-vs-random ordering is k-dependent.**
+At k=5–20 the §6 claim "trained ≤ random MLE-ID" holds (random ≈ 11
+sits at or above the trained range 5–13). At k=80 the ordering flips:
+eat_all 16.8 > eat_bio 17.3 > sl_eat_bio_ssl_all 18.9 > random 10.5,
+because random-init's manifold doesn't keep widening as k grows the way
+trained-model manifolds do.
+
+The headline of §6 — *the eff_rank/MLE-ID ratio* expanded by training
+from ≈ 1 to 17–43× — does not depend on absolute MLE-ID values, only
+on the relative scaling of the linear envelope vs the local manifold
+dim. That ratio claim is robust. The absolute MLE-ID claim is
+estimator-conditional; restate any paper draft as "MLE-ID(k=20, n=10k)
+read 7–14 for trained, 11–15 for random." Source:
+`mle_id_sensitivity/mle_id_sensitivity.csv`.
+
 ---
 
 ## 7. RETRACTED — The L4 TwoNN dip
