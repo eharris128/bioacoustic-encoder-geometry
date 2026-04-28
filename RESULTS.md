@@ -738,6 +738,25 @@ Source: `nway_eat_all4/direction/l12_summary.csv` and the OLD-manifest
 counterpart under
 `naturelm_by_source_100each_20260418T171459Z/nway_eat_all4/direction/`.
 
+**Bootstrap CIs (added 2026-04-28).** B=30 bootstraps over manifest items.
+L12 |cos(top1, bio_axis)|, median [5%, 95%]:
+
+| model              | median [5%, 95%]         |
+|--------------------|-------------------------:|
+| **sl_eat_all_ssl_all** | **0.743 [0.674, 0.796]** |
+| sl_eat_bio_ssl_all     |   0.035 [0.007, 0.149]   |
+| eat_all                |   0.099 [0.006, 0.339]   |
+| eat_bio                |   0.260 [0.055, 0.400]   |
+| random_init            |   0.263 [0.037, 0.756]   |
+
+`sl_eat_all_ssl_all`'s lower-95% (0.674) sits above every other
+trained model's upper-95% with no overlap. random-init has a wide CI
+(spans 0.04–0.76) consistent with the §5.2 caveat that random-init's
+top-1 axis happens to align with source-mean variance on bird-heavy
+manifests; its Cohen's d on top1 has CI [−0.10, +0.23] that straddles
+zero, so the alignment is coincidental, not a real classifier. Source:
+`nway_eat_all4/bootstrap_l12_direction/bootstrap_l12_summary.csv`.
+
 ---
 
 ## 5.3. CLAIM (new) — The §5.1 mode collapse is *directional*, not clip-collapse; trained models *preserve* within-clip frame variance
