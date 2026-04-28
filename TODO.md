@@ -165,15 +165,16 @@ Unblocked once Step 2 manifest enrichment lands.
   every layer L0..L12; sl_eat_bio_ssl_all hits two minima — L9 (0.14)
   coincides with §4 / §4.5 / §4.7 / §4.9 peaks; L12 (0.07) is the
   cleanest factoring layer.
-- [ ] **Stronger nested-subspace test (deferred — needs scale-up).**
-  The Veitch claim's stronger form is that the Order centroids span
-  a low-dim affine subspace anchored at the Aves centroid. With only
-  2 subgroups (Passer + other-Aves), the within-Aves "subspace" is
-  1-dimensional by construction — uninformative at our current
-  resolution. Need ≥4 individual bird Orders × ~50 samples each,
-  which the current 600-sample manifest does not have (non-Passer
-  orders ≤ 11 samples each). Requires a scale-up; see "Step 1
-  outstanding decisions" above.
+- [x] **Stronger nested-subspace test (done — `step3c_veitch_4order.py`,
+  Phase 3 commit `fcb507e`; cross-check on OLD manifest commit
+  `bb00af1`).** Scaled up to a per-Order manifest with 4 individual
+  bird Orders × 100 samples each (Passeriformes, Charadriiformes,
+  Piciformes, Strigiformes). Tested |cos(Aves−Mammalia, Order_i−Aves)|
+  per (model, layer, Order). Headline: `sl_eat_bio_ssl_all` factors all
+  4 Orders against the Class direction at L7, with cos 0.03–0.08 across
+  every Order. None of the other trained models drop the median below
+  0.30. The §4.8 Veitch finding generalizes from "Passer-vs-other-Aves"
+  to all 4 individual bird Orders.
 
 ## Roadmap Section 2 — owned by teammate
 

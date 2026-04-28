@@ -525,7 +525,19 @@ spans very heterogeneous acoustic domains (marine mammals vs songbirds
 vs raptors). A within-Aves-only or within-Mammalia-only species
 analysis (smaller per-class sample requirement, more homogeneous
 acoustic context) would test whether the random-init advantage holds
-for closely-related species. Open follow-up.
+for closely-related species.
+
+**Within-class follow-up (closes the open question).** Restricting the
+separability ratio to within-Aves species (13 species, ≥ 5 clips) and
+within-Mammalia species (15 species) on the new per-Order manifest
+keeps the qualitative finding: random-init has the highest separability
+inside both Classes at most layers (Aves L5 = 0.078, Mammalia L5 =
+0.229), trained models stay 0.02–0.05 within-Aves at every layer.
+`sl_eat_bio_ssl_all` is again the only trained model that approaches
+random-init within a single Class, reaching ~0.085 within-Aves at
+L9–L12. The §4.9 "trained models compress fine species detail" claim
+generalizes — it isn't an artifact of mixing acoustically-distinct
+Classes. Source: `nway_eat_all4/class/within_class_separability.csv`.
 
 **Bootstrap CIs (added 2026-04-27).** B=30 bootstraps confirm the
 random-init advantage with margin. At L10:
@@ -666,6 +678,65 @@ most sample-stable finding in the paper. The two SSL models'
 post-amplification directions differ by **almost an order of
 magnitude in top-1 share** with non-overlapping CIs. Source:
 `bootstrap_taxonomic_cis/bootstrap_taxonomic_summary.csv`.
+
+---
+
+## 5.2. CLAIM (new) — The dominant L12 direction in `sl_eat_all_ssl_all` IS the bio classifier
+
+**What we found.** §5.1 left an open follow-up: what *is* the dominant
+direction that absorbs 61 % of L12 variance in `sl_eat_all_ssl_all`?
+`step5_l12_direction.py` answers it directly. For each model, project
+each item's pooled L12 activation onto the top eigenvector and onto the
+bio-vs-nonbio centroid axis (the §4 axis); compare the two via
+`|cos(top1, bio_axis)|` plus Cohen's d on each.
+
+L12 results, both manifests:
+
+| model              | top1 share | \|cos(top1, bio_axis)\| | d on top1 | d on bio_axis |
+|--------------------|-----------:|------------------------:|----------:|--------------:|
+| **sl_eat_all_ssl_all** (NEW) | 0.625 | **0.741** | +0.52 | +0.82 |
+| **sl_eat_all_ssl_all** (OLD) | 0.614 | **0.819** | +0.56 | +0.76 |
+| sl_eat_bio_ssl_all (NEW) | 0.083 | 0.041 | −0.06 | +2.77 |
+| sl_eat_bio_ssl_all (OLD) | 0.082 | 0.032 | −0.05 | +2.54 |
+| eat_all (NEW)      | 0.275 | 0.048 | −0.02 | +1.78 |
+| eat_bio (NEW)      | 0.162 | 0.254 | +0.19 | +1.02 |
+| random_init (NEW)  | 0.565 | 0.061 | −0.01 | +0.46 |
+
+**The §5.1 mode-collapse direction in `sl_eat_all_ssl_all` is the bio
+classifier.** Top-1 eigenvector aligns at cos = 0.74–0.82 with the
+bio-vs-nonbio axis, replicates across both manifests, and gives a
+Cohen's d of ~0.5 separating bio from non-bio items along that single
+1D axis. SSL fine-tuning on a non-bio-pretrained model installs a
+single-feature "is this an animal vocalization?" classifier as L12's
+dominant direction — confirming the mechanistic story in §5.1.
+
+**`sl_eat_bio_ssl_all` is the dual case.** Its top-1 share is small
+(8 %, no collapse), and its top-1 eigenvector is *orthogonal* to the
+bio axis (cos = 0.03). Yet its bio separation along the (non-collapsed)
+bio axis is by far the strongest in the family: Cohen's d = 2.77 along
+the bio axis vs −0.06 along top-1. The bio direction is real and
+strong; it just doesn't dominate L12's variance.
+
+**Random-init is a useful negative control.** It has high top-1 share
+(0.57, comparable to `sl_eat_all_ssl_all`), but its top-1 eigenvector
+is uncorrelated with the bio axis (cos = 0.06) and Cohen's d on top-1
+is essentially zero. Mode collapse alone doesn't make a classifier;
+SSL on a non-bio-pretrained model specifically installs a *bio*
+classifier.
+
+**Replication caveat.** On the OLD manifest, random-init's
+`|cos(top1, bio_axis)|` reads 0.75 — close to `sl_eat_all_ssl_all`'s
+value. But the corresponding Cohen's d on top-1 is only +0.14: the
+top-1 axis isn't actually separating bio from non-bio, it's just that
+on a manifest where 4/6 sources are bird-heavy, source-mean variance
+happens to align with the bio axis. The test that distinguishes a real
+classifier from coincidental alignment is the Cohen's d on the
+projection, not the cosine alone. Only `sl_eat_all_ssl_all` clears
+both bars on both manifests.
+
+Source: `nway_eat_all4/direction/l12_summary.csv` and the OLD-manifest
+counterpart under
+`naturelm_by_source_100each_20260418T171459Z/nway_eat_all4/direction/`.
 
 ---
 
