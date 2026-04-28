@@ -13,3 +13,4 @@ download_model.sh
 artifacts/runs/
 artifacts/roadmap_part1*/
 artifacts/manifests_smoke/
+.claude/
