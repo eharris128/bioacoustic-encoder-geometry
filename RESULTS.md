@@ -607,6 +607,98 @@ Source: `nway_eat_all4/per_source_frame_level/per_source_pairwise.csv`.
 
 ---
 
+## 4.11. CLAIM (new) — Linear-probe corroboration of §4.7: trained Class direction is probe-recoverable, with `sl_eat_bio_ssl_all` highest at every layer
+
+**What we found.** §4.7 reports that `sl_eat_bio_ssl_all` reaches the
+strongest learned direction in the family at L7 with subspace cos = 0.40
+(Aves vs Mammalia), beating every other learned direction in this paper.
+A peer-review red-team flagged that subspace cosines on centroid
+differences cannot, on their own, distinguish "the model encodes Class
+as a feature" from "the model has learned acoustic invariances that
+incidentally separate Aves from Mammalia inputs." We add a non-
+geometric, non-centroid corroboration: linear-probe accuracy.
+
+**Setup.** L2-regularized logistic regression on standardized frame
+activations, 80/20 stratified split, seed 42. Two probes per (model,
+layer):
+
+- **Class probe:** Aves (n=400) vs Mammalia (n=200), so 600 clips × 50
+  frames = 30,000 rows. Majority baseline 0.667.
+- **Order probe:** Passeriformes (n=100) vs other-Aves (Charadriiformes
+  + Piciformes + Strigiformes, n=300), within-Aves only, 400 clips × 50
+  frames = 20,000 rows. Majority baseline 0.750.
+
+Mean probe accuracy across L5/L7/L9/L12 per model:
+
+| model                    | mean Class probe acc | mean Order probe acc |
+|--------------------------|---------------------:|---------------------:|
+| `eat_all`                | 0.920                | 0.835                |
+| `eat_bio`                | 0.911                | 0.825                |
+| `sl_eat_all_ssl_all`     | 0.925                | 0.842                |
+| **`sl_eat_bio_ssl_all`** | **0.957**            | **0.900**            |
+| `random_init_eat_seed42` | 0.856                | 0.751                |
+
+`sl_eat_bio_ssl_all` reads the highest Class **and** Order probe
+accuracy at every individual layer L5/L7/L9/L12, peaking at L9 with
+Class 0.981 and Order 0.944 (the highest of any (model, layer) cell in
+the run). The geometric ranking from §4.7 — `sl_eat_bio_ssl_all` >
+others > random-init — replicates in probe-accuracy space.
+
+**Two follow-on observations the table forces.**
+
+1. **Class is partly architectural; Order is fully learned.** Random-
+   init reads Class probe 0.856 (well above the 0.667 majority
+   baseline) — even completely untrained EAT-base architecture passing
+   audio through random transformer weights produces a representation
+   with ~85% linearly-recoverable Aves-vs-Mammalia structure. The
+   trained-vs-random Class gap is therefore only ~7–10%. Random-init
+   reads Order probe 0.751 — *exactly* at majority baseline at every
+   layer. Order discrimination is a fully-learned property; the
+   architecture provides none of it. The cleanest "learned" gap in the
+   table is on Order (trained 0.83–0.94 vs random 0.75 = chance), not
+   on Class.
+
+2. **Order accuracy at L12 of `sl_eat_all_ssl_all` survives the §5.1
+   mode collapse.** §5.1 reports that `sl_eat_all_ssl_all` puts 61% of
+   L12 variance in one direction; §5.2 reports that direction is the
+   bio classifier. We had read this as "the model has thrown out
+   everything except its bio classifier at L12." But the L12 Order
+   probe still reads 0.842 — just as recoverable as at L5/L7/L9 of the
+   same model (0.83–0.85). Order-discriminative information is
+   preserved at L12 even though it lives in low-eigenvalue directions
+   that the centroid geometry of §5 cannot see. Soften the §5.2
+   reading from "thrown out everything except bio" to "the *dominant*
+   variance direction at L12 is the bio classifier; lower-eigenvalue
+   structure still carries Order information."
+
+**Methodological caveat.** The script also runs Iterative Nullspace
+Projection (INLP, Ravfogel et al. 2020) on the Class probe with
+`max_iters=15`, then tests whether Order accuracy survives the
+projection. We do not report the survival ratio as evidence of
+Class⊥Order factoring: with 15 iterations of 1-D nullification, Class
+probe accuracy only drops from ~0.92 to ~0.83, not to the 0.55 floor.
+Class information lives in many directions in 768-d, and the
+projection does not fully null it. Order survival reads 0.93–1.01
+across all four trained models, which is partly a tautology of
+"Class wasn't fully nulled" rather than "Order is independent of
+Class." A more aggressive nullification regime (max_iters ≥ 80, or a
+multi-class probe so each iteration nulls a higher-dimensional
+subspace) would convert this into a defensible Class⊥Order test;
+deferred.
+
+**Why it matters.** §4.7's "strongest learned direction" language
+now has linear-probe grounding, not just centroid geometry — addressing
+the reviewer's concern (1) (geometry-as-semantics) for the Class-
+direction claim specifically. §4.8's Class⊥Order Veitch claim is *not*
+addressed by this experiment and still owes its own reframe; see §9
+OPEN.
+
+Source: `step6_inlp_class_order.py`,
+`nway_eat_all4/inlp_class_order/{inlp_summary.csv, inlp_results.csv,
+inlp_summary.png}`.
+
+---
+
 ## 5. CLAIM — Late-layer collapse splits the family by `_bio` vs not, and
 `sl_eat_all_ssl_all` collapses *back to the random-init baseline*
 
@@ -1122,7 +1214,51 @@ Still open:
   direction; but within-bio cos = 0.45-0.63 (not 1.0) means the model
   also discriminates among bio sources within the bio cluster.
 
-(All §9 items closed as of 2026-04-28.)
+Closed by the 2026-04-28 (later) red-team round (Opus 4.7 reviewer
+feedback in `publication_path/`):
+
+- ~~**§4.7 corroborated by linear probe.**~~ Closed by §4.11
+  (`inlp_class_order/inlp_summary.csv`). `sl_eat_bio_ssl_all` reads
+  highest Class and Order probe accuracy at every layer L5/L7/L9/L12;
+  geometric §4.7 ranking replicates in probe-accuracy space.
+
+Reopened by the 2026-04-28 (later) red-team round:
+
+- **§4.8 Veitch test as written is at the random-orthogonality floor
+  for 768-d.** Expected |cos| of two independently chosen unit vectors
+  in 768-d is √(2/(πd)) ≈ 0.029; the headline cos 0.033 [0.004, 0.110]
+  is at that floor. The contrast with random-init (0.93) is real but
+  shows random-init *fails* to be orthogonal, not that the trained
+  model *succeeds* at factoring. Reframe §4.8 from "factored
+  hierarchy" to "drift toward random-orthogonality floor that random-
+  init does not exhibit"; the directional claim survives, the
+  factored-hierarchy claim does not without §4.11-style probe
+  triangulation specifically on Class⊥Order. See
+  `publication_path/inlp_writeup.md` for follow-up INLP variants.
+- **§5.2 over-reads "thrown out everything except bio."** Per §4.11,
+  L12 of `sl_eat_all_ssl_all` retains 0.842 Order probe accuracy —
+  Order-discriminative info survives in low-eigenvalue directions the
+  centroid geometry of §5 cannot see. Soften §5.2 from "the model has
+  thrown out everything except its bio classifier" to "the *dominant*
+  variance direction at L12 is the bio classifier; lower-eigenvalue
+  structure still carries Order information."
+
+Still open after this round:
+
+- **Across-manifest spread for §4.7–§4.9 numbers.** Bootstraps see
+  sample-selection noise but not manifest-construction noise. Reviewer
+  predicts the across-manifest spread for §4.8's L12 cos is several ×
+  the [0.004, 0.110] CI shown. Manifest-resampling experiment queued
+  in TODO.md.
+- **§4.5 threshold-vs-linear is a single point.** "78% of the way at
+  25% mix" is consistent with linear / saturating / threshold-like;
+  needs a mixing-ratio sweep to distinguish.
+- **The 2×2 ingredient confound and SSL-as-new-data-domain.** n=4
+  cannot disentangle "bio pretrain × SSL fine-tune" from "the specific
+  random seed of the run that produced `sl_eat_bio_ssl_all`," and the
+  SSL fine-tune introduces a new acoustic domain at fine-tune time
+  for `sl_eat_bio_ssl_all` but not for `sl_eat_all_ssl_all`. Prose-only
+  fix in §1 / §8 (TODO).
 
 ---
 
