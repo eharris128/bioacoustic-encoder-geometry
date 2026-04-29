@@ -460,7 +460,10 @@ def build_naturelm_dataset(
     ds = ds.cast_column("audio", Audio(decode=False))
 
     for item in ds:
-        meta = _item_to_meta(item)
+        try:
+            meta = _item_to_meta(item)
+        except Exception:
+            continue
 
         if not _matches_filters(meta, source_dataset, class_filter, order_filter, species_pair):
             continue
@@ -471,8 +474,11 @@ def build_naturelm_dataset(
             if label_counts.get(label, 0) >= max_samples_per_class:
                 continue
 
-        audio = _audio_from_hf_item(item)
-        acts = extract_all_layers(model, audio, max_frames=max_frames, rng=rng, mode=mode)
+        try:
+            audio = _audio_from_hf_item(item)
+            acts = extract_all_layers(model, audio, max_frames=max_frames, rng=rng, mode=mode)
+        except Exception:
+            continue
 
         if mode == "mean":
             for layer in range(NUM_LAYERS_TOTAL):
