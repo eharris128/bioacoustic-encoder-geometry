@@ -448,37 +448,87 @@ def build_naturelm_dataset(
     metadata_list: list[dict] = []
     label_counts: dict[int, int] = {}
 
+    import os
+    import random
+    import pandas as pd
+    from huggingface_hub import hf_hub_download, list_repo_tree
+
     print(
-        f"Streaming NatureLM-audio-training "
+        f"Loading NatureLM-audio-training via shard download "
         f"(source={source_dataset}, class={class_filter}, "
         f"order={order_filter}, species_pair={species_pair}) ...",
         flush=True,
     )
 
-    # decode=False avoids torchcodec/FFmpeg version issues — we decode bytes manually
-    ds = load_dataset(DATASET_REPO, split="train", streaming=True)
-    ds = ds.cast_column("audio", Audio(decode=False))
+    cache_dir = ".naturelm_cache"
+    os.makedirs(cache_dir, exist_ok=True)
 
-    for item in ds:
+    # Get list of all parquet shards (cached after first call)
+    shard_list_path = os.path.join(cache_dir, "shard_list.txt")
+    if os.path.exists(shard_list_path):
+        with open(shard_list_path) as f:
+            all_shards = [line.strip() for line in f if line.strip()]
+    else:
+        print("Fetching shard list from HuggingFace (one-time)...", flush=True)
+        items = list(list_repo_tree(DATASET_REPO, repo_type="dataset", recursive=True))
+        all_shards = sorted(
+            getattr(it, "path", "") for it in items
+            if getattr(it, "path", "").endswith(".parquet")
+        )
+        with open(shard_list_path, "w") as f:
+            f.write("\n".join(all_shards))
+        print(f"  Found {len(all_shards)} shards.", flush=True)
+
+    # Shuffle for diverse coverage across species/sources
+    random.seed(42)
+    random.shuffle(all_shards)
+
+    for shard_path in all_shards:
+        # Stop early if all classes are filled
+        if max_samples_per_class is not None and label_names:
+            if all(label_counts.get(l, 0) >= max_samples_per_class for l in range(len(label_names))):
+                print(f"  All classes reached cap of {max_samples_per_class}. Stopping.", flush=True)
+                break
+
+        # Download shard (cached by huggingface_hub)
         try:
-            meta = _item_to_meta(item)
+            local_path = hf_hub_download(
+                repo_id=DATASET_REPO,
+                filename=shard_path,
+                repo_type="dataset",
+                local_dir=cache_dir,
+            )
+            df = pd.read_parquet(local_path)
         except Exception:
+            continue  # skip corrupt or missing shard
+
+        # Fast pandas pre-filter before touching audio
+        if source_dataset is not None:
+            df = df[df["source_dataset"].isin(source_dataset)]
+        if df.empty:
             continue
 
-        if not _matches_filters(meta, source_dataset, class_filter, order_filter, species_pair):
-            continue
-
-        label = _species_label(meta, species_pair, class_filter)
-
-        if max_samples_per_class is not None:
-            if label_counts.get(label, 0) >= max_samples_per_class:
+        for _, row in df.iterrows():
+            item = row.to_dict()
+            try:
+                meta = _item_to_meta(item)
+            except Exception:
                 continue
 
-        try:
-            audio = _audio_from_hf_item(item)
-            acts = extract_all_layers(model, audio, max_frames=max_frames, rng=rng, mode=mode)
-        except Exception:
-            continue
+            if not _matches_filters(meta, source_dataset, class_filter, order_filter, species_pair):
+                continue
+
+            label = _species_label(meta, species_pair, class_filter)
+
+            if max_samples_per_class is not None:
+                if label_counts.get(label, 0) >= max_samples_per_class:
+                    continue
+
+            try:
+                audio = _audio_from_hf_item(item)
+                acts = extract_all_layers(model, audio, max_frames=max_frames, rng=rng, mode=mode)
+            except Exception:
+                continue
 
         if mode == "mean":
             for layer in range(NUM_LAYERS_TOTAL):
