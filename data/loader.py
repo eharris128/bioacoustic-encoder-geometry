@@ -582,3 +582,214 @@ def build_naturelm_dataset(
         }
 
     return dataset, metadata_list
+
+
+# ---------------------------------------------------------------------------
+# Xeno-canto direct downloader (no HuggingFace dependency)
+# ---------------------------------------------------------------------------
+
+XENOCANTO_API = "https://xeno-canto.org/api/2/recordings"
+XENOCANTO_CACHE = ".xenocanto_cache"
+
+
+def build_xenocanto_dataset(
+    model,
+    species_pair: tuple[str, str],
+    label_names: list[str] | None = None,
+    n_per_species: int = 100,
+    max_frames: int = DEFAULT_MAX_FRAMES,
+    mode: str = "mean",
+) -> tuple[dict[int, tuple[np.ndarray, np.ndarray]], list[dict]]:
+    """
+    Build a per-layer probe dataset by querying xeno-canto API directly.
+    No HuggingFace dependency — downloads MP3s to .xenocanto_cache/.
+
+    Parameters
+    ----------
+    model         : EAT model loaded via load_model
+    species_pair  : (species_a, species_b) scientific names, e.g.
+                    ("Pyrrhula pyrrhula", "Coccothraustes coccothraustes")
+    label_names   : human-readable names; defaults to species_pair
+    n_per_species : max recordings to download per species
+    mode          : "mean" → one 768-dim vector per recording
+    """
+    import os, requests
+    from sklearn.decomposition import PCA  # noqa — only for type reference below
+
+    if label_names is None:
+        label_names = list(species_pair)
+
+    os.makedirs(XENOCANTO_CACHE, exist_ok=True)
+    rng = np.random.default_rng(42)
+
+    layer_X: dict[int, list[np.ndarray]] = {i: [] for i in range(NUM_LAYERS_TOTAL)}
+    layer_y: dict[int, list[np.ndarray]] = {i: [] for i in range(NUM_LAYERS_TOTAL)}
+    metadata_list: list[dict] = []
+
+    for label, species in enumerate(species_pair):
+        print(f"\nFetching {n_per_species} recordings of {species} from xeno-canto...", flush=True)
+        urls = _xenocanto_fetch_urls(species, n_per_species)
+        print(f"  Found {len(urls)} recordings online.", flush=True)
+
+        collected = 0
+        for rec_id, url, filename in urls:
+            if collected >= n_per_species:
+                break
+            local_path = os.path.join(XENOCANTO_CACHE, filename)
+            if not os.path.exists(local_path):
+                try:
+                    r = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"}, allow_redirects=True)
+                    r.raise_for_status()
+                    with open(local_path, "wb") as f:
+                        f.write(r.content)
+                except Exception:
+                    continue
+            try:
+                audio = load_audio_file(local_path)
+                acts = extract_all_layers(model, audio, max_frames=max_frames, rng=rng, mode=mode)
+            except Exception:
+                continue
+
+            if mode == "mean":
+                for layer in range(NUM_LAYERS_TOTAL):
+                    layer_X[layer].append(acts[layer])
+                    layer_y[layer].append(np.array([label], dtype=np.int32))
+            else:
+                n_frames = acts.shape[1]
+                for layer in range(NUM_LAYERS_TOTAL):
+                    layer_X[layer].append(acts[layer])
+                    layer_y[layer].append(np.full(n_frames, label, dtype=np.int32))
+
+            metadata_list.append({"id": rec_id, "species": species, "label": label})
+            collected += 1
+            print(f"  {label_names[label]} {collected}/{n_per_species} ...", flush=True)
+
+    if mode == "mean":
+        dataset: dict[int, tuple[np.ndarray, np.ndarray]] = {
+            layer: (np.stack(layer_X[layer], axis=0), np.concatenate(layer_y[layer]))
+            for layer in range(NUM_LAYERS_TOTAL)
+        }
+    else:
+        dataset = {
+            layer: (np.concatenate(layer_X[layer], axis=0), np.concatenate(layer_y[layer]))
+            for layer in range(NUM_LAYERS_TOTAL)
+        }
+
+    return dataset, metadata_list
+
+
+def _xenocanto_fetch_urls(species: str, n: int) -> list[tuple[str, str, str]]:
+    """Query xeno-canto API and return list of (rec_id, download_url, filename)."""
+    import requests
+    results = []
+    page = 1
+    query = species.replace(" ", "+")
+    while len(results) < n:
+        try:
+            resp = requests.get(
+                f"{XENOCANTO_API}?query={query}&page={page}",
+                timeout=15,
+                headers={"User-Agent": "Mozilla/5.0"},
+            )
+            data = resp.json()
+        except Exception:
+            break
+        for rec in data.get("recordings", []):
+            rec_id = rec.get("id", "")
+            url = rec.get("file", "")
+            filename = rec.get("file-name") or f"XC{rec_id}.mp3"
+            if url:
+                results.append((rec_id, url, filename))
+            if len(results) >= n:
+                break
+        if page >= int(data.get("numPages", 1)):
+            break
+        page += 1
+    return results[:n]
+
+
+# ---------------------------------------------------------------------------
+# Noise subspace computation and projection
+# ---------------------------------------------------------------------------
+
+def compute_noise_subspace(
+    model,
+    audio_paths: list[str],
+    n_components: int = 3,
+    snr_levels_db: list[float] | None = None,
+    max_frames: int = DEFAULT_MAX_FRAMES,
+    n_recordings: int = 8,
+) -> dict[int, np.ndarray]:
+    """
+    Compute the noise subspace per layer by running an SNR sweep on a subset
+    of recordings and taking the top n_components PCA directions.
+
+    Returns { layer_index: np.ndarray of shape (768, n_components) }
+    — the columns are the noise basis vectors to project out.
+    """
+    from sklearn.decomposition import PCA
+
+    if snr_levels_db is None:
+        snr_levels_db = [20.0, 10.0, 5.0, 1.0]
+
+    rng = np.random.default_rng(42)
+    paths = list(audio_paths)
+    if len(paths) > n_recordings:
+        idx = rng.choice(len(paths), n_recordings, replace=False)
+        paths = [paths[i] for i in sorted(idx)]
+
+    print(f"\nComputing noise subspace ({n_components} components) from {len(paths)} recordings "
+          f"× {len(snr_levels_db)} SNR levels...", flush=True)
+
+    layer_acts: dict[int, list[np.ndarray]] = {i: [] for i in range(NUM_LAYERS_TOTAL)}
+
+    for path in paths:
+        try:
+            audio = load_audio_file(path)
+        except Exception:
+            continue
+        audio_np = audio.squeeze(0).numpy()
+        signal_power = float(np.mean(audio_np ** 2)) + 1e-12
+
+        for snr_db in snr_levels_db:
+            noise_power = signal_power / (10.0 ** (snr_db / 10.0))
+            noise = rng.normal(0.0, np.sqrt(noise_power), audio_np.shape).astype(np.float32)
+            noisy = torch.from_numpy(audio_np + noise).unsqueeze(0)
+            try:
+                acts = extract_all_layers(model, noisy, max_frames=max_frames, rng=rng, mode="mean")
+                for layer in range(NUM_LAYERS_TOTAL):
+                    layer_acts[layer].append(acts[layer])
+            except Exception:
+                continue
+
+    subspaces: dict[int, np.ndarray] = {}
+    for layer in range(NUM_LAYERS_TOTAL):
+        X = np.stack(layer_acts[layer], axis=0)  # (n_rec * n_snr, 768)
+        if X.shape[0] < n_components:
+            subspaces[layer] = np.zeros((768, n_components), dtype=np.float32)
+            continue
+        pca = PCA(n_components=n_components)
+        pca.fit(X)
+        subspaces[layer] = pca.components_.T.astype(np.float32)  # (768, n_components)
+        var = pca.explained_variance_ratio_
+        print(f"  Layer {layer:2d}: noise PC1={var[0]:.3f}, PC2={var[1]:.3f}, PC3={var[2]:.3f}", flush=True)
+
+    return subspaces
+
+
+def project_out_subspace(
+    dataset: dict[int, tuple[np.ndarray, np.ndarray]],
+    subspaces: dict[int, np.ndarray],
+) -> dict[int, tuple[np.ndarray, np.ndarray]]:
+    """
+    Project the noise subspace out of every layer's activation matrix.
+
+    For each layer: X_clean = X - X @ Q @ Q.T
+    where Q is the (768, n_components) noise basis.
+    """
+    cleaned: dict[int, tuple[np.ndarray, np.ndarray]] = {}
+    for layer, (X, y) in dataset.items():
+        Q = subspaces[layer]             # (768, n_components)
+        X_proj = X @ Q @ Q.T            # projection onto noise subspace
+        cleaned[layer] = (X - X_proj, y)
+    return cleaned
