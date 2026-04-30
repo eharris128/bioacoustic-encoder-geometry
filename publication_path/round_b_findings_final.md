@@ -19,7 +19,7 @@ plus the optional 3.7 cheap mitigation and §4.5 refined sweep.
 | 3.4 (MLP probe ablation) | **Closed (data)** | sl_eat_bio MLP gaps 0.015–0.083; "linear component" softening supported |
 | 3.5 (binary Class re-test) | **Closed (data)** | 14/16 cells at exact 0.667 majority; 2 broke-early cells at 0.72/0.73 |
 | 3.6 (iter sweep) | **Closed (data)** | n=10 destruction is 0.07–0.16 at non-degenerate cells; asymmetry robust at low iter |
-| 3.7 (random-init multi-seed) | Defensible (Limitations note); cheap mitigation in flight | step8 seeds 7,13 L9 launched at 12:36 UTC |
+| 3.7 (random-init multi-seed) | **Closed (data) for §4.12 at L9** | seed 42 +0.049, seed 7 +0.048, seed 13 +0.061; mean +0.053; sign uniform across 3 seeds. §4.7/§4.8 cross-seed deferred to future revision (defensible per response v1). |
 | §4.12 caveat 2 (asymmetric depth) | **Closed (data)** | step14 multi-class Order INLP: 16 trained-model cells, bin-Class drop ±0.006 |
 | §4.5 single mix ratio | **Closed (data)** | step13 refined sweep — sharp threshold at α=0.025 (44% of full range) |
 | Q6 (low-rank vs acoustic-feature explanation) | **Closed (data)** | Pearson(null_median, eff_rank) = −0.820 (p<0.001), n=15 |
@@ -203,13 +203,14 @@ features survive shuffling.
 
 ## What's still in flight
 
-- **step11 random_init L9, L12** — landing within the next ~90 min.
-  Expected to replicate the +0.05 Order-improves-under-Class-null sign
-  at all 4 layers (already confirmed at L5 +0.045, L7 +0.049).
-- **step8_seeds_7_13_L9** — 3.7 cheap mitigation. ~3 hours.
-  Confirms whether the +0.05 sign holds at random-init seeds other
-  than 42. Defensible to defer per the red-team's response, but
-  running anyway since CPU is available.
+All experiments complete. Final state:
+
+- **step11 random_init**: L5 +0.045, L7 +0.049, L9 +0.049, L12 +0.052
+  — uniform +0.05 sign across all four layers at seed 42 (replicates
+  step8 baseline exactly).
+- **step8_seeds_7_13_L9** (3.7 cheap mitigation): seed 7 +0.048, seed
+  13 +0.061. Cross-seed at L9 confirms +0.05 sign is robust
+  (range +0.048 to +0.061; mean +0.053 across 3 seeds).
 
 ## Preprint v2 patch plan
 
