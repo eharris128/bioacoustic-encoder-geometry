@@ -1,0 +1,13 @@
+model,layer,iter,class_5way_acc,class_chance
+sl_eat_bio_ssl_all,9,0,0.7386666666666667,0.2
+sl_eat_bio_ssl_all,9,1,0.6901666666666667,0.2
+sl_eat_bio_ssl_all,9,2,0.6761666666666667,0.2
+sl_eat_bio_ssl_all,9,3,0.628,0.2
+sl_eat_bio_ssl_all,9,4,0.6135,0.2
+sl_eat_bio_ssl_all,9,5,0.5931666666666666,0.2
+sl_eat_bio_ssl_all,9,6,0.5806666666666667,0.2
+sl_eat_bio_ssl_all,9,7,0.5598333333333333,0.2
+sl_eat_bio_ssl_all,9,8,0.5326666666666666,0.2
+sl_eat_bio_ssl_all,9,9,0.5123333333333333,0.2
+sl_eat_bio_ssl_all,9,10,0.4796666666666667,0.2
+sl_eat_bio_ssl_all,9,11,0.4578333333333333,0.2

@@ -20,11 +20,13 @@ All four EAT-family models extracted against the frozen manifest `naturelm_by_so
   2026-04-27 in `open_questions.md` §3. Re-evaluate only if we scale
   beyond the 600-sample manifest or add collaborators needing direct
   activation access.
-- [ ] Decide whether to scale beyond 100 samples × 6 sources × 4 models.
-  With Step 2 + Step 3a now done at 600 samples and CIs tight, the case
-  for scale-up depends on whether Step 2-taxonomic / Step 3b / Step 3c
-  need more samples per category. Defer until we run the unblocked
-  taxonomic experiments and see where per-(class, layer) cells run thin.
+- [x] Decide whether to scale beyond 100 samples × 6 sources × 4 models.
+  Resolved: no scale-up. The taxonomic per-Order manifest (commit
+  `26485da`, 200 samples per Order across 4 bird Orders + 200 per
+  non-bird Class) gave per-(class, layer) cells with tight bootstrap
+  CIs (commit `0310354`); the Round B campaign closed all 7 red-team
+  concerns at this scale. Re-evaluate only if a future round needs
+  finer per-Family/Genus resolution.
 
 ### Step 2 — statistics across layers and models
 
@@ -192,70 +194,65 @@ Concern numbering tracks the review.
 
 ### Compute (run on `sentient` 129.213.131.108 once GPU is free)
 
-- [ ] **§4.8 INLP probe** — `step6_inlp_class_order.py` (committed). Trains
-  Class probe (Aves vs Mammalia), iteratively nulls its row-space, then
-  trains Order probe (Passeriformes vs other-Aves) on Class-nullspace
-  activations. Survival ratio ≈ 1.0 = factored; ≈ 0.0 = entangled.
-  Default layers L5/L7/L9/L12 across all 5 models. ~hours on the A10.
-  Resolves reviewer concerns (1) "geometry-as-semantics" and (6)
-  "Veitch test indistinguishable from random orthogonality."
-- [ ] **Manifest-resampling sensitivity** (concern (4)). Redraw the
-  600-sample manifest at 5 different seeds (keep the 100-per-source
-  stratification), re-extract activations for the trained models,
-  re-run §4.7 / §4.8 / §4.9 numbers. Report across-manifest spread
-  alongside within-manifest bootstrap CIs. Reviewer's prediction: the
-  across-manifest spread for §4.8 L12 cos is several × the [0.004, 0.110]
-  CI shown — confirm or refute.
+- [x] **§4.8 INLP probe** (commits `2a79e5a` initial, `c3cd168`
+  frame-level leakage fix, `d45dc01` clip-level v2). Class-then-Order
+  INLP run across L5/L7/L9/L12 in `inlp_class_order/`; clip-level v2
+  results integrated into preprint_v2.md §8. Round B follow-ups —
+  step8 aggressive (`step8_inlp_aggressive.py`, `8e0e93c`) and step9
+  Order-first (`step9_inlp_order_first.py`, `8e0e93c`) — confirmed the
+  asymmetric INLP signature: Class survives Order-nullification, Order
+  does not survive Class-nullification.
+- [x] **Manifest-resampling sensitivity** (commit `a4005fe`,
+  `step7_manifest_resampling.py`). Across-seed spread reported in
+  `manifest_resampling/resampling_summary.csv` alongside
+  within-manifest CIs; results integrated into preprint_v1 and v2.
 
 ### Prose-only revisions (no compute) — preprint draft v1
 
-- [ ] **Concern (1) — soften semantic vocabulary.** Replace "develops [a
-  feature]" with "exhibits [a geometric property]" throughout §4.7,
-  §5.2, §5.4 unless INLP supports the stronger reading. Specific
-  flagged phrases: §5.2 "the model has thrown out everything except
-  its bio classifier," §5.4 "the bio classifier is installed at L12,"
-  §4.7 "strongest learned direction."
-- [ ] **Concern (1) — §4.5 threshold-vs-linear is a single point.**
-  Either run a mixing-ratio sweep (5%, 10%, 25%, 50%, 75%) on
-  `sl_eat_bio_ssl_all` L9 to actually distinguish linear / saturating /
-  threshold, or downgrade the §4.5 claim to "asymmetric response" with
-  one data point.
-- [ ] **Concern (2) — random-init is a "preserves input acoustics"
-  control, not a "no structure" control.** Flag in §2 and §5/§6 where
-  random-init eff_rank L12 ≈ trained `sl_eat_all_ssl_all` L12 (9.8 vs
-  11.2): the equality is misleading because they got there by opposite
-  routes. Optionally add one stronger control: shuffled-label SSL,
-  frequency-PCA init, or non-audio-pretrained EAT-base.
-- [ ] **Concern (3) — the SSL-axis is confounded with new-data-domain
-  exposure.** SSL is on the bio+non-bio union for both variants, which
-  means `sl_eat_bio_ssl_all` sees a *new* data domain at fine-tune
-  while `sl_eat_all_ssl_all` does not. Add an explicit paragraph in
-  §1 or §8 calling this out as a confound the n=4 design cannot
-  resolve.
-- [ ] **Concern (5) — reframe §3.** Currently framed as "pooling
-  distorts geometry." Soften to "frame-level and pooled views diverge
-  heterogeneously across (model, layer); we choose frame-level
-  because the geometric primitives in §2 are defined on the
-  unaggregated distribution." Drop the "distortion" / "pathology"
-  language.
-- [ ] **Concern (6) — fix the Veitch null-distribution comparison.**
-  In 768-d, expected |cos| of two independently-chosen unit vectors
-  is √(2/(πd)) ≈ 0.029. The §4.8 headline 0.033 is at that floor;
-  random-init's 0.93 is the anomalously *aligned* number. Reframe:
-  "random-init produces aligned Class/Order displacements at cos ≈
-  0.94; trained models drift toward the random-orthogonality floor;
-  `sl_eat_bio_ssl_all` reaches it most cleanly." The "factored
-  hierarchy" framing is contingent on whether INLP supports it; if
-  not, fall back to the directional-signature framing.
+- [x] **Concern (1) — soften semantic vocabulary** (commits `fbcb372`
+  v1 §4.8/§10/abstract reframe, `de1b87c`/`b557173` v2). v2 uses
+  "exhibits a geometric property" and "asymmetric coupled hierarchy"
+  framing throughout; the §5.2 "thrown out everything except its bio
+  classifier" and §5.4 "bio classifier is installed at L12" phrases
+  are gone.
+- [x] **Concern (1) — §4.5 threshold-vs-linear is a single point**
+  (commits `9e907ac` step13 added, `d34185f` 11-α refined sweep).
+  `audio_mixing_refined/mixing_summary_by_alpha.csv`: at α=0.025
+  (2.5% non-bio audio), bio-axis projection has shifted 44% of full
+  range — sharp threshold near α=0, approximately linear thereafter.
+  Integrated into preprint_v2.md §4.5.
+- [x] **Concern (2) — random-init is a "preserves input acoustics"
+  control** (commit `a4005fe`). Flagged in preprint_v1 §2 and §5/§6;
+  v2 §10 Discussion further addresses the "got there by opposite
+  routes" framing. Stronger controls (shuffled-label SSL, frequency-PCA
+  init) deferred — not required by reviewer per v2 ship readiness.
+- [x] **Concern (3) — the SSL-axis is confounded with new-data-domain
+  exposure** (commit `a4005fe`). Confound called out in preprint_v1 §1
+  and §8; carried into v2 §10 Limitations (iv). The n=4 design
+  inability to resolve it is explicit.
+- [x] **Concern (5) — reframe §3** (commit `a4005fe`). v2 §3 now
+  reads "Frame-level and mean-pooled views diverge heterogeneously
+  across (model, layer)" — "distortion"/"pathology" language dropped.
+- [x] **Concern (6) — fix the Veitch null-distribution comparison**
+  (commits `fbcb372` v1 §4.8 reframe, `8e0e93c`
+  `step10_veitch_permutation_null.py`). Permutation-null results in
+  `veitch_perm_null/`. v2 §8 reframes as "asymmetric INLP signature"
+  rather than factored-hierarchy; random-init's anomalous alignment
+  vs trained-model drift toward orthogonality floor is the framing.
 
-### Framing decision (after INLP completes)
+### Framing decision (after INLP completes) — RESOLVED
 
-- [ ] If INLP-Order survives in `sl_eat_bio_ssl_all` and not in the
-  other trained models → keep factored-hierarchy framing; §4.8
-  becomes "geometric evidence triangulated by INLP-Order survival."
-- [ ] If INLP-Order does not survive → pivot to the directional-
-  signature framing (RESULTS.md §10 option 2), demote §4.8 to a
-  methodological note about random-init's anomalous alignment.
+INLP-Order destruction is real but partial (0.057–0.218 across 11
+retained cells; largest at `sl_eat_bio_ssl_all` L9). Symmetry-test
+showed Class survives Order-nullification, Order does not survive
+Class-nullification (step14 `multiclass_order_inlp`, commit `9e907ac`).
+
+- [x] Adopted: **asymmetric coupled hierarchy** framing (commit
+  `fbcb372` v1 reframe, integrated into preprint_v2.md §8). Neither
+  pure factored nor pure entangled — the linear component of Order is
+  encoded within the Class subspace, with non-linear residue
+  (MLP-probe 0.015–0.083 post-null). This is a *third* option beyond
+  the binary the original framing-decision posed.
 
 ## Out of scope for the current pilot
 
