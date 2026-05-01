@@ -689,7 +689,12 @@ def _xenocanto_fetch_urls(species: str, n: int) -> list[tuple[str, str, str]]:
         )
     results = []
     page = 1
-    query = species.replace(" ", "+")
+    # v3 requires tag syntax: gen:Pyrrhula sp:pyrrhula
+    parts = species.strip().split()
+    if len(parts) >= 2:
+        query = f"gen:{parts[0]}+sp:{parts[1]}"
+    else:
+        query = f"sp:{parts[0]}"
     while len(results) < n:
         try:
             resp = requests.get(
