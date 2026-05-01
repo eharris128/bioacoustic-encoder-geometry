@@ -588,7 +588,7 @@ def build_naturelm_dataset(
 # Xeno-canto direct downloader (no HuggingFace dependency)
 # ---------------------------------------------------------------------------
 
-XENOCANTO_API = "https://xeno-canto.org/api/2/recordings"
+XENOCANTO_API = "https://xeno-canto.org/api/3/recordings"
 XENOCANTO_CACHE = ".xenocanto_cache"
 
 
@@ -679,21 +679,29 @@ def build_xenocanto_dataset(
 
 
 def _xenocanto_fetch_urls(species: str, n: int) -> list[tuple[str, str, str]]:
-    """Query xeno-canto API and return list of (rec_id, download_url, filename)."""
-    import requests
+    """Query xeno-canto API v3 and return list of (rec_id, download_url, filename)."""
+    import os, requests
+    api_key = os.environ.get("XENOCANTO_API_KEY", "")
+    if not api_key:
+        raise EnvironmentError(
+            "Set XENOCANTO_API_KEY environment variable. "
+            "Get your key at https://xeno-canto.org/account"
+        )
     results = []
     page = 1
     query = species.replace(" ", "+")
     while len(results) < n:
         try:
             resp = requests.get(
-                f"{XENOCANTO_API}?query={query}&page={page}",
+                f"{XENOCANTO_API}?query={query}&page={page}&key={api_key}",
                 timeout=15,
                 headers={"User-Agent": "Mozilla/5.0"},
             )
             data = resp.json()
         except Exception:
             break
+        if "error" in data:
+            raise RuntimeError(f"xeno-canto API error: {data['message']}")
         for rec in data.get("recordings", []):
             rec_id = rec.get("id", "")
             url = rec.get("file", "")

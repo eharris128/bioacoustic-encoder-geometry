@@ -11,3 +11,6 @@ download_model.sh
 .researchctl/archive/
 .researchctl/workspaces/
 artifacts/runs/
+.env
+.xenocanto_cache/
+.naturelm_cache/
