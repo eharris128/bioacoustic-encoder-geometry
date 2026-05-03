@@ -50,6 +50,14 @@ Notably high embedding for a same-genus pair — crow calls are acoustically mor
 100 recordings each. Peak **99.0% at T8/T11**. Embedding: 67.0%.
 Near-ceiling performance. T0 already hits 92.5% — cross-family separation is established very early, with all transformer layers above 94%.
 
+### House Sparrow vs Common Swift *(different orders, Passeriformes vs Apodiformes)*
+100 recordings each. Peak **98.0% at T5/T6/T7**. Embedding: 69.5%.
+T0 already at 92% — separation is clear almost immediately. High and flat across all transformer layers.
+
+### Chaffinch vs Great Spotted Woodpecker *(different orders, Passeriformes vs Piciformes)*
+100 recordings each. Peak **97.0% at T9**. Embedding: 59.1%.
+Cross-order pair with lower embedding than expected (59%). Accuracy ramps from T0 (87.9%) to peak at T9 — slower build than other cross-order pairs.
+
 ---
 
 ## Cross-experiment pattern
@@ -64,6 +72,8 @@ Near-ceiling performance. T0 already hits 92.5% — cross-family separation is e
 | Goldfinch vs Eurasian Siskin | Cross-genus, same family | 92.5% | T5 | 65.5% |
 | Bullfinch vs Hawfinch | Cross-genus, same family | 95.0% | T2 | 61.0% |
 | European Robin vs Eurasian Blackbird | Different families | 99.0% | T8/T11 | 67.0% |
+| Chaffinch vs Great Spotted Woodpecker | Different orders | 97.0% | T9 | 59.1% |
+| House Sparrow vs Common Swift | Different orders | 98.0% | T5/T6/T7 | 69.5% |
 | Bullfinch vs Tawny Owl | Different orders | 99.0% | T3/T9 | 65.5% |
 
-**Accuracy broadly scales with taxonomic distance.** Same-genus pairs show embedding near-chance (~53–72%) with peak accuracy between T6–T11. Cross-family/order pairs hit 99% and establish separation as early as T0–T1. The subspecies result (Great Tit bokharensis) is an outlier likely due to sample bias. House Crow is an anomaly among same-genus pairs — crow calls may be inherently more distinctive than passerine congeners.
+**Accuracy broadly scales with taxonomic distance.** Same-genus pairs show embedding near-chance (~53–72%) with peak accuracy between T6–T11. Cross-family/order pairs hit 97–99% and establish separation as early as T0–T1. The subspecies result (Great Tit bokharensis) is an outlier likely due to sample bias. House Crow is an anomaly among same-genus pairs — crow calls may be inherently more distinctive than passerine congeners.
