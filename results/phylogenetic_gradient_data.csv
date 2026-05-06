@@ -1,0 +1,12 @@
+pair,mya,taxonomic_level,peak_accuracy,peak_layer,acc_emb,acc_T0,acc_T1,acc_T2,acc_T3,acc_T4,acc_T5,acc_T6,acc_T7,acc_T8,acc_T9,acc_T10,acc_T11
+great_tit_vs_great_tit_bokharensis,0.5,Subspecies,92.2,4,81.8,86.4,89.6,88.3,92.2,90.3,89.0,89.0,89.6,90.3,89.6,86.4,90.9
+common_chiffchaff_vs_iberian_chiffchaff,2.0,Same genus,91.5,12,62.5,72.0,82.0,84.5,82.0,82.5,84.5,83.5,83.0,86.5,89.0,86.5,91.5
+willow_warbler_vs_chiffchaff,2.0,Same genus,93.0,7,53.0,71.5,83.5,91.5,87.5,87.0,89.0,93.0,91.0,91.0,91.5,92.0,90.5
+house_sparrow_vs_tree_sparrow,4.4,Same genus,85.4,7,53.3,74.9,79.4,83.9,82.9,81.9,80.9,85.4,82.4,81.9,79.9,81.9,83.9
+goldfinch_vs_eurasian_siskin,6.0,Same family,92.5,6,65.5,78.0,88.0,92.0,91.0,89.0,92.5,92.0,89.5,90.5,92.0,90.5,85.0
+house_crow_vs_carrion_crow,10.0,Same genus,95.0,10,72.0,84.0,85.0,91.5,93.5,92.5,90.5,89.5,93.5,93.0,95.0,90.5,87.5
+bullfinch_vs_hawfinch,12.5,Same family,95.0,3,61.0,87.0,90.0,95.0,91.0,89.0,89.0,92.0,92.0,91.0,92.0,94.0,94.0
+european_robin_vs_eurasian_blackbird,17.0,Diff. families,99.0,9,67.0,92.5,98.0,96.0,97.0,94.5,95.5,96.5,98.0,99.0,97.5,97.5,99.0
+house_sparrow_vs_common_swift,65.0,Diff. orders,98.0,6,69.5,92.0,96.5,96.5,96.0,95.0,98.0,98.0,98.0,97.5,96.5,97.5,97.5
+bullfinch_vs_tawny_owl,65.0,Diff. orders,99.0,4,65.5,87.0,95.5,97.0,99.0,96.5,98.0,98.5,98.0,98.5,99.0,98.0,96.0
+chaffinch_vs_great_spotted_woodpecker,70.0,Diff. orders,97.0,10,59.1,87.9,91.9,95.5,96.0,96.5,94.9,93.9,94.9,95.5,97.0,96.5,95.5
