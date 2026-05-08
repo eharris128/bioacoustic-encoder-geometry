@@ -10,13 +10,13 @@ point estimates throughout — no bootstrap CIs yet.
 (manifest enrichment, per-Class/per-Order frame-level metrics, species
 barycenters, Veitch hierarchy test, late-layer collapse mechanism)
 after verifying that taxonomic labels were already in the parquet
-metadata (not blocked on teammate). Major new findings from this round:
+metadata. Major new findings from this round:
 
 - **§4.7 (new) — Aves vs Mammalia is the strongest learned direction.**
   `sl_eat_bio_ssl_all` L7 reaches cos = 0.379 — beats the §4 bio-vs-
   non-bio L9 cos of 0.580. The Class-level direction is what bio fine-
-  tuning learns most strongly. Geometric peak (L7) ≈ teammate's probe
-  peak (L5). Order within Aves is much weaker (cos floor 0.73).
+  tuning learns most strongly. Geometric peak (L7) ≈ linear-probe peak
+  at L5. Order within Aves is much weaker (cos floor 0.73).
 - **§4.8 (new) — `sl_eat_bio_ssl_all` factors Class and Order
   orthogonally at the output (Veitch).** L12 cos((Aves−Mammalia),
   (Passer−Aves)) = 0.074 — essentially perpendicular. None of the
@@ -400,7 +400,7 @@ shows a much weaker effect: best is `sl_eat_bio_ssl_all` L9 cos =
 Source: `taxonomic_frame_level/{taxonomic_pairwise.csv,
 class_aves_vs_mammalia_cos.png, order_passer_vs_other_aves_cos.png}`.
 
-**Why it matters.** The teammate's linear probes peak at L5 for Class
+**Why it matters.** Linear probes peak at L5 for Class
 (82.5% accuracy) and L9 for Order (70.3%). Our geometric peaks land at
 L7 for Class and L9 for Order. **Probes and centroid geometry agree on
 which layer encodes which distinction**, even though the metrics are
@@ -409,8 +409,8 @@ hierarchy is at the layer where probes find it.
 
 **Caveats.** Per-Order resolution is coarse — Passeriformes dominates
 (207/271 Aves), other-Aves is a 17-Order grab bag of ≤11 samples each.
-A finer per-Order test would need denser per-Order sampling (TODO.md
-Step 1 scale-up).
+A finer per-Order test would need denser per-Order sampling (Step 1
+scale-up).
 
 ---
 
@@ -512,7 +512,7 @@ is **specifically** about bio-vs-non-bio (a binary distinction) and
 §4.7 about Aves-vs-Mammalia (a coarse Class distinction). At the
 species level, training compresses rather than expands the geometry.
 
-This reconciles the apparent tension with the teammate's probe results
+This reconciles the apparent tension with the linear-probe results
 showing 70.3% Order accuracy at L9: **linear decodability** (a
 classifier finding a hyperplane) and **centroid-distance separability**
 (a geometric ratio) are different quantities. Probes can extract
@@ -1177,7 +1177,7 @@ Closed by the 2026-04-27 (later) taxonomic chain:
   species detail to learn coarser abstractions. See new §4.9.
 - ~~Manifest enrichment for Class/Order/Species.~~ Done in
   `enrich_manifest_taxonomy.py`; labels were already in parquet
-  metadata, no teammate coordination needed.
+  metadata.
 - ~~Per-Class / per-Order frame-level structure.~~ See new §4.7.
 
 Closed by the 2026-04-28 autonomous chain (Phase 3-5):
@@ -1214,8 +1214,7 @@ Still open:
   direction; but within-bio cos = 0.45-0.63 (not 1.0) means the model
   also discriminates among bio sources within the bio cluster.
 
-Closed by the 2026-04-28 (later) red-team round (Opus 4.7 reviewer
-feedback in `publication_path/`):
+Closed by the 2026-04-28 (later) red-team round:
 
 - ~~**§4.7 corroborated by linear probe.**~~ Closed by §4.11
   (`inlp_class_order/inlp_summary.csv`). `sl_eat_bio_ssl_all` reads
@@ -1233,8 +1232,7 @@ Reopened by the 2026-04-28 (later) red-team round:
   hierarchy" to "drift toward random-orthogonality floor that random-
   init does not exhibit"; the directional claim survives, the
   factored-hierarchy claim does not without §4.11-style probe
-  triangulation specifically on Class⊥Order. See
-  `publication_path/inlp_writeup.md` for follow-up INLP variants.
+  triangulation specifically on Class⊥Order.
 - **§5.2 over-reads "thrown out everything except bio."** Per §4.11,
   L12 of `sl_eat_all_ssl_all` retains 0.842 Order probe accuracy —
   Order-discriminative info survives in low-eigenvalue directions the
@@ -1248,8 +1246,7 @@ Still open after this round:
 - **Across-manifest spread for §4.7–§4.9 numbers.** Bootstraps see
   sample-selection noise but not manifest-construction noise. Reviewer
   predicts the across-manifest spread for §4.8's L12 cos is several ×
-  the [0.004, 0.110] CI shown. Manifest-resampling experiment queued
-  in TODO.md.
+  the [0.004, 0.110] CI shown.
 - **§4.5 threshold-vs-linear is a single point.** "78% of the way at
   25% mix" is consistent with linear / saturating / threshold-like;
   needs a mixing-ratio sweep to distinguish.

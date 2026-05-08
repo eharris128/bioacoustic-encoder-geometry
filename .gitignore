@@ -2,14 +2,8 @@ venv/
 models/
 __pycache__/
 *.pyc
-aves/
-# audio/ — un-gitignored to share with team
-cluster_output/bullfinch/
-cluster_output/guineafowl/
-download_model.sh
-.researchctl/staging/
-.researchctl/archive/
-.researchctl/workspaces/
+*.log
+.DS_Store
 artifacts/runs/
 artifacts/roadmap_part1*/
 artifacts/manifests_smoke/

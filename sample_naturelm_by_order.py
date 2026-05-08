@@ -7,7 +7,7 @@ fields (class / order), and emits a frozen JSONL manifest compatible
 with `collect_esp_aves2_activations.py` and the downstream taxonomic
 analysis scripts.
 
-Default targets (matches the teammate's bird-Order probe panel):
+Default targets (matches the bird-Order probe panel):
   Aves / Passeriformes      n=100
   Aves / Charadriiformes    n=100
   Aves / Piciformes         n=100

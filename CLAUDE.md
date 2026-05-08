@@ -12,12 +12,10 @@ random-init EAT baseline (architecture only, no learned weights) that anchors
 absolute magnitudes.
 
 The project pivoted from an earlier exploratory phase on the legacy AVES
-torchaudio model + Bullfinch recordings; that phase is **out of scope**. See
-`memory/MEMORY.md` and the project memory at
-`~/.claude-heron/projects/-home-evan-projects-sentient-futures/memory/`.
+torchaudio model + Bullfinch recordings; that phase is **out of scope**.
 
 Read `RESULTS.md` for the running narrative (CLAIM / RETRACTED / OPEN
-sections) and `TODO.md` for what's next.
+sections).
 
 ## Models in scope
 
@@ -158,17 +156,13 @@ Retracted: the L4 TwoNN dip (estimator artifact) and the "pooled L0 ≈ 3
 across all four models = shared tokenizer" story (pooling artifact). See
 `RESULTS.md` §7–§8.
 
-## Scope and ownership
+## Scope
 
-- **In scope (us):** Step 1 + Step 2 + Step 3a (audio mixing) + Step 3b
-  (species barycenters) + Step 3c (Veitch hierarchy test). Plus per-Class
-  and per-Order taxonomic resolution at frame level (the geometric
-  complement to the teammate's probes). See `TODO.md`.
-- **Owned by teammate:** linear probes, attribution, noise dynamics. Do not
-  duplicate. Coordinate on manifest enrichment with Class/Order/Species
-  labels (the teammate already has them via probe training).
-- **Out of scope:** Section 3 (SAEs, dictionary learning), legacy AVES
-  exploration, cross-species call-type transfer, RSA with CRCNS zebra-finch.
+- **In scope:** Step 1 (extraction) + Step 2 (geometry) + Step 3a (audio
+  mixing) + Step 3b (species barycenters) + Step 3c (Veitch hierarchy
+  test). Plus per-Class and per-Order taxonomic resolution at frame level.
+- **Out of scope:** SAEs / dictionary learning, legacy AVES exploration,
+  cross-species call-type transfer, RSA with CRCNS zebra-finch.
 
 ## Conventions
 

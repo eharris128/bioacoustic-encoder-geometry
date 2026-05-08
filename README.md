@@ -1,189 +1,125 @@
-# Sentient Futures — AVES Interpretability
+# Sentient Futures — Geometry of ESP-AVES2 EAT audio encoders
 
-Exploratory interpretability research on [AVES/BirdAVES](https://github.com/earthspecies/aves), a HuBERT-based self-supervised transformer for animal vocalizations (Earth Species Project).
+Geometric interpretability of the **ESP-AVES2 EAT-family** of audio encoders
+released by [Earth Species Project](https://www.earthspecies.org/). We
+collect residual-stream activations from four EAT checkpoints over a frozen
+slice of `EarthSpeciesProject/NatureLM-audio-training` and study how the
+geometry of those activations is shaped by training. A random-init EAT
+baseline (architecture only, no learned weights) anchors absolute
+magnitudes.
 
-## Reference materials
+See [`RESULTS.md`](RESULTS.md) for the running narrative (CLAIM / RETRACTED
+/ OPEN sections).
 
-- Roadmap PDF: [references/roadmaps/aves2_interp_roadmap.pdf](references/roadmaps/aves2_interp_roadmap.pdf)
-- Raphael result screenshot 1: [references/raphael_results/raphael_result_2026-04-11_142344.png](references/raphael_results/raphael_result_2026-04-11_142344.png)
-- Raphael result screenshot 2: [references/raphael_results/raphael_result_2026-04-11_142359.png](references/raphael_results/raphael_result_2026-04-11_142359.png)
-- Raphael result screenshot 3: [references/raphael_results/raphael_result_2026-04-11_142425.png](references/raphael_results/raphael_result_2026-04-11_142425.png)
-- Raphael result screenshot 4: [references/raphael_results/raphael_result_2026-04-11_142434.png](references/raphael_results/raphael_result_2026-04-11_142434.png)
+## Models
 
-## Roadmap Part 1 Pilot
+| key                       | description                                    |
+|---------------------------|------------------------------------------------|
+| `eat_all`                 | EAT pretrained on bio + non-bio audio          |
+| `eat_bio`                 | EAT pretrained on bio-only audio               |
+| `sl_eat_all_ssl_all`      | `eat_all` + SSL fine-tune on bio + non-bio     |
+| `sl_eat_bio_ssl_all`      | `eat_bio` + SSL fine-tune on bio + non-bio     |
+| `random_init_eat_seed42`  | EAT-base architecture, random reinit at seed 42|
 
-The current pilot for roadmap part 1 uses the four ESP AVES2 EAT model repos against
-`EarthSpeciesProject/NatureLM-audio-training`, stratified by `source_dataset`.
-
-- Manifest builder: `sample_naturelm_by_source.py`
-- Activation extractor: `collect_esp_aves2_activations.py`
-- Frozen `100/source_dataset` pilot manifest: `artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl`
-- Raw activation shards live under `artifacts/roadmap_part1/<manifest_id>/<model>/` and should stay out of git.
-
-Current extraction flow:
-
-```bash
-# Build a frozen manifest by source_dataset
-python sample_naturelm_by_source.py --samples_per_source 100
-
-# Collect residual-stream activations for the two working supervised EAT checkpoints
-python collect_esp_aves2_activations.py \
-  --manifest artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl \
-  --models sl_eat_all_ssl_all,sl_eat_bio_ssl_all
-```
-
-Notes:
-- Each extracted sample produces a `(13, 513, 768)` tensor: embedding state plus post-layer outputs for transformer blocks `0..11`.
-- The manifest stores exact global row indices so extraction can fetch audio through the Hugging Face dataset viewer backend without rescanning the full dataset.
-- The roadmap scripts require network access to Hugging Face for Parquet metadata, checkpoint downloads, and presigned audio asset fetches.
-- As of 2026-04-18, `esp-aves2-eat-all` and `esp-aves2-eat-bio` on Hugging Face expose placeholder safetensors files with zero tensors, so the extractor fails fast on those two until upstream weights are fixed.
-
-## What we've done so far
-
-### 1. Layer representation analysis (`explore_layers.py`)
-
-Extracted frame-level embeddings from all 12 transformer layers for two species (Helmeted Guineafowl, Eurasian Bullfinch), projected to 2D with PCA.
-
-**Finding:** Early layers encode shared acoustic features (species overlap). By mid-layers, species separate cleanly. Late layers show sub-clusters within each species — likely distinct vocalization/syllable types.
-
-![Layer exploration](layer_exploration.png)
-
-### 2. Attention head analysis (`explore_attention.py`)
-
-Hooked into Q/K projections across all 144 attention heads (12 layers x 12 heads) to extract and visualize attention weight matrices.
-
-**Findings:**
-- **Early layers** use local attention (±100ms) — acoustic/spectral processing
-- **Late layers** shift to global attention — frames reach across the full sequence
-- **Functional specialization** within layers: some heads stay local (pitch/rhythm tracking) while others go global (structural matching), even at the same depth
-- **Vertical stripe patterns** in late layers indicate "anchor frames" — acoustically salient moments that all frames attend to
-
-![Attention across layers](attention_across_layers.png)
-![Attention specialization](attention_specialization.png)
-
-### 3. Cluster analysis (`explore_clusters.py`)
-
-Clustered late-layer (layer 11) frame embeddings with k-means and mapped cluster labels back onto spectrograms. Exported audio clips per cluster for listening.
-
-**Finding:** Clusters align with spectrogram structure — distinct vocalization types, silence, and call sub-phases. Comparing similar clusters (e.g., Guineafowl C1 vs C2, cosine similarity 0.86) revealed the model splits on subtle spectral differences below human perceptual thresholds.
-
-### 4. Species linear probe (`probe_species.py`)
-
-Trained logistic regression probes per layer to classify Bullfinch vs Hawfinch using 9 recordings from [xeno-canto](https://xeno-canto.org). Leave-one-recording-out cross-validation.
-
-**Finding:** Species is linearly separable from layer 0 (90%), peaks at layer 1 (94%), then **dips** in mid-layers (5-6, ~84%) before recovering at layer 11 (91% with lowest variance). The mid-layer dip suggests a representational bottleneck where the model discards raw spectral cues and reorganizes toward abstract features.
-
-![Species probe](probe_species.png)
-
-### 5. Within-species structure (`explore_individuals.py`)
-
-PCA + silhouette analysis on 28 Bullfinch recordings from xeno-canto across all 12 layers. Tests whether the model preserves or erases recording identity.
-
-**Finding:** The model **progressively erases recording identity** across layers. Silhouette score drops monotonically from 0.020 (layer 0) to negative values (layers 8-10), meaning late-layer representations organize by vocalization type rather than recording source. The model learns what's invariant across recordings (the species' vocal repertoire) rather than what's specific to each (noise, mic, individual).
-
-![Individual silhouette](individuals_silhouette.png)
-
-### 6. CKA layer similarity (`explore_cka.py`)
-
-Computed linear CKA (Centered Kernel Alignment) between all pairs of transformer layers, plus CKA against mel spectrogram input.
-
-**Findings:**
-- **Two processing regimes:** Layers 0-6 form one block (high mutual CKA), layers 7-11 form another. Confirms the phase transition seen in all prior analyses.
-- **Late layers do the heavy lifting:** Adjacent CKA drops most sharply at layers 9→10→11, meaning the final layers make the largest single-step transformations.
-- **All transformer layers have diverged from raw acoustics:** CKA with mel spectrogram is ~0.01 across all layers — the CNN feature extractor (pre-transformer) has already transformed the signal dramatically. The acoustic→abstract transition begins before layer 0.
-
-![CKA analysis](cka_analysis.png)
-
-### 7. Full pipeline: CNN feature extractor (`explore_cnn_layers.py`)
-
-Hooked into all 7 CNN convolutional layers to trace the full pipeline from raw audio through to the transformer.
-
-**Findings:**
-- **CNN layers do the heavy lifting:** Adjacent CKA between CNN layers is 0.10-0.23 (massive transformation per step), vs 0.97-0.99 for transformer layers. Each CNN layer transforms the signal more than all 12 transformer layers combined.
-- **CNN builds toward spectrogram-like features:** CKA with mel spectrogram peaks at CNN layer 6 (0.017), not layer 0. The CNN is constructing spectral representations, not destroying them.
-- **The real processing divide is CNN vs transformer**, not early vs late transformer layers.
-
-![CNN pipeline](cnn_pipeline.png)
-
-### 8. Temporal context probing (`explore_temporal.py`)
-
-Tests whether later layers encode more temporal context (can predict future frames) than early layers. For each layer, trains a linear probe to predict the cluster identity of frame t+k from the embedding at frame t, across offsets of 20ms to 1000ms.
-
-**Finding:** All layers predict the future **equally well** — layer 0 and layer 11 are nearly identical (83% at t+1, ~47% at t+50). The temporal context advantage over shuffled controls is +40pp at short offsets, fading to +8pp at 1 second. This means temporal prediction comes from the **CNN feature extractor's receptive field**, not the transformer. The transformer refines *what kind* of sound it is, not *what comes next*.
-
-![Temporal context](temporal_context.png)
-
-### 9. AVES vs HuBERT comparison (`compare_hubert.py`)
-
-Same architecture (HuBERT-base, 12 layers, 768-dim), same Bullfinch audio input, different training data: AVES trained on animal sounds, HuBERT trained on human speech. Tests whether the layer hierarchy is architecture-driven or data-driven.
-
-**Findings:**
-- **Recording identity erasure:** Both erase across layers (architecture), but AVES retains more recording-specific info early on — animal sounds have more individual variation that matters.
-- **Transformation magnitude:** HuBERT makes bigger jumps at layers 0→1 and 2→3 (CKA drops to 0.955); AVES stays above 0.97 throughout. HuBERT is more aggressive in early transformations.
-- **Acoustic grounding:** AVES maintains higher similarity to mel spectrograms in early layers — it preserves spectral detail longer, consistent with the greater spectral diversity of animal vocalizations.
-- **Attention locality:** The biggest difference. AVES shows a jagged, oscillating local/global pattern; HuBERT is smoother and more structured. The models have learned **fundamentally different attention strategies** from their training data.
-
-**Conclusion:** The broad processing hierarchy is architecture-driven (shared by both models). But attention strategies, transformation profiles, and acoustic grounding are shaped by training data — AVES has genuinely adapted to animal vocalizations.
-
-![AVES vs HuBERT](compare_hubert.png)
-
-### 10. Acoustic feature probing (`explore_acoustic_probes.py`)
-
-Probes each layer for measurable acoustic properties (energy, spectral centroid, bandwidth, zero-crossing rate, spectral flatness, HF energy ratio) using ridge regression. Also profiles the layer-11 clusters by their acoustic characteristics.
-
-**Findings:**
-- **Acoustic features are only linearly decodable at layers 0-1**, and only for spectral bandwidth (R²=0.14) and HF energy ratio (R²=0.33). By layer 2, all features drop to R²≈0. The transformer immediately discards raw acoustic information from its linearly-accessible representation.
-- **But late-layer clusters are acoustically meaningful.** Clusters 2 and 3 have high zero-crossing rate, high spectral centroid (~3-4kHz), and high spectral flatness — noisy/broadband sounds. Clusters 0, 5, 7 have low centroid, low ZCR — tonal/low-frequency sounds. Energy is similar across all clusters.
-- **The model encodes sound type nonlinearly.** It organizes vocalizations into acoustically distinct categories, but the encoding is not linearly aligned with any single acoustic feature. It's built an abstract, distributed representation of "what kind of sound this is."
-
-![Acoustic probes](acoustic_probes.png)
-![Cluster profiles](cluster_acoustic_profiles.png)
+All five expose 13 layers (`model.pos_drop` + 12 transformer blocks) at
+hidden dim 768. Two extra random-init seeds (7 and 13) are extracted to
+validate init variability; only their per-seed CSVs persist on disk.
 
 ## Setup
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-
-# CPU-only PyTorch (use the default pip install torch for GPU)
-pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-pip install esp-aves torchcodec matplotlib scikit-learn
-pip install duckdb transformers safetensors timm requests
-
-# Clone AVES repo for configs and example audio
-git clone https://github.com/earthspecies/aves.git
-
-# Download model checkpoint (360MB)
-mkdir -p models
-curl -L -o models/aves-base-all.torchaudio.pt \
-  https://storage.googleapis.com/esp-public-files/ported_aves/aves-base-all.torchaudio.pt
+pip install torch torchaudio transformers huggingface_hub safetensors \
+            pyarrow matplotlib scikit-learn scipy timm
 ```
 
-## Usage
+The EAT base architecture is fetched on first use via
+`AutoModel.from_pretrained("worstchan/EAT-base_epoch30_pretrain", trust_remote_code=True)`.
+Per-checkpoint safetensors pull from `EarthSpeciesProject/esp-aves2-*`.
+Audio comes from `EarthSpeciesProject/NatureLM-audio-training` parquet
+shards via `hf_hub_download` (cached under `~/.cache/huggingface/hub/`,
+~14 GB). Network access to Hugging Face is required for any extraction.
+
+## Pipeline
+
+### Step 1 — extraction
 
 ```bash
-# Basic inference — extract embeddings from example audio
-python run_aves.py
-
-# Layer representation exploration (PCA across layers x species)
-python explore_layers.py
-
-# Attention head analysis (hooks into Q/K projections)
-python explore_attention.py
-
-# Cluster analysis (spectrogram overlay + audio export)
-python explore_clusters.py
-
-# Species linear probe (Bullfinch vs Hawfinch, leave-one-recording-out CV)
-python probe_species.py
-
-# Within-species structure (28 Bullfinch recordings, PCA + silhouette)
-python explore_individuals.py
+python collect_esp_aves2_activations.py \
+  --manifest artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl \
+  --models eat_all,eat_bio,sl_eat_all_ssl_all,sl_eat_bio_ssl_all
 ```
 
-## Model details
+Hooks the 13 layers, forwards each manifest item, and writes shards
+(`(B, 13, 513, 768)` in float16, ~25 samples per shard) to
+`artifacts/roadmap_part1/<manifest>/<model>/shards/`. Resumable. The
+`--random-init-seed N` path loads EAT-base, then walks `init_weights` +
+`reset_parameters` + a `normal(0, 0.02)` fallback for the 2/150 parameters
+those paths miss.
 
-- **Model:** AVES-base-all (95M params, 12 layers, 12 heads, 768-dim)
-- **Input:** Raw audio at 16kHz mono
-- **Output:** Frame-level embeddings at ~50fps (one 768-dim vector per 20ms)
-- **Architecture:** HuBERT (7-layer CNN feature extractor → 12-layer transformer encoder)
+### Step 2 — geometry analysis
+
+Each script reads from shards and writes to
+`artifacts/comparisons/<manifest>/nway_eat_all4/<subdir>/`:
+
+| script                              | purpose                                     |
+|-------------------------------------|---------------------------------------------|
+| `nway_compare_eat_models.py`        | Pooled embeddings + cross-model CKA        |
+| `step2_spectral_dim_eat.py`         | Singular values, `eff_rank`, PR, TwoNN per (model, layer) |
+| `step2_subspace_angles_eat.py`      | L2-norm histograms + top-10 subspace overlap (across-layer / across-model / bio-vs-non-bio) |
+| `step2_pooled_vs_frame_eat.py`      | Pooled-vs-frame distortion check on `sl_eat_bio_ssl_all` |
+| `step2_tier1_frame_level.py`        | Frame-level `eff_rank` / PR / TwoNN / MLE-ID across all four trained models |
+| `step2_random_init_compare.py`      | 5-way comparison: trained vs random-init   |
+| `step2_random_init_variability.py`  | Init variability across seeds 7 / 13 / 42  |
+| `step2_taxonomic_frame_level.py`    | Per-Class and per-Order frame-level metrics |
+| `step3a_audio_mixing_pilot.py`      | Mixing-ratio sweep on bio axis             |
+| `step3b_species_barycenters.py`     | Within-class species barycenters           |
+| `step3c_veitch_hierarchy.py`        | Veitch orthogonality test for Class / Order|
+
+Frame-level analyses subsample 50 frames per item uniformly from the
+valid-token range with seed 42 (600 × 50 = 30,000 rows per (model, layer));
+TwoNN and MLE-ID further subsample to 10,000 rows.
+
+## Geometry primitives
+
+Defined in `step2_tier1_frame_level.py` and imported elsewhere:
+
+- **Effective rank** = `exp(-Σ p_i log p_i)` over normalized eigenvalues of the centered covariance.
+- **Participation ratio** = `(Σλ)² / Σλ²`.
+- **Intrinsic dimension** — TwoNN (k=2) and MLE-ID (k=20). MLE-ID is the preferred estimator; TwoNN has a known L4 failure mode (see `RESULTS.md` §7).
+- **Subspace overlap** — `mean(cos(principal_angles))` between top-k=10 PCA bases via `scipy.linalg.subspace_angles`. 1.0 = identical, 0.0 = orthogonal.
+
+## Pooling convention
+
+Pooled comparisons take the mean over `tokens[1:valid_token_count]`,
+**skipping token 0** (EAT's CLS-like token). See
+`compare_esp_aves2_models.pooled_layer_vectors`. Frame-level analyses
+include token 0.
+
+## Data
+
+- `artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl` — frozen 600-sample manifest (100 × 7 source datasets), tracked.
+- `artifacts/roadmap_part1/<manifest>/<model>/shards/` — per-model activation shards (~5.8 GB / model, gitignored).
+- `artifacts/comparisons/<manifest>/nway_eat_all4/...` — committed CSVs and plots.
+
+## Headline findings
+
+1. **Pooling distorts geometry.** Frame-level `eff_rank` > pooled `eff_rank` everywhere; the ratio varies ×2–×15 across (model, layer).
+2. **Bio fine-tuning produces a learned directional separation.** `sl_eat_bio_ssl_all` drops bio-vs-non-bio top-10 cos to 0.57 at L9 vs a random-init baseline of 0.91 at the same layer.
+3. **Late-layer collapse splits the family by `_bio` vs not.** `sl_eat_all_ssl_all` L12 `eff_rank` (11.2) is essentially identical to the random-init baseline (9.8); the bio fine-tunes retain 180+ at L12.
+4. **Architecture sets manifold dim, training expands the linear envelope.** Random-init MLE-ID = 11–15; trained MLE-ID = 7–14. Training does not widen the manifold — it expands the `eff_rank` / MLE-ID *ratio* from ~1 (random) to 17–43 (trained).
+5. **Init variability is tight.** Seeds 7 / 13 / 42 random-init `eff_rank` spreads ≤ 1.3 across all layers vs trained-vs-random gaps of ~200–350.
+
+See `RESULTS.md` for the full claim list with retractions.
+
+## Conventions
+
+- Random seed: 42 throughout for data subsampling and random-init.
+- Plots: 150 dpi, `bbox_inches="tight"`, PNG.
+- Suppress sklearn convergence warnings with `python -W ignore <script>.py`.
+- New metric primitives go in `step2_tier1_frame_level.py` and are imported elsewhere — do not duplicate across scripts.
+
+## Reference
+
+- Roadmap PDF: [`references/roadmaps/aves2_interp_roadmap.pdf`](references/roadmaps/aves2_interp_roadmap.pdf)

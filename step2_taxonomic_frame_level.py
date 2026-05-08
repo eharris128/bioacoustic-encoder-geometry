@@ -10,7 +10,7 @@ across the 17 minority orders) — at this manifest scale the individual
 non-Passeriformes orders are too thin (<=11 samples each) for separate
 analysis.
 
-Geometric complement to the teammate's probes: probes peak Class at L5
+Geometric complement to linear probes: probes peak Class at L5
 (Aves vs Amphibia vs Mammalia) and Order at L9 (4 bird orders) — does
 the directional separation between our coarser groupings peak at the
 same layers?

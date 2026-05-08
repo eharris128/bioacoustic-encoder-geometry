@@ -27,10 +27,10 @@ import pyarrow.dataset as ds
 MANIFEST_ID = "naturelm_by_source_100each_20260418T171459Z"
 DEFAULT_MANIFEST = Path(f"artifacts/manifests/{MANIFEST_ID}.jsonl")
 DEFAULT_OUTPUT = Path(f"artifacts/manifests/{MANIFEST_ID}_taxonomic.jsonl")
-DEFAULT_PARQUET_GLOB = (
-    "/home/evan/.cache/huggingface/hub/"
-    "datasets--EarthSpeciesProject--NatureLM-audio-training/"
-    "snapshots/*/train/part0/shard_*.parquet"
+DEFAULT_PARQUET_GLOB = str(
+    Path.home() / ".cache" / "huggingface" / "hub" /
+    "datasets--EarthSpeciesProject--NatureLM-audio-training" /
+    "snapshots" / "*" / "train" / "part0" / "shard_*.parquet"
 )
 
 TAXONOMIC_FIELDS = (

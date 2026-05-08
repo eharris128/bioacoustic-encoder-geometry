@@ -1,6 +1,6 @@
 """Step 2 Tier 1: frame-level geometry across all four EAT-family models.
 
-Combines three follow-ups from TODO.md into one script so we only load each
+Combines three follow-ups into one script so we only load each
 model's shards once:
 
 1. **Generalize pooled-vs-frame.** Recompute effective rank, participation
