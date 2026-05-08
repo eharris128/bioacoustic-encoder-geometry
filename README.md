@@ -119,7 +119,3 @@ See `RESULTS.md` for the full claim list with retractions.
 - Plots: 150 dpi, `bbox_inches="tight"`, PNG.
 - Suppress sklearn convergence warnings with `python -W ignore <script>.py`.
 - New metric primitives go in `step2_tier1_frame_level.py` and are imported elsewhere — do not duplicate across scripts.
-
-## Reference
-
-- Roadmap PDF: [`references/roadmaps/aves2_interp_roadmap.pdf`](references/roadmaps/aves2_interp_roadmap.pdf)
