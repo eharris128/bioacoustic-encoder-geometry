@@ -1,201 +1,175 @@
 # Project 2 — Next Steps: Interpretability for Interspecies Communication
 
----
-
-## Probe Training Phase
-
-### Context
-
-The mentor has already established class-level (Aves / Amphibia / Mammalia) and
-order-level (Passeriformes / Charadriiformes / Piciformes / Strigiformes) probes.
-This phase covers the separations not yet handled:
-
-| Experiment | File | What it tests |
-|---|---|---|
-| Animals vs Music | `experiments/animals_vs_music.py` | Does AVES linearly separate biological vocalizations from structured non-biological audio (violin)? |
-| Music vs Speech | `experiments/music_vs_speech.py` | Does AVES distinguish musical instruments from human speech despite being trained on animals? |
-| Species pairs | `experiments/species.py` | At which layer does fine-grained species identity become linearly decodable? |
-| Species vs Species (custom) | `experiments/species_vs_species.py` | Generic binary probe for any two species — populated once sample sizes are verified and pairs confirmed with mentor. |
+Last updated: 2026-05-08
 
 ---
 
-### Scaffolded files and their roles
+## Current Status
 
-**`data/loader.py`**
-Central data pipeline. All experiment configs pass their `RECORDINGS` dict here.
-Handles model loading, audio loading (WAV + MP3), forward passes, frame
-subsampling (seed 42, max 3000 frames per recording), and assembles the
-`{ layer: (X, y) }` dataset consumed by the probe trainer.
-
-**`probes/train.py`**
-Trains one logistic regression probe per layer using leave-one-recording-out
-(LORO) cross-validation. Applies StandardScaler → PCA(50 dims) → LogisticRegression
-per fold. Returns `{ layer: mean_loro_accuracy }`.
-
-*How `loro_cross_validate` works:*
-
-`build_dataset` stacks all recordings into one contiguous array in order.
-`loro_cross_validate` tracks where each recording starts via cumulative frame
-offsets, then iterates over folds — each fold holds out one recording's frames,
-trains the full pipeline (scaler → PCA → LR) on the rest, and applies the fitted
-transforms to the held-out frames (`.transform`, never `.fit_transform` on test
-data). Fold accuracies are averaged per layer to produce the final profile.
-
-LORO is used instead of a random split because each recording carries recording-level
-structure (noise floor, individual timbre, microphone) that a random split would leak
-into training, artificially inflating accuracy. LORO ensures the probe only ever
-evaluates on recordings it has never seen.
-
-*How to analyze effectiveness:*
-
-- **Layer accuracy profile** — plot `accuracy_per_layer` (layer on x, accuracy on y).
-  A non-monotone profile (peak early, dip mid-network, partial recovery late) is the
-  interesting signal — it means layers serve different functional roles. A flat profile
-  means the probe can't detect differences across depth. A monotone rise means the
-  feature is built up progressively.
-- **Compare to chance** — chance = `1 / n_classes` (50% for binary probes). Layers
-  barely above chance are not linearly encoding the probed feature.
-- **Fold variance** — high variance across folds indicates outlier recordings (class
-  imbalance, corrupted audio, or the probe overfitting to one recording's artifacts).
-  Low variance = the probe generalizes stably across individuals.
-- **PCA variance explained** — inspect `pca.explained_variance_ratio_.sum()` on a
-  representative fold. If < 60%, consider raising `pca_components`; if > 95%, you can
-  reduce components to speed up training without accuracy loss.
-- **Ablate PCA** — run once with raw 768-dim input to confirm PCA compression isn't
-  discarding discriminative directions. A significant accuracy drop means the relevant
-  structure is spread across more than 50 dimensions.
-
-*How `train_all_layers` works:*
-
-`train_all_layers` is the single entry point that experiment scripts call. It does
-three things:
-
-1. **Infer class count and chance level** — reads the label array from any layer
-   (`np.unique(y)`), counts distinct classes, and computes `chance = 1 / n_classes`.
-   This is done once here so callers don't have to pass it in, and so it's always
-   consistent with the actual data rather than a hardcoded assumption.
-
-2. **Delegate to `loro_cross_validate`** — passes through all arguments unchanged.
-   The separation exists so `loro_cross_validate` can be called independently (e.g.
-   for a single experiment sweep without the metadata wrapper).
-
-3. **Print a per-layer accuracy table** — immediately after LORO finishes, prints
-   each layer's accuracy and its delta over chance so you can inspect results without
-   waiting for plots. Format: `embedding | layer N | accuracy% | +delta%`.
-
-Returns a dict with four keys:
-- `accuracy_per_layer` — `{ layer_int: float }`, the main result consumed by `evaluate.py`
-- `chance_level` — `1 / n_classes`, used by `evaluate.py` to draw the reference line on plots
-- `n_classes` — sanity-check that the right number of classes were loaded
-- `n_recordings` — sanity-check on dataset size
-
-**`probes/evaluate.py`**
-Produces two outputs per experiment:
-1. Accuracy curve (`*_accuracy.png`) — per-layer LORO accuracy with chance-level reference
-2. LDA projection (`*_lda.png`) — 2D discriminant projection at layers 0, 3, 6, 9, 12
-
-All PNGs are written to `results/`. The single entry point is `run_evaluation`, which
-experiment scripts call after `train_all_layers`.
-
-*How `plot_accuracy_curve` works:*
-
-Takes `accuracy_per_layer` (the dict from `train_all_layers`) and plots a line chart
-with one point per layer. Layer 0 is labeled `emb` (CNN embedding); layers 1–12 are
-labeled `T0`–`T11` (transformer layers). A dashed gray line marks chance level. A gold
-dot marks the peak layer so it's immediately visible. Saved at 150 dpi.
-
-*How `plot_lda_projection` works:*
-
-For each layer in `layers_to_plot`, fits a `LinearDiscriminantAnalysis` on the full
-dataset for that layer (standardized first, same convention as the probes) and projects
-to 2D. Each class is scatter-plotted in a distinct color with `alpha=0.3, s=3` (same
-style as existing project LDA plots). One subplot per layer, arranged in a single row.
-For binary experiments only LD1 exists — the y-axis is zeroed so points still render
-as a 2D scatter rather than a 1D strip.
-
-*How `run_evaluation` works:*
-
-Calls both plot functions, clips the requested `lda_layers` to layers that are actually
-present in the dataset, then prints a formatted summary table to stdout showing accuracy
-and delta-over-chance per layer. Experiment scripts only need to call this one function
-after training — they don't interact with the individual plot functions directly.
-
-**`experiments/animals_vs_music.py`**
-Config + entry point for the binary animal-vs-music probe. Label 0 = animal, label 1 = music.
-
-*Current config (NatureLM version — requires Lambda / stable HuggingFace connection):*
-
-- **Animal (0):** up to 200 recordings streamed from NatureLM xeno-canto, mean-pooled (one vector per recording)
-- **Music (1):** 19 local recordings (5 violin + 5 piano + 5 flute + 4 guitar), mean-pooled
-
-Class imbalance (200 animal vs 19 music) is expected — LORO handles it but probe will be biased toward the larger class. Consider capping animals at 19 for a balanced comparison, or adding more music sources.
-
-*Offline/local version* (20 animal vs 19 music, no network required) is available in git history (commit before the NatureLM revert).
-
-**`experiments/music_vs_speech.py`**
-Config + entry point for the binary music-vs-speech probe. Label 0 = violin,
-label 1 = LibriVox speech. **Only 2 speech files available locally — collect
-≥5 before running for stable LORO estimates.**
-
-**`experiments/species.py`**
-Config + entry point for all species-pair probes. Three pairs pre-configured:
-`bullfinch_vs_hawfinch` (same order, fine-grained), `bullfinch_vs_guineafowl`
-(cross-order), `hawfinch_vs_guineafowl` (cross-order). Add new pairs directly
-in the `PAIRS` dict.
-
-**`experiments/species_vs_species.py`**
-Generic binary probe stub for a single custom species pair. `SPECIES_A`,
-`SPECIES_B`, and `RECORDINGS` are left empty — populate once sample sizes have
-been verified and the target pair confirmed with the mentor.
-
-**`results/`**
-Output directory. All PNGs and any future summary CSVs land here. Tracked by git
-via `.gitkeep`.
+The xeno-canto probing phase is complete (11 species pairs, 100 recordings each). The NatureLM scaling pipeline is built and ready to run on GCP. Teammate Evan Harris has completed a parallel geometry analysis on `origin/main` whose findings directly complement and explain the probe results.
 
 ---
 
-### Recommended run order
+## Immediate — NatureLM Scaling Run
 
-1. **Implement `data/loader.py`** — all experiments depend on it.
-2. **Implement `probes/train.py`** — depends on loader output format.
-3. **Implement `probes/evaluate.py`** — depends on train output format.
-4. **Run `experiments/animals_vs_music.py`** — most data available, best-balanced.
-5. **Collect ≥5 speech files → run `experiments/music_vs_speech.py`**.
-6. **Run `experiments/species.py`** — runs all three pairs sequentially.
+Two scripts are written and ready. Run on a GCP T4 GPU instance (~$2–3 total).
 
----
+**GCP setup:** Compute Engine → Deep Learning on Linux boot disk (PyTorch) → NVIDIA T4 on n1-standard-4 → SSH in → `pip install avex datasets esp-aves soundfile scipy`. Request T4 quota increase if needed.
 
-### Expected outputs per experiment
+**Step 1 — extract activations** (~3–5 hrs on GPU):
+```bash
+python -W ignore scripts/batch_extract_naturelm.py --rows 1000 --device cuda
+```
+Extracts 18 species × 1000 recordings each into `activations/naturelm/<slug>/`. Resume-safe — skips completed species.
 
-| Experiment | PNG outputs | What to look for |
-|---|---|---|
-| Animals vs Music | `animals_vs_music_accuracy.png`, `animals_vs_music_lda.png` | Near-100% even at layer 0 would suggest AVES immediately segregates bio vs non-bio audio; a layer-dependent rise would be more interesting |
-| Music vs Speech | `music_vs_speech_accuracy.png`, `music_vs_speech_lda.png` | Low accuracy throughout = AVES doesn't distinguish non-animal sound types; high accuracy = some generalization beyond animal domain |
-| Species (each pair) | `species_{pair}_accuracy.png`, `species_{pair}_lda.png` | Fine-grained pair (bullfinch vs hawfinch) should peak later than cross-order pairs; compare peak layer to mentor's order-level results |
+**Step 2 — run all 10 probe pairs** (~20 min, CPU fine):
+```bash
+python -W ignore experiments/naturelm_probe_all_pairs.py
+```
+Outputs accuracy + LDA PNGs per pair to `results/probe-output/naturelm_species_vs_species/`.
 
----
-
-### Definition of "done" before moving to attribution
-
-- [x] All three experiment scripts run end-to-end without error (animals_vs_music ✓)
-- [x] Accuracy curves saved to `results/` for all three experiments (+ all three species pairs) (animals_vs_music ✓ → `results/probe-output/animals_vs_music/`)
-- [x] LDA projection plots saved for all experiments (animals_vs_music ✓)
-- [x] Peak accuracy layer identified for each experiment and noted in the summary table below (animals_vs_music: T5 @ 98.9%)
-- [ ] Results compared to mentor's class/order baselines — does the layer hierarchy hold?
-- [ ] `music_vs_speech` has ≥5 speech recordings (not just 2)
-- [ ] `species_vs_species.py` populated with confirmed pair and run end-to-end
-
-Once all boxes are checked, move to the attribution phase (causal tracing /
-activation patching to identify which heads and layers drive each separation).
+Note: Great Tit vs Bokharensis is dropped — NatureLM doesn't tag Parus major subspecies.
 
 ---
 
-### Peak layer summary (fill in after running)
+## Completed Experiments
 
-| Experiment | Peak layer | Peak accuracy | Chance level |
-|---|---|---|---|
-| Animals vs Music | T5 | 98.9% | 50% |
-| Music vs Speech | TBD | TBD | 50% |
-| Bullfinch vs Hawfinch | TBD | TBD | 50% |
-| Bullfinch vs Guineafowl | TBD | TBD | 50% |
-| Hawfinch vs Guineafowl | TBD | TBD | 50% |
+### Animals vs Music
+**Script:** `experiments/animals_vs_music.py`
+**Data:** Local — bullfinch + hawfinch + helmeted guinea fowl vs violin + misc music.
+**Result:** Peak T5 @ 98.9%. AVES cleanly linearly separates animal vocalizations from music across all transformer layers.
+
+### Species vs Species (xeno-canto, 100 recordings/species, LORO)
+
+Full probe results in `results/probe-output/probes_results_README.md`. Phylogenetic gradient visualization at `results/phylogenetic_gradient.png/.pdf`.
+
+| Pair | Taxonomy | Peak | Peak layer | Emb |
+|---|---|---|---|---|
+| House Sparrow vs Tree Sparrow | Same genus | 85.4% | T6 | 53.3% |
+| Willow Warbler vs Chiffchaff | Same genus | 93.0% | T6 | 53.0% |
+| Common vs Iberian Chiffchaff | Same genus | 91.5% | T11 | 62.5% |
+| House Crow vs Carrion Crow | Same genus | 95.0% | T9 | 72.0% |
+| Great Tit vs Great Tit Bokharensis | Subspecies* | 92.2% | T3 | 81.8% |
+| Goldfinch vs Eurasian Siskin | Same family | 92.5% | T5 | 65.5% |
+| Bullfinch vs Hawfinch | Same family | 95.0% | T2 | 61.0% |
+| European Robin vs Eurasian Blackbird | Diff. families | 99.0% | T8/T11 | 67.0% |
+| Chaffinch vs Great Spotted Woodpecker | Diff. orders | 97.0% | T9 | 59.1% |
+| House Sparrow vs Common Swift | Diff. orders | 98.0% | T5/T6/T7 | 69.5% |
+| Bullfinch vs Tawny Owl | Diff. orders | 99.0% | T3/T9 | 65.5% |
+
+*Bokharensis result likely reflects sample bias (only 54 recordings) — treat with caution.
+
+**Core finding:** Probe accuracy and peak layer depth both scale with phylogenetic distance. Same-genus embedding accuracy ~53% (chance); cross-order pairs established by T0–T1.
+
+---
+
+## Evan's Findings (origin/main)
+
+Evan ran a systematic geometry analysis of all four ESP-AVES2 EAT checkpoints + a random-init baseline on 600 NatureLM samples (100 × 7 sources). All claims confirmed with B=50 bootstrap CIs and robustness sweeps. Source: `RESULTS.md` on `origin/main`, last updated 2026-04-28.
+
+### Key findings for the paper
+
+**★ `sl_eat_bio_ssl_all` learns a factored hierarchical geometry — strongest paper claim (§4.7, §4.8, §4.9)**
+
+The only model that simultaneously develops all four properties:
+- Bio-vs-non-bio directional separation (cos = 0.57 at L9 vs random-init 0.91, confirmed B=50 bootstrap)
+- Aves-vs-Mammalia Class direction at L7 (cos = 0.38) — the strongest single learned direction in the family
+- Orthogonal Class and Order encoding at L12 (cos = 0.074; no other trained model goes below 0.30)
+- Within-Aves species structure (separability ratio 0.20 at L10)
+
+No single training ingredient produces all four simultaneously. This is the most novel framing and the cleanest model-comparison story.
+
+**★ Trained models compress species detail to learn coarser abstractions (§4.9) — directly explains Sid's probe results**
+
+Random-init has *higher* per-species separability (ratio 0.33) than any trained model (peak 0.20). Training acquires Class/Order invariances by putting acoustically-distinct same-class species *closer* together. This is the geometric explanation for why LORO probes plateau and why same-genus pairs are so much harder than cross-order pairs.
+
+**Random-init baseline is critical for the paper (§2)**
+
+Architecture alone gives frame-level eff_rank 10–12 and bio/non-bio frames indistinguishable (cos ≥ 0.91). Every number below this floor is attributable to learning. Must include random-init as anchor in any paper draft.
+
+**The bio↔non-bio direction is threshold-like, not linear (§4.5)**
+
+Audio-mixing pilot: adding 25% non-bio to a bio clip pulls L9 representation 78% of the way to pure non-bio (midpoint deviation −0.30). Sharp asymmetric response, specific to `sl_eat_bio_ssl_all`.
+
+**`sl_eat_all_ssl_all` L12 mode collapse installs the bio classifier in a single block (§5.1, §5.2, §5.4)**
+
+At L12: 61% of variance in one direction (vs 26% at L11). That direction IS the bio centroid axis (|cos| = 0.74). The L11→L12 transition does both mode collapse and bio classification simultaneously.
+
+**Manifold dim is set by architecture, not learning (§6)**
+
+Trained MLE-ID(k=20, n=10k): 7–14. Random-init: 11–15. Training does not expand manifold dim. The real learned property is the eff_rank/MLE-ID ratio: random-init ≈ 1, trained 17–43×. **Always report as "MLE-ID(k=20, n=10k)" in the paper — absolute values are (n,k)-conditional.**
+
+**Mean-pooling distorts linear geometry (§3)**
+
+Frame-level eff_rank > pooled eff_rank at every (model, layer). The xeno-canto probing pipeline uses mean-pooled activations — probe accuracy numbers likely understate the true separability available in raw patch tokens.
+
+### Retracted — do not use in paper
+- L4 TwoNN intrinsic-dim dip — TwoNN(k=2) estimator failure; MLE-ID(k=20) shows no dip.
+- "Convergent L0 eff_rank ≈ 3 across models" — mean-pooling artifact.
+
+### How Evan's geometry connects to Sid's probe results
+
+| Evan's finding | Sid's probe observation |
+|---|---|
+| §4.9: trained models suppress species-level separability | LORO accuracy plateaus; same-genus pairs hardest |
+| §4.7: Aves/Mammalia is the strongest direction at L7 | Same-genus pairs only differ in suppressed signal → peak at T6 |
+| §4.8: Class/Order orthogonal at L12 | Cross-order pairs separate trivially by T0–T1 |
+| §3: mean-pooling understates separability | Raw-token probing (untested) would likely push accuracy higher |
+
+### Recommended paper framings
+
+1. **★ Factored hierarchy** — `sl_eat_bio_ssl_all` uniquely develops (a)–(d) above. Most novel, most defensible.
+2. **Directional bio signature** — §4 + §4.5 + §5.1 as mechanism. Tighter scope; good fallback.
+3. **Mean-pooling distorts audio-encoder geometry** — methods paper; needs non-EAT control.
+4. **Manifold expansion without dim growth** — §6; exposed to MLE-ID estimator objections (documented in §6 caveat).
+
+---
+
+## Next Priorities (after scaling run)
+
+### High
+- **RSA with zebra finch neural recordings (CRCNS aa-4)** — 914 neurons from Field L, CLM/CMM, NCM. Present same stimuli to AVES and neural data, compute pairwise distance matrices per layer, correlate via RSA. Most publishable direction — directly maps AVES layers to biological auditory hierarchy.
+- **Sparse Autoencoders (SAEs) on layer 11** — decompose 768-dim space into sparse interpretable directions. Use TopK activation (K≈20–40), not L1. Report L0, reconstruction variance explained, dead feature fraction, and max-activating examples for top-20 features.
+
+### Medium
+- **Re-run probes with raw patch tokens** (not mean-pooled) to test Evan's §3 prediction that current accuracy numbers are understated. Use `mode="raw"` in `load_species_pair` after NatureLM extraction is done.
+- **Attention head ablation** — zero out heads one at a time, measure species separability collapse. Tests whether local/global head specialization is real.
+- **Cross-species cluster transfer** — train k-means on Bullfinch L11 embeddings, apply to Hawfinch. Tests universality of discovered categories.
+
+---
+
+## Pipeline Reference
+
+### Xeno-canto probing pipeline
+```
+experiments/species_vs_species.py
+  → data/loader.build_xenocanto_dataset()   # fetch + extract activations live
+  → probes/train.train_all_layers()          # LORO cross-validation, PCA(50) → LR
+  → probes/evaluate.run_evaluation()         # accuracy PNG + LDA PNG
+```
+
+### NatureLM offline pipeline
+```
+scripts/batch_extract_naturelm.py           # extract once to activations/naturelm/
+  → extract_species_activations.extract_species()
+
+experiments/naturelm_probe_all_pairs.py     # probe all 10 pairs from saved activations
+  → scripts/load_species_activations.load_species_pair()
+  → probes/train.train_all_layers()
+  → probes/evaluate.run_evaluation()
+```
+
+### Layer indexing (throughout codebase)
+- Index 0 = CNN `local_encoder` output (labeled `emb` in plots)
+- Indices 1–12 = transformer blocks 0–11 (labeled `T0`–`T11` in plots)
+- All activations shape `(n_patches, 768)` with CLS token stripped
+
+### Supported models
+| avex name | Description |
+|---|---|
+| `esp_aves2_eat_all` | EAT pretrained, all data (default) |
+| `esp_aves2_eat_bio` | EAT pretrained, bio-only data |
+| `esp_aves2_sl_eat_all_ssl_all` | supervised fine-tune, all data |
+| `esp_aves2_sl_eat_bio_ssl_all` | supervised fine-tune, bio data |
+
+Checkpoints auto-download from HuggingFace via `avex` on first use.

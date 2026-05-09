@@ -194,41 +194,44 @@ def _style_ax(ax, xlabel: str, title: str, subtitle: str) -> None:
     ax.tick_params(colors=DARK_TEAL, labelsize=9)
     ax.yaxis.grid(True, color="#E8E8E8", linewidth=0.8, zorder=0)
     ax.set_axisbelow(True)
-    ax.set_title(title, fontsize=13, color=DARK_TEAL, fontweight="bold", pad=10)
+    ax.set_title(title, fontsize=13, color=DARK_TEAL, fontweight="bold", pad=28)
     ax.text(
-        0.5, 1.01, subtitle,
+        0.5, 1.04, subtitle,
         transform=ax.transAxes, ha="center", va="bottom",
         fontsize=8, color=GRAY, style="italic",
     )
 
 
-def _label_points(ax, xs, ys, labels, x_log):
-    """Place text labels with simple heuristic offsets to reduce overlap."""
-    # Manual per-point offsets (dx in log-data fraction, dy in data units)
-    # Positive dx = right, negative = left; positive dy = up, negative = down
-    OFFSETS = {
-        "Gt. Tit/Bokharensis*":       (-0.25,  1.8),
-        "Com./Iberian Chiffchaff":    ( 0.08, -2.5),
-        "Willow Warbler/Chiffchaff":  ( 0.08,  1.5),
-        "House/Tree Sparrow":         ( 0.08, -2.2),
-        "Goldfinch/Siskin":           ( 0.08,  1.5),
-        "House/Carrion Crow":         (-0.35,  1.8),
-        "Bullfinch/Hawfinch":         ( 0.08,  1.5),
-        "Robin/Blackbird":            ( 0.08, -2.2),
-        "Sparrow/Swift":              (-0.35,  1.8),
-        "Bullfinch/Tawny Owl":        ( 0.08, -2.5),
-        "Chaffinch/Woodpecker":       ( 0.08,  1.5),
-    }
+def _label_points(ax, xs, ys, labels, panel_ylim, min_gap_frac=0.07):
+    """Place text labels to the right of each point, stacking at the same x position."""
+    from collections import defaultdict
+    groups: dict = defaultdict(list)
     for x, y, lbl in zip(xs, ys, labels):
-        dx_log, dy = OFFSETS.get(lbl, (0.08, 1.5))
-        ax.annotate(
-            lbl,
-            xy=(x, y),
-            xytext=(x * (10 ** dx_log), y + dy),
-            fontsize=7.5, color=DARK_TEAL,
-            arrowprops=dict(arrowstyle="-", color=GRAY, lw=0.6),
-            va="center",
-        )
+        groups[x].append((y, lbl))
+
+    y_lo, y_hi = panel_ylim
+    y_range = y_hi - y_lo
+    min_gap = y_range * min_gap_frac
+
+    for x, items in groups.items():
+        items_sorted = sorted(items, key=lambda t: t[0])
+        x_text = x * 1.3   # push labels 30% to the right in log-data space
+
+        # Build spread y-positions, enforcing minimum gap
+        ys_spread = [items_sorted[0][0]]
+        for i in range(1, len(items_sorted)):
+            next_y = max(items_sorted[i][0], ys_spread[-1] + min_gap)
+            ys_spread.append(next_y)
+
+        for y_text, (y_dot, lbl) in zip(ys_spread, items_sorted):
+            ax.annotate(
+                f" {lbl}",
+                xy=(x, y_dot),
+                xytext=(x_text, y_text),
+                fontsize=7, color=DARK_TEAL, va="center", ha="left",
+                arrowprops=dict(arrowstyle="-", color=GRAY, lw=0.5),
+                clip_on=False,
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -238,7 +241,7 @@ def _label_points(ax, xs, ys, labels, x_log):
 def make_figure(records: list[dict], out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(17, 6))
     fig.patch.set_facecolor("white")
 
     mya     = np.array([r["mya"]           for r in records])
@@ -256,14 +259,12 @@ def make_figure(records: list[dict], out_dir: Path) -> None:
         subtitle="Each point = one species pair",
     )
     ax1.set_ylabel("Peak LORO Accuracy (%)", fontsize=11, color=DARK_TEAL, fontweight="bold")
-    ax1.set_ylim(50, 105)
-
-    ax1.axhline(50, color=GRAY, linewidth=1, linestyle="--", alpha=0.6, zorder=1)
-    ax1.text(0.6, 51.5, "Chance (50%)", fontsize=7.5, color=GRAY, transform=ax1.get_xaxis_transform())
+    ylim1 = (80, 104)
+    ax1.set_ylim(*ylim1)
 
     ax1.scatter(mya, peak_ac, c=colors, s=120, zorder=4, edgecolors="white", linewidths=0.8)
     _add_trend(ax1, log_mya, peak_ac)
-    _label_points(ax1, mya, peak_ac, labels, log_mya)
+    _label_points(ax1, mya, peak_ac, labels, ylim1, min_gap_frac=0.06)
 
     # ── Panel 2: Peak Layer vs MYA ──────────────────────────────────────────
     _style_ax(
@@ -272,18 +273,19 @@ def make_figure(records: list[dict], out_dir: Path) -> None:
         title="Peak Layer Depth vs Phylogenetic Distance",
         subtitle="Deeper layer = more processing needed to separate species",
     )
-    ax2.set_ylabel("Peak Layer Index", fontsize=11, color=DARK_TEAL, fontweight="bold")
-    ax2.set_ylim(-0.5, 12.5)
+    ax2.set_ylabel("Peak Layer", fontsize=11, color=DARK_TEAL, fontweight="bold")
+    ylim2 = (-0.5, 14.5)
+    ax2.set_ylim(*ylim2)
     ax2.set_yticks(range(13))
     ax2.set_yticklabels(LAYER_LABELS, fontsize=8.5, color=DARK_TEAL)
 
     ax2.scatter(mya, peak_ly, c=colors, s=120, zorder=4, edgecolors="white", linewidths=0.8)
     _add_trend(ax2, log_mya, peak_ly)
-    _label_points(ax2, mya, peak_ly, labels, log_mya)
+    _label_points(ax2, mya, peak_ly, labels, ylim2, min_gap_frac=0.10)
 
-    # ── Legend ──────────────────────────────────────────────────────────────
+    # ── Legend — horizontal bar at bottom ───────────────────────────────────
     legend_handles = [
-        mpatches.Patch(facecolor=col, label=lvl, edgecolor="white")
+        mpatches.Patch(facecolor=col, label=lvl, edgecolor="#ccc")
         for lvl, col in LEVEL_COLORS.items()
     ]
     fig.legend(
@@ -291,28 +293,29 @@ def make_figure(records: list[dict], out_dir: Path) -> None:
         title="Taxonomic level",
         title_fontsize=9,
         fontsize=8.5,
-        loc="center right",
-        bbox_to_anchor=(1.01, 0.5),
+        ncols=len(LEVEL_COLORS),
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.06),
         frameon=True,
-        framealpha=0.9,
+        framealpha=0.95,
         edgecolor="#E0E0E0",
     )
 
     # ── Overall title ────────────────────────────────────────────────────────
     fig.suptitle(
         "Probe Accuracy Gradients Track Phylogenetic Distance",
-        fontsize=16, fontweight="bold", color=DARK_TEAL, y=1.02,
+        fontsize=15, fontweight="bold", color=DARK_TEAL, y=0.98,
     )
 
     # ── Footer ───────────────────────────────────────────────────────────────
     fig.text(
-        0.5, -0.02,
-        "Linear probes on AVEX ESP bioacoustic transformer (13 layers). "
+        0.5, 0.01,
+        "Linear probes on ESP bioacoustic transformer (13 layers). "
         "LORO cross-validation. Phylogenetic distances from TimeTree.",
         fontsize=7, color=GRAY, ha="center",
     )
 
-    plt.tight_layout(rect=[0, 0, 0.88, 1])
+    plt.tight_layout(rect=[0, 0.04, 1, 0.94])
 
     png_path = out_dir / "phylogenetic_gradient.png"
     pdf_path = out_dir / "phylogenetic_gradient.pdf"
