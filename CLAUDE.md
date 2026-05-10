@@ -11,11 +11,11 @@ study how the geometry of those activations is shaped by training. Plus a
 random-init EAT baseline (architecture only, no learned weights) that anchors
 absolute magnitudes.
 
-The project pivoted from an earlier exploratory phase on the legacy AVES
-torchaudio model + Bullfinch recordings; that phase is **out of scope**.
+Additionally, Sid's **probe pipeline** runs LORO logistic-regression probes
+across species pairs drawn from xeno-canto + NatureLM to measure how
+phylogenetic distance shapes layer-by-layer separability.
 
-Read `RESULTS.md` for the running narrative (CLAIM / RETRACTED / OPEN
-sections).
+Read `RESULTS.md` for the running narrative (CLAIM / RETRACTED / OPEN sections).
 
 ## Models in scope
 
@@ -41,6 +41,8 @@ python3 -m venv venv
 source venv/bin/activate
 pip install torch torchaudio transformers huggingface_hub safetensors \
             pyarrow matplotlib scikit-learn scipy timm
+# For probe pipeline:
+pip install avex datasets esp-aves soundfile
 ```
 
 The EAT base architecture is fetched on first use via
@@ -53,16 +55,15 @@ Per-checkpoint safetensors are pulled from the corresponding
 
 ## Running scripts
 
-All scripts are standalone, run from the project root. No test suite — each
-script writes CSVs/PNGs to `artifacts/comparisons/...` and prints results to
-stdout.
+All scripts are standalone, run from the project root:
 
 ```bash
 source venv/bin/activate
-python -W ignore <script>.py
+python -W ignore <script>.py                      # geometry pipeline
+python -W ignore experiments/<experiment>.py      # probe experiments
 ```
 
-## Pipeline
+## Geometry pipeline (Evan)
 
 ### Step 1 — extraction
 
@@ -76,7 +77,7 @@ shape `(B, 13, 513, 768)` in float16) to
 `artifacts/roadmap_part1/<manifest>/<model>/shards/`. Resumable via the
 existing-shards scan. The `--random-init-seed N` path (used for the baseline)
 loads EAT-base, then walks `init_weights` + `reset_parameters` + a
-`normal(0, 0.02)` fallback for the 2/150 parameters those paths miss.
+`normal(0, 0.02)` fallback.
 
 ### Step 2 — geometry analysis
 
@@ -87,13 +88,40 @@ Each script reads from shards and writes to
 |-------------------------------------|---------------------------------------------|
 | `nway_compare_eat_models.py`        | Consolidated pooled embeddings + cross-model CKA |
 | `step2_spectral_dim_eat.py`         | Singular values, eff_rank, PR, TwoNN per (model, layer) |
-| `step2_subspace_angles_eat.py`      | L2-norm histograms + across-layer/model/bio-vs-non-bio top-10 subspace overlap |
-| `step2_pooled_vs_frame_eat.py`      | Pooled-vs-frame distortion check on `sl_eat_bio_ssl_all` |
-| `step2_tier1_frame_level.py`        | Frame-level eff_rank/PR/TwoNN/MLE-ID across all 4 trained models + bio-vs-non-bio at frame level |
+| `step2_subspace_angles_eat.py`      | L2-norm histograms + subspace overlap |
+| `step2_pooled_vs_frame_eat.py`      | Pooled-vs-frame distortion check |
+| `step2_tier1_frame_level.py`        | Frame-level eff_rank/PR/TwoNN/MLE-ID across all 4 trained models |
 | `step2_random_init_compare.py`      | 5-way comparison: trained models vs random-init baseline |
 | `step2_random_init_variability.py`  | Init variability across random-init seeds 7/13/42 |
 
-### Frame-level subsampling
+## Probe pipeline (Sid)
+
+### Module structure
+
+- **`data/loader.py`** — centralized model loading and activation extraction. `build_dataset` (local files) and `build_naturelm_dataset` (HuggingFace streaming). Both return `{layer_index: (X, y)}`.
+- **`probes/train.py`** — `train_all_layers` runs LORO cross-validation across all 13 layers.
+- **`probes/evaluate.py`** — `run_evaluation` saves accuracy curve PNG + LDA projection PNG to `results/`.
+- **`experiments/`** — entry points wiring `data/loader`, `probes/train`, `probes/evaluate`. Runnable: `animals_vs_music.py`, `species.py`, `naturelm_probe_all_pairs.py`.
+- **`scripts/batch_extract_naturelm.py`** — resume-safe batch extractor for 18 species × N recordings.
+- **`scripts/plot_phylogenetic_gradient.py`** — plots peak accuracy vs MYA distance across species pairs.
+
+### Layer indexing convention
+
+13 layers total:
+- Index 0 = CNN `feature_projection` output (embedding layer, labeled `"emb"`)
+- Indices 1–12 = transformer layers 0–11 (labeled `"T0"`–`"T11"`)
+
+### Running probe experiments
+
+```bash
+# Extract activations for NatureLM scaling (GPU recommended):
+python -W ignore scripts/batch_extract_naturelm.py --rows 1000 --device cuda
+
+# Run all 10 species-pair probe experiments:
+python -W ignore experiments/naturelm_probe_all_pairs.py
+```
+
+## Frame-level subsampling
 
 Where frame-level analyses subsample, we draw 50 frames per item uniformly
 from the valid-token range with seed 42 (600 × 50 = 30,000 rows per
@@ -107,11 +135,9 @@ Defined in `step2_tier1_frame_level.py`; reused via import by later scripts.
   the centered covariance.
 - **Participation ratio** = `(Σλ)² / Σλ²`.
 - **Intrinsic dimension** — TwoNN(k=2) and MLE-ID(k=20). MLE-ID is the
-  preferred estimator; TwoNN has a known L4 failure mode (see
-  `RESULTS.md` §7).
+  preferred estimator; TwoNN has a known L4 failure mode (see `RESULTS.md` §7).
 - **Subspace overlap** — `mean(cos(principal_angles))` between top-k=10 PCA
-  bases via `scipy.linalg.subspace_angles`. 1.0 = identical, 0.0 =
-  orthogonal.
+  bases via `scipy.linalg.subspace_angles`. 1.0 = identical, 0.0 = orthogonal.
 
 ## Pooling convention
 
@@ -126,14 +152,11 @@ include token 0; that's the existing convention everywhere.
   the frozen 600-sample manifest (100 × 7 source datasets), tracked.
 - `artifacts/roadmap_part1/<manifest>/<model>/shards/` — per-model
   activation shards (~5.8G/model, gitignored). 5 models present:
-  the 4 trained + `random_init_eat_seed42`. Seeds 7 and 13 were extracted,
-  stats computed, shards deleted.
+  the 4 trained + `random_init_eat_seed42`.
 - `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_*,random_init_*}/`
   — committed CSVs, plots, and per-seed stats.
-
-Raw audio waveforms live in the HF parquet cache
-(`~/.cache/huggingface/hub/datasets--EarthSpeciesProject--NatureLM-audio-training/`,
-~14G). **Do not delete** while audio-mixing follow-ups are open.
+- `audio/` — local xeno-canto recordings for probe experiments (gitignored).
+- `results/probe-output/` — probe accuracy PNGs and LDA plots per species pair.
 
 ## Key findings (current state — see `RESULTS.md` for full claims + retractions)
 
@@ -143,34 +166,21 @@ Raw audio waveforms live in the HF parquet cache
    `sl_eat_bio_ssl_all` drops bio-vs-non-bio top-10 cos to 0.57 at L9 vs a
    random-init baseline of 0.91 at the same layer.
 3. **Late-layer collapse splits the family by `_bio` vs not.**
-   `sl_eat_all_ssl_all` L12 eff_rank (11.2) is essentially identical to the
-   random-init baseline (9.8); the bio fine-tunes retain 180+ at L12.
+   `sl_eat_all_ssl_all` L12 eff_rank (11.2) ≈ random-init baseline (9.8).
 4. **Architecture sets manifold dim, training expands the linear envelope.**
-   Random-init MLE-ID = 11–15; trained MLE-ID = 7–14. Training does not
-   widen the manifold — it expands the eff_rank/MLE-ID *ratio* from ~1
-   (random) to 17–43 (trained).
-5. **Init variability is tight.** Seeds 7/13/42 random-init eff_rank spreads
-   ≤1.3 across all layers vs trained-vs-random gaps of ~200–350.
-
-Retracted: the L4 TwoNN dip (estimator artifact) and the "pooled L0 ≈ 3
-across all four models = shared tokenizer" story (pooling artifact). See
-`RESULTS.md` §7–§8.
-
-## Scope
-
-- **In scope:** Step 1 (extraction) + Step 2 (geometry) + Step 3a (audio
-  mixing) + Step 3b (species barycenters) + Step 3c (Veitch hierarchy
-  test). Plus per-Class and per-Order taxonomic resolution at frame level.
-- **Out of scope:** SAEs / dictionary learning, legacy AVES exploration,
-  cross-species call-type transfer, RSA with CRCNS zebra-finch.
+   Random-init MLE-ID = 11–15; trained MLE-ID = 7–14. Training expands the
+   eff_rank/MLE-ID ratio from ~1 (random) to 17–43 (trained).
+5. **Probe accuracy scales with phylogenetic distance.** Same-genus pairs peak
+   at T5–T6 (~85–93%); cross-order pairs separate by T0–T1 (~97–99%). This is
+   the probe-level signature of the geometric compression Evan documents.
 
 ## Conventions
 
 - Random seed: 42 throughout for data subsampling and random-init.
 - Plots: 150 dpi, `bbox_inches="tight"`, PNG.
+- PCA to 50 dims before logistic regression probes (768-dim is too slow on CPU).
 - All artifacts under `artifacts/comparisons/` are committed; shards under
-  `artifacts/roadmap_part1/` are gitignored.
+  `artifacts/roadmap_part1/` are gitignored. Audio files and `activations/` gitignored.
 - Suppress sklearn convergence warnings with `python -W ignore <script>.py`.
 - When extending the pipeline, write the metric definition once in
-  `step2_tier1_frame_level.py` and import elsewhere — do not duplicate
-  primitives across scripts.
+  `step2_tier1_frame_level.py` and import elsewhere — do not duplicate primitives.
