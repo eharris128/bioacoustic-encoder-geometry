@@ -64,17 +64,9 @@ suffice for orders that diverged ~100 Mya.
 |---|---|
 | ![House Sparrow vs Common Swift accuracy](results/probe-output/species_vs_species/house_sparrow_vs_common_swift_accuracy.png) | ![Bullfinch vs Tawny Owl accuracy](results/probe-output/species_vs_species/bullfinch_vs_tawny_owl_accuracy.png) |
 
-### Animals vs Music — a clean sanity check
-
-Biology vs non-biology separates across all layers with high margin,
-confirming that the encoder's feature space is structured around sound
-source category before any species-level structure.
-
-![Animals vs Music accuracy](results/probe-output/animals_vs_music/animals_vs_music_accuracy.png)
-
 ---
 
-## Supporting Finding: Geometry Confirms the Probe Signal
+## Geometry Confirms the Probe Signal
 
 Independent geometric analysis of the full NatureLM-audio-training corpus provides an understandable account of why the probing gradient exists.
 
