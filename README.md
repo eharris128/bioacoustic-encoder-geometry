@@ -1,21 +1,15 @@
-# Phylogenetic Structure in Bioacoustic Audio Encoders
+# Mechanistic Interpretability for Interspecies Communication - Towards geometrical analysis of bioacoustic encoder models
 
-*Preliminary findings — Sentient Futures lab, 2026*
-
-We investigate how a family of self-supervised audio encoders
-([ESP-AVES2 EAT](https://huggingface.co/EarthSpeciesProject)) organizes
-species identity across its internal layers. Using linear probing and
-geometric analysis of residual-stream activations, we find that the encoders
-implicitly learn a representation of phylogenetic distance — without any
-taxonomic supervision.
+What does a classifier model trained on animal vocalizations learn about the animals themselves? We applied mechanistic interpretability techniques to the Earth Species Project's AVEX model family to probe and extract bioacoustic information from the model's activation space. We find that taxonomic structure is distinctly correlated to the model's encoded network depth, where distinctions between taxonomic classes peak at early-mid layers, while species-level separation of the same order and genus requires deeper disentanglement. Phylogenetic distance is found to correlate to probe accuracy and peak layer depth, linear probes show that recent divergence in species pairs requires more layer depth to separate in comparison to pairs of different classes. This gradient reflects consistency with geometric analysis, showing that orthogonal subspaces are developed for class and order information at Layer 12, while fine-grained species classification is de-prioritized. Our results suggest that bio-acoustic classification models implicitly encode evolutionary structure in vocalizations, implicating the use of these models as a venue for research into inter-species linguistic structure. 
 
 ---
 
 ## Core Finding: Probe Accuracy Scales with Evolutionary Distance
 
-We trained linear probes (LORO cross-validation, PCA(50) → logistic
-regression) on activations from 11 species pairs spanning every level of the
-avian taxonomic hierarchy. **Probe accuracy and the depth at which separation
+We trained linear probes on activations from 11 species pairs spanning every level of the
+avian taxonomic hierarchy.
+
+**Probe accuracy and the depth at which separation
 is established both scale monotonically with phylogenetic distance.**
 
 ![Phylogenetic gradient](results/phylogenetic_gradient.png)
@@ -82,19 +76,17 @@ source category before any species-level structure.
 
 ## Supporting Finding: Geometry Confirms the Probe Signal
 
-Independent geometric analysis of the full NatureLM-audio-training corpus
-(600 samples × 4 trained EAT checkpoints + random-init baseline) provides a
-mechanistic account of why the probing gradient exists.
+Independent geometric analysis of the full NatureLM-audio-training corpus provides an understandable account of why the probing gradient exists.
 
 **`sl_eat_bio_ssl_all` develops a factored hierarchical geometry** — the only
 model that simultaneously shows:
 
 1. A learned bio-vs-non-bio directional axis (cosine similarity 0.57 at L9
-   vs. random-init baseline 0.91 — a sharp learned separation).
+   vs. random-init baseline 0.91.
 2. A Class-level direction at L7 that separates Aves from Mammalia (cos =
-   0.38), the strongest single learned direction in the model.
+   0.38).
 3. Orthogonal Class and Order encoding at L12 (cos = 0.074; no other trained
-   model below 0.30) — the geometry separates taxonomic levels independently.
+   model below 0.30).
 4. Within-Aves species structure at L10 (separability ratio 0.20).
 
 **Training compresses fine species detail to acquire coarser abstractions.**
@@ -114,7 +106,7 @@ ratio from ~1 (random) to 17–43 (trained).
 
 ### Probe pipeline
 
-- **Data:** 100 recordings per species from
+- **Data:** 1000 recordings per species from
   [xeno-canto](https://xeno-canto.org/) via the API.
 - **Model:** `sl_eat_bio_ssl_all` (EAT-bio + SSL fine-tune on all audio),
   accessed via [avex](https://github.com/earthspecies/avex).
@@ -135,6 +127,25 @@ ratio from ~1 (random) to 17–43 (trained).
   `scipy.linalg.subspace_angles`). All findings reported with B=50 bootstrap CIs.
 
 ---
+
+## Implications
+Linear probe accuracy scaling monotonically with phylogenetic taxonomy drives forward significant implications towards our understanding of classification models' knowledge of interspecies communication. Correlation with species' evolutionary distance with no access to phylogenetic information implies that the model may have learned evolutionary structure encoded in its hidden states, primarily through animal vocalization. For further research involving interspecies communication as a an interpretable linguistic structure problem, it may be scientifically plausible to view evolutionary structure as a starting point. 
+
+## Future
+### 1.) Attribution Methods
+It will be important to develop a score for time-frequency mark impact on classification. We aim to develop a heatmap-styled gradient indicating which frequency bands and time windows at each pair's peak layers drive classification, identifying which acoustic features actually correlate to species identity. 
+
+### 2.) Unsupervised Structure
+We will then fixate on model-specific vocalization data and aim to find biological clusters which correspond to internal structure. Classification as the model's primary methodology makes this process a difficult one, meaning behavioral metadata is of greater importance. 
+
+### 3.) Cross-species generalization
+We aim to find whether factored heirarchy in AVEX models is testable. Evaluating our current probe results on tranferred species of same family/order to better understand what taxonomic heirarchy our probes generalize acoustic signatures to. 
+
+### 4.) Decoding
+A long-term vision. We aim to be able to reconstruct sparrow calls from finch calls' representation space through training a decoder on top of a model's representations. Our short-term system for this will be unsupervised call segmentation and cluster analysis to understand if two clusters from different species map similarly. 
+
+### 5.) Behavioral grounding
+The most ambitious goal for this project. Grounding in behavioral annotation. 
 
 ## Setup
 
