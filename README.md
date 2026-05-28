@@ -1,5 +1,7 @@
 # Mechanistic Interpretability for Interspecies Communication - Towards geometrical analysis of bioacoustic encoder models
 
+Authors: Raphael Sarfati, Siddharth Putta, Evan Harris
+
 What does a classifier model trained on animal vocalizations learn about the animals themselves? We applied mechanistic interpretability techniques to the Earth Species Project's AVEX model family to probe and extract bioacoustic information from the model's activation space. We find that taxonomic structure is distinctly correlated to the model's encoded network depth, where distinctions between taxonomic classes peak at early-mid layers, while species-level separation of the same order and genus requires deeper disentanglement. Phylogenetic distance is found to correlate to probe accuracy and peak layer depth, linear probes show that recent divergence in species pairs requires more layer depth to separate in comparison to pairs of different classes. This gradient reflects consistency with geometric analysis, showing that orthogonal subspaces are developed for class and order information at Layer 12, while fine-grained species classification is de-prioritized. Our results suggest that bio-acoustic classification models implicitly encode evolutionary structure in vocalizations, implicating the use of these models as a venue for research into inter-species linguistic structure. 
 
 ---
