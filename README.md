@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
+
 # Mechanistic Interpretability for Interspecies Communication - Towards geometrical analysis of bioacoustic encoder models
 
 Authors: Raphael Sarfati, Siddharth Putta, Evan Harris
@@ -12,7 +15,7 @@ We trained linear probes on activations from 11 species pairs spanning every lev
 avian taxonomic hierarchy.
 
 **Probe accuracy and the depth at which separation
-is established both scale monotonically with phylogenetic distance.**
+is established both scale positively with phylogenetic distance.**
 
 ![Phylogenetic gradient](results/phylogenetic_gradient.png)
 
@@ -65,6 +68,19 @@ suffice for orders that diverged ~100 Mya.
 | | |
 |---|---|
 | ![House Sparrow vs Common Swift accuracy](results/probe-output/species_vs_species/house_sparrow_vs_common_swift_accuracy.png) | ![Bullfinch vs Tawny Owl accuracy](results/probe-output/species_vs_species/bullfinch_vs_tawny_owl_accuracy.png) |
+
+### LDA 
+![Bullfinch vs Hawfinch LDA](results/probe-output/species_vs_species/bullfinch_vs_hawfinch_lda.png)
+- Around 12.5 MYA
+- Same genus, and similar birds.
+- Separation emerges in mid-to-late layers.
+
+![Bullfinch vs Tawny Owl LDA](results/probe-output/species_vs_species/bullfinch_vs_tawny_owl_lda.png)
+- 65-80 MYA
+
+![Common Chiffchaff vs Iberian Chiffchaff LDA](results/probe-output/species_vs_species/common_chiffchaff_vs_iberian_chiffchaff_lda.png)
+- 2 MYA
+- Separation far more entangled, where the model's resolution breaks down
 
 ---
 
@@ -123,23 +139,31 @@ ratio from ~1 (random) to 17–43 (trained).
 ---
 
 ## Implications
-Linear probe accuracy scaling monotonically with phylogenetic taxonomy drives forward significant implications towards our understanding of classification models' knowledge of interspecies communication. Correlation with species' evolutionary distance with no access to phylogenetic information implies that the model may have learned evolutionary structure encoded in its hidden states, primarily through animal vocalization. For further research involving interspecies communication as a an interpretable linguistic structure problem, it may be scientifically plausible to view evolutionary structure as a starting point. 
+Bioacoustic classification models are trained to distinguish species, but our results suggest they learn something deeper in the process. Probe accuracy scaling with phylogenetic distance, without any evolutionary supervision, indicates that the acoustic signals animals produce carry recoverable information about their evolutionary relationships. The model learned to classify animal vocalizations, yet a phylogenetic tree emerged unsupervised.
+
+The geometric analysis reinforces this: the best-performing checkpoint develops orthogonal subspaces for Class and Order at L12, acquiring coarse taxonomic invariances at the cost of fine-grained species discriminability. A model that had merely memorized acoustic fingerprints would not show this pattern.
+
+The phylogenetic gradient we identify here is a first foothold for interspecies communication research through interpretability on bioacoustic encoder models. In order to define tranferrable linguistics and enact meaningful feature extraction, it can be revealing to understand what structure may be encoded through vocalizations. 
 
 ## Future
+
+Several directions follow directly from these findings. The most urgent is statistical hardening: replacing argmax peak-layer with a weighted mean layer metric. Computing bootstrap confidence intervals (B=1000) over LORO folds, and formally testing the phylogenetic gradient with Spearman ρ across pairs would make individual pair estimates stable enough for the correlation to be more statistically meaningful. 
+
 ### 1.) Attribution Methods
-It will be important to develop a score for time-frequency mark impact on classification. We aim to develop a heatmap-styled gradient indicating which frequency bands and time windows at each pair's peak layers drive classification, identifying which acoustic features actually correlate to species identity. 
+Linear probes tell us where in the network species become separable. They do not tell us why. We will apply integrated gradients from the probe decision boundary back to the input spectrogram, producing time-frequency heatmaps that show which acoustic features drive classification at each peak layer. For a same-genus pair peaking at T6, this answers whether the model using pitch, temporal envelope, formant structure, or call rhythm? Downstream, sparse autoencoders applied to the 768-dim activations could decompose representations into monosemantic features that fire consistently across species for shared call types. 
+
 
 ### 2.) Unsupervised Structure
-We will then fixate on model-specific vocalization data and aim to find biological clusters which correspond to internal structure. Classification as the model's primary methodology makes this process a difficult one, meaning behavioral metadata is of greater importance. 
+The probe asks A vs B. The next question is whether, within a single species, the representation space has internal geometry corresponding to call type, behavioral context, or individual identity. We will apply unsupervised clustering to within-species activations at peak layers and test whether emergent clusters align with available metadata — call type annotations from xeno-canto, geographic origin, or recording context. This requires behaviorally annotated corpora; zebra finch datasets are the most tractable first target.
 
 ### 3.) Cross-species generalization
-We aim to find whether factored heirarchy in AVEX models is testable. Evaluating our current probe results on tranferred species of same family/order to better understand what taxonomic heirarchy our probes generalize acoustic signatures to. 
+We aim to find whether factored heirarchy in AVEX models is testable. Evaluating our current probe results on tranferred species of same family/order to better understand what taxonomic heirarchy our probes generalize acoustic signatures to. If the model learned general acoustic biology rather than species-specific quirks, a probe trained on one species pair should generalize to a related pair. We will evaluate probe weights trained on one finch pair directly on a held-out finch pair without retraining. Transfer above chance would confirm that the probe captured a family-level acoustic signature — directly testing whether the factored hierarchy Evan identified at L12 is behaviorally operative across the taxonomy
 
 ### 4.) Decoding
-A long-term vision. We aim to be able to reconstruct sparrow calls from finch calls' representation space through training a decoder on top of a model's representations. Our short-term system for this will be unsupervised call segmentation and cluster analysis to understand if two clusters from different species map similarly. 
+A long-term vision. We aim to be able to reconstruct sparrow calls from finch calls' representation space through training a decoder on top of a model's representations. Communication requires understanding what a signal means independent of comparison. As a first step toward decoding, we will apply unsupervised call segmentation to continuous recordings, embed each call unit at the peak layer, and test whether clusters from different species with known behavioral context (alarm, contact, song) align in representation space. Cross-species semantic alignment, such as mapping alarms through various species, would be the first evidence of transferable communicative structure.
 
 ### 5.) Behavioral grounding
-The most ambitious goal for this project. Grounding in behavioral annotation. 
+The hardest open problem. We plan to identify existing behaviorally annotated corpora and run the full probe pipeline against behavioral labels rather than species labels. If representation geometry correlates with communicative function across species, that is the result that connects this line of work to genuine interspecies communication in the full sense.
 
 ## Setup
 
@@ -182,7 +206,6 @@ python -W ignore step2_tier1_frame_level.py
 python -W ignore step2_random_init_compare.py
 ```
 
-See [`CLAUDE.md`](CLAUDE.md) for the full script reference.
 
 ---
 
