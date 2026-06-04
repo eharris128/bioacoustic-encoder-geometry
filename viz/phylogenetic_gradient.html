@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Phylogenetic Gradient — ESP bioacoustic probes</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root {
+    --teal: #1A4A5C;
+    --gray: #8C9BA8;
+    --ink: #22323a;
+    --bg: #ffffff;
+    --grid: #ECECEC;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 28px 22px 48px; }
+  h1 {
+    font-size: 22px; color: var(--teal); margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub { color: var(--gray); font-size: 13px; margin: 0 0 20px; line-height: 1.5; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+    margin-bottom: 16px; font-size: 12.5px;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+  .lg {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    padding: 3px 9px; border-radius: 999px; border: 1px solid #e3e7ea;
+    user-select: none; transition: opacity .15s, background .15s;
+  }
+  .lg:hover { background: #f6f8f9; }
+  .lg.off { opacity: 0.32; }
+  .lg .sw { width: 11px; height: 11px; border-radius: 50%; }
+  .toggle {
+    margin-left: auto; display: inline-flex; border: 1px solid #dfe4e7;
+    border-radius: 8px; overflow: hidden;
+  }
+  .toggle button {
+    border: 0; background: #fff; color: var(--teal); font: inherit;
+    font-size: 12px; padding: 6px 12px; cursor: pointer;
+  }
+  .toggle button.active { background: var(--teal); color: #fff; }
+  .panels { display: grid; grid-template-columns: 1.32fr 1fr; gap: 22px; }
+  @media (max-width: 880px) { .panels { grid-template-columns: 1fr; } }
+  .panel { border: 1px solid #eef1f2; border-radius: 12px; padding: 12px 8px 6px; }
+  .panel h2 {
+    font-size: 13.5px; color: var(--teal); margin: 2px 0 0 12px; font-weight: 700;
+  }
+  .panel .cap { font-size: 11px; color: var(--gray); margin: 2px 0 0 12px; font-style: italic; }
+  svg { display: block; width: 100%; height: auto; }
+  .axis path, .axis line { stroke: #cdd6da; }
+  .axis text { fill: var(--teal); font-size: 11px; }
+  .gridline line { stroke: var(--grid); }
+  .gridline path { stroke: none; }
+  .axis-label { fill: var(--teal); font-size: 11.5px; font-weight: 700; }
+  .traj { fill: none; stroke-width: 1.6; opacity: 0.78; transition: opacity .12s, stroke-width .12s; }
+  .traj.dim { opacity: 0.10; }
+  .traj.hot { opacity: 1; stroke-width: 3.4; }
+  .peakdot { stroke: #fff; stroke-width: 1.1; }
+  .dot { stroke: #fff; stroke-width: 1; cursor: pointer; transition: opacity .12s; }
+  .dot.dim { opacity: 0.12; }
+  .dot.hot { stroke: var(--teal); stroke-width: 2; }
+  .trend { stroke: var(--teal); stroke-dasharray: 5 4; stroke-width: 1.4; opacity: 0.5; fill: none; }
+  .tip {
+    position: fixed; pointer-events: none; z-index: 10; opacity: 0;
+    background: rgba(26,74,92,0.97); color: #fff; font-size: 12px; line-height: 1.45;
+    padding: 8px 11px; border-radius: 8px; max-width: 240px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.18); transition: opacity .1s;
+  }
+  .tip b { font-size: 12.5px; }
+  .tip .meta { color: #bfe0ec; font-size: 11px; }
+  .foot { color: var(--gray); font-size: 11px; margin-top: 22px; line-height: 1.5; }
+  .foot a { color: var(--teal); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Probe accuracy gradients track phylogenetic distance</h1>
+  <p class="sub">
+    Linear (LORO cross-validated) probes read out species identity from each of 13 layers of the ESP
+    bioacoustic transformer. Closely related species need deeper layers and never fully separate;
+    distantly related ones split apart in the first transformer block.
+    <b>Hover any line or point</b> to trace one species pair across both views.
+  </p>
+
+  <div class="controls">
+    <div class="legend" id="legend"></div>
+    <div class="toggle" id="toggle">
+      <button data-mode="acc" class="active">Right panel: Peak accuracy</button>
+      <button data-mode="layer">Peak layer</button>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h2>Accuracy across layers</h2>
+      <div class="cap">x = layer depth (embedding → transformer block 11) · y = probe accuracy</div>
+      <svg id="lines" viewBox="0 0 600 430"></svg>
+    </div>
+    <div class="panel">
+      <h2 id="rtitle">Peak accuracy vs phylogenetic distance</h2>
+      <div class="cap" id="rcap">each point = one species pair · x is log-scaled (My since divergence)</div>
+      <svg id="scatter" viewBox="0 0 480 430"></svg>
+    </div>
+  </div>
+
+  <p class="foot">
+    Probes: logistic regression on PCA-reduced layer activations, leave-one-recording-out cross-validation.
+    Phylogenetic distances (millions of years since divergence) from TimeTree + literature.
+    Data: <code>results/phylogenetic_gradient_data.csv</code> · ESP-AVES2 EAT encoder.
+  </p>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const DATA = {"layers":["emb","T0","T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11"],"pairs":[{"pair":"great_tit_vs_great_tit_bokharensis","label":"Gt. Tit / Bokharensis","mya":0.5,"level":"Subspecies","peakAcc":92.2,"peakLayer":4,"acc":[81.8,86.4,89.6,88.3,92.2,90.3,89.0,89.0,89.6,90.3,89.6,86.4,90.9]},{"pair":"common_chiffchaff_vs_iberian_chiffchaff","label":"Com. / Iberian Chiffchaff","mya":2.0,"level":"Same genus","peakAcc":91.5,"peakLayer":12,"acc":[62.5,72.0,82.0,84.5,82.0,82.5,84.5,83.5,83.0,86.5,89.0,86.5,91.5]},{"pair":"willow_warbler_vs_chiffchaff","label":"Willow Warbler / Chiffchaff","mya":2.0,"level":"Same genus","peakAcc":93.0,"peakLayer":7,"acc":[53.0,71.5,83.5,91.5,87.5,87.0,89.0,93.0,91.0,91.0,91.5,92.0,90.5]},{"pair":"house_sparrow_vs_tree_sparrow","label":"House / Tree Sparrow","mya":4.4,"level":"Same genus","peakAcc":85.4,"peakLayer":7,"acc":[53.3,74.9,79.4,83.9,82.9,81.9,80.9,85.4,82.4,81.9,79.9,81.9,83.9]},{"pair":"goldfinch_vs_eurasian_siskin","label":"Goldfinch / Siskin","mya":6.0,"level":"Same family","peakAcc":92.5,"peakLayer":6,"acc":[65.5,78.0,88.0,92.0,91.0,89.0,92.5,92.0,89.5,90.5,92.0,90.5,85.0]},{"pair":"house_crow_vs_carrion_crow","label":"House / Carrion Crow","mya":10.0,"level":"Same genus","peakAcc":95.0,"peakLayer":10,"acc":[72.0,84.0,85.0,91.5,93.5,92.5,90.5,89.5,93.5,93.0,95.0,90.5,87.5]},{"pair":"bullfinch_vs_hawfinch","label":"Bullfinch / Hawfinch","mya":12.5,"level":"Same family","peakAcc":95.0,"peakLayer":3,"acc":[61.0,87.0,90.0,95.0,91.0,89.0,89.0,92.0,92.0,91.0,92.0,94.0,94.0]},{"pair":"european_robin_vs_eurasian_blackbird","label":"Robin / Blackbird","mya":17.0,"level":"Diff. families","peakAcc":99.0,"peakLayer":9,"acc":[67.0,92.5,98.0,96.0,97.0,94.5,95.5,96.5,98.0,99.0,97.5,97.5,99.0]},{"pair":"house_sparrow_vs_common_swift","label":"Sparrow / Swift","mya":65.0,"level":"Diff. orders","peakAcc":98.0,"peakLayer":6,"acc":[69.5,92.0,96.5,96.5,96.0,95.0,98.0,98.0,98.0,97.5,96.5,97.5,97.5]},{"pair":"bullfinch_vs_tawny_owl","label":"Bullfinch / Tawny Owl","mya":65.0,"level":"Diff. orders","peakAcc":99.0,"peakLayer":4,"acc":[65.5,87.0,95.5,97.0,99.0,96.5,98.0,98.5,98.0,98.5,99.0,98.0,96.0]},{"pair":"chaffinch_vs_great_spotted_woodpecker","label":"Chaffinch / Woodpecker","mya":70.0,"level":"Diff. orders","peakAcc":97.0,"peakLayer":10,"acc":[59.1,87.9,91.9,95.5,96.0,96.5,94.9,93.9,94.9,95.5,97.0,96.5,95.5]}]};
+
+const LEVELS = ["Subspecies","Same genus","Same family","Diff. families","Diff. orders"];
+const COLORS = {
+  "Subspecies":"#2ECC71","Same genus":"#3498DB","Same family":"#9B59B6",
+  "Diff. families":"#E67E22","Diff. orders":"#E74C3C"
+};
+
+const tip = d3.select("#tip");
+const active = new Set(LEVELS);   // which taxonomic levels are shown
+let hot = null;                   // currently highlighted pair key
+let mode = "acc";                 // right-panel y variable
+
+function showTip(html, ev) {
+  tip.html(html).style("opacity", 1)
+     .style("left", (ev.clientX + 14) + "px")
+     .style("top",  (ev.clientY + 14) + "px");
+}
+function hideTip() { tip.style("opacity", 0); }
+function pairTip(d) {
+  return `<b>${d.label}</b><br><span class="meta">${d.level} · ${d.mya} My · `
+       + `peak ${d.peakAcc}% @ ${DATA.layers[d.peakLayer]}</span>`;
+}
+function visible(d) { return active.has(d.level); }
+
+/* ---------------- Legend ---------------- */
+const legend = d3.select("#legend");
+LEVELS.forEach(lv => {
+  const el = legend.append("div").attr("class","lg").attr("data-lv",lv);
+  el.append("span").attr("class","sw").style("background", COLORS[lv]);
+  el.append("span").text(lv);
+  el.on("click", () => {
+    if (active.has(lv)) active.delete(lv); else active.add(lv);
+    el.classed("off", !active.has(lv));
+    render();
+  });
+});
+
+/* ---------------- Left panel: layer trajectories ---------------- */
+const L = { w:600, h:430, m:{t:14,r:14,b:42,l:42} };
+const lsvg = d3.select("#lines");
+const lx = d3.scalePoint().domain(d3.range(13)).range([L.m.l, L.w-L.m.r]).padding(0.5);
+const ly = d3.scaleLinear().domain([50,100]).range([L.h-L.m.b, L.m.t]);
+const line = d3.line().x((v,i)=>lx(i)).y(v=>ly(v)).curve(d3.curveMonotoneX);
+
+// gridlines + axes
+lsvg.append("g").attr("class","gridline")
+  .attr("transform",`translate(0,0)`)
+  .call(d3.axisLeft(ly).tickSize(-(L.w-L.m.l-L.m.r)).tickFormat(""))
+  .attr("transform",`translate(${L.m.l},0)`);
+lsvg.append("g").attr("class","axis")
+  .attr("transform",`translate(${L.m.l},0)`)
+  .call(d3.axisLeft(ly).ticks(6).tickFormat(d=>d+"%"));
+lsvg.append("g").attr("class","axis")
+  .attr("transform",`translate(0,${L.h-L.m.b})`)
+  .call(d3.axisBottom(lx).tickFormat(i=>DATA.layers[i]));
+lsvg.append("text").attr("class","axis-label")
+  .attr("transform","rotate(-90)").attr("x",-(L.h)/2).attr("y",13)
+  .attr("text-anchor","middle").text("probe accuracy");
+
+const trajG = lsvg.append("g");
+const trajs = trajG.selectAll("path.traj").data(DATA.pairs).join("path")
+  .attr("class","traj")
+  .attr("stroke", d=>COLORS[d.level])
+  .attr("d", d=>line(d.acc))
+  .on("mousemove", (ev,d)=>{ setHot(d.pair); showTip(pairTip(d),ev); })
+  .on("mouseleave", ()=>{ setHot(null); hideTip(); });
+
+const peaks = lsvg.append("g").selectAll("circle").data(DATA.pairs).join("circle")
+  .attr("class","peakdot")
+  .attr("r",3.6)
+  .attr("fill", d=>COLORS[d.level])
+  .attr("cx", d=>lx(d.peakLayer))
+  .attr("cy", d=>ly(d.peakAcc))
+  .style("pointer-events","none");
+
+/* ---------------- Right panel: scatter vs MYA ---------------- */
+const S = { w:480, h:430, m:{t:14,r:18,b:46,l:46} };
+const ssvg = d3.select("#scatter");
+const sx = d3.scaleLog().domain([0.4,90]).range([S.m.l, S.w-S.m.r]);
+const syAcc = d3.scaleLinear().domain([80,100]).range([S.h-S.m.b, S.m.t]);
+const syLayer = d3.scaleLinear().domain([0,12]).range([S.h-S.m.b, S.m.t]);
+
+const sGrid = ssvg.append("g").attr("class","gridline").attr("transform",`translate(${S.m.l},0)`);
+const sYAxis = ssvg.append("g").attr("class","axis").attr("transform",`translate(${S.m.l},0)`);
+const sXAxis = ssvg.append("g").attr("class","axis").attr("transform",`translate(0,${S.h-S.m.b})`)
+  .call(d3.axisBottom(sx).tickValues([0.5,1,2,5,10,20,50]).tickFormat(d=>d));
+ssvg.append("text").attr("class","axis-label")
+  .attr("x",(S.m.l+S.w-S.m.r)/2).attr("y",S.h-8).attr("text-anchor","middle")
+  .text("phylogenetic distance (My, log scale)");
+const sYLabel = ssvg.append("text").attr("class","axis-label")
+  .attr("transform","rotate(-90)").attr("x",-(S.h)/2).attr("y",14).attr("text-anchor","middle");
+const trendPath = ssvg.append("path").attr("class","trend");
+const dotsG = ssvg.append("g");
+
+function sy(d){ return mode==="acc" ? syAcc(d.peakAcc) : syLayer(d.peakLayer); }
+function syScale(){ return mode==="acc" ? syAcc : syLayer; }
+
+function leastSquares(pts){ // pts: [{x:log10(mya), y}]
+  const n=pts.length, sxv=d3.sum(pts,p=>p.x), syv=d3.sum(pts,p=>p.y);
+  const sxy=d3.sum(pts,p=>p.x*p.y), sxx=d3.sum(pts,p=>p.x*p.x);
+  const m=(n*sxy - sxv*syv)/(n*sxx - sxv*sxv);
+  const b=(syv - m*sxv)/n; return {m,b};
+}
+
+function drawScatter(){
+  const yS = syScale();
+  sYLabel.text(mode==="acc" ? "peak probe accuracy" : "peak layer index");
+  d3.select("#rtitle").text(mode==="acc"
+    ? "Peak accuracy vs phylogenetic distance"
+    : "Peak layer depth vs phylogenetic distance");
+  d3.select("#rcap").text(mode==="acc"
+    ? "closer species top out lower — they barely separate"
+    : "closer species peak in deeper layers — they need more processing");
+
+  const val = d => mode==="acc" ? d.peakAcc : d.peakLayer;
+
+  // Axes/grid set synchronously so labels are always present (transitions can
+  // be skipped by some renderers); only point movement is animated below.
+  sGrid.call(d3.axisLeft(yS).ticks(6).tickSize(-(S.w-S.m.l-S.m.r)).tickFormat(""));
+  sYAxis.call(
+    mode==="acc" ? d3.axisLeft(yS).ticks(6).tickFormat(d=>d+"%")
+                 : d3.axisLeft(yS).ticks(7).tickFormat(d=>DATA.layers[d]));
+
+  const shown = DATA.pairs.filter(visible);
+  const fit = leastSquares(shown.map(d=>({x:Math.log10(d.mya), y: val(d)})));
+  const xs = [0.5,80];
+  trendPath
+    .attr("d", d3.line()(xs.map(x=>[sx(x), yS(fit.m*Math.log10(x)+fit.b)])))
+    .style("opacity", shown.length>=2 ? 0.5 : 0);
+
+  const dots = dotsG.selectAll("circle").data(DATA.pairs, d=>d.pair);
+  const merged = dots.join(enter => enter.append("circle")
+    .attr("class","dot")
+    .attr("r",6.5)
+    .attr("fill", d=>COLORS[d.level])
+    .attr("cx", d=>sx(d.mya))
+    .attr("cy", d=>yS(val(d)))
+    .on("mousemove",(ev,d)=>{ setHot(d.pair); showTip(pairTip(d),ev); })
+    .on("mouseleave",()=>{ setHot(null); hideTip(); })
+  );
+  merged.attr("cx", d=>sx(d.mya));
+  merged.transition().duration(400).attr("cy", d=>yS(val(d)));
+}
+
+/* ---------------- Linked highlight + filtering ---------------- */
+function setHot(key){ hot = key; applyState(); }
+function applyState(){
+  trajs.classed("dim", d=> !visible(d) || (hot && d.pair!==hot))
+       .classed("hot", d=> hot && d.pair===hot && visible(d))
+       .style("display", d=> visible(d) ? null : "none");
+  peaks.style("display", d=> visible(d) ? null : "none")
+       .attr("r", d=> hot && d.pair===hot ? 5.5 : 3.6);
+  dotsG.selectAll("circle")
+       .classed("dim", d=> !visible(d) || (hot && d.pair!==hot))
+       .classed("hot", d=> hot && d.pair===hot && visible(d))
+       .style("display", d=> visible(d) ? null : "none");
+}
+
+function render(){ drawScatter(); applyState(); }
+
+/* mode toggle */
+d3.selectAll("#toggle button").on("click", function(){
+  d3.selectAll("#toggle button").classed("active", false);
+  d3.select(this).classed("active", true);
+  mode = this.dataset.mode;
+  drawScatter(); applyState();
+});
+
+render();
+</script>
+</body>
+</html>
