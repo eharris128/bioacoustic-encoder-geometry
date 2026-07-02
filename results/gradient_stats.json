@@ -1,0 +1,28 @@
+{
+  "n_pairs": 10,
+  "pairs": [
+    "common_chiffchaff_vs_iberian_chiffchaff",
+    "willow_warbler_vs_chiffchaff",
+    "house_sparrow_vs_tree_sparrow",
+    "house_crow_vs_carrion_crow",
+    "goldfinch_vs_eurasian_siskin",
+    "bullfinch_vs_hawfinch",
+    "european_robin_vs_eurasian_blackbird",
+    "chaffinch_vs_great_spotted_woodpecker",
+    "house_sparrow_vs_common_swift",
+    "bullfinch_vs_tawny_owl"
+  ],
+  "spearman_rho": 0.8414790579803637,
+  "p_two_sided_asymptotic": 0.002271043198131102,
+  "p_greater_permutation": 0.0015998400159984002,
+  "bootstrap_ci_95": [
+    0.4396331549421287,
+    0.9741975772697306
+  ],
+  "bootstrap_degenerate_frac": 0.0,
+  "pearson_r_on_log10_mya": 0.7896363445052864,
+  "pearson_p_two_sided": 0.006588725444710369,
+  "sig_threshold_rho_1sided_p05": 0.5482845423171573,
+  "sig_threshold_rho_2sided_p05": 0.653321328180018,
+  "significant_1sided_p05": true
+}

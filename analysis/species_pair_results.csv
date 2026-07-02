@@ -1,0 +1,11 @@
+pair,mya,accuracy,notes
+common_chiffchaff_vs_iberian_chiffchaff,2,0.915,same genus; T11 peak; emb 0.625
+willow_warbler_vs_chiffchaff,6,0.930,same genus; T6 peak; emb 0.530; MYA per species_pairs_expansion.md
+house_sparrow_vs_tree_sparrow,4.4,0.854,same genus; T6 peak; emb 0.533
+house_crow_vs_carrion_crow,8,0.950,same genus (Corvus); T9 peak; emb 0.720; MYA est — VERIFY TT
+goldfinch_vs_eurasian_siskin,11,0.925,same family (Fringillidae, cross-genus); T5 peak; emb 0.655; MYA est — VERIFY TT
+bullfinch_vs_hawfinch,12.5,0.950,same family; T2 peak; emb 0.610
+european_robin_vs_eurasian_blackbird,27,0.990,diff. families (Muscicapidae/Turdidae); T8/T11 peak; emb 0.670; MYA est — VERIFY TT
+chaffinch_vs_great_spotted_woodpecker,67,0.970,diff. orders (Passeriformes/Piciformes); T9 peak; emb 0.591; MYA est — VERIFY TT
+house_sparrow_vs_common_swift,75,0.980,diff. orders (Passeriformes/Apodiformes); T5–T7 peak; emb 0.695; MYA est — VERIFY TT
+bullfinch_vs_tawny_owl,65,0.990,diff. orders (Passeriformes/Strigiformes); T3/T9 peak; emb 0.655
