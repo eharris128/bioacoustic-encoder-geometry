@@ -182,3 +182,126 @@ well-separated clusters. What the data actually shows:
 
 Overview plot: `results/bullfinch_within_all_layers.png` (silhouette across
 layers, HDBSCAN mass, k-sweep curves per layer).
+
+## Appendix — code and method walkthrough
+
+### Files
+
+- **`bullfinch_within_layer_cluster.py`** — single-layer pipeline. Exposes
+  `collect_clips`, `extract_all_clips`, `save_all_layers`, `pca50`,
+  `sweep_kmeans`, `hdbscan_cluster`, `plot_results`. `main()` runs the
+  full path for one `--layer` (default index 6 = `T5`) and caches the
+  raw activations to `activations/bullfinch_layers_raw.npz`.
+- **`bullfinch_within_all_layers.py`** — driver. Loads the cached
+  activations and loops the same primitives across all 13 EAT layers.
+  Writes the CSV, the overview plot, and the auto-generated draft of this
+  document (before manual editing of the narrative sections).
+- **`data/loader.py`** — provides `load_model` (EAT via `avex`, hooks on
+  local_encoder + 12 transformer blocks) and
+  `extract_all_layers(model, audio, mode="raw")` which returns a
+  `(13, n_frames, 768)` array — one row of patches per layer.
+
+### Extraction (no pool)
+
+For each clip we do:
+
+1. `load_audio_file(path)` → mono 16 kHz float32 tensor. Uses `soundfile`
+   for WAV/FLAC and falls back to `librosa` for MP3.
+2. `extract_all_layers(model, audio, mode="raw")` runs one forward pass
+   through EAT and captures every hooked layer's output. The CLS token
+   (position 0) is stripped from every transformer block so all 13 layers
+   emit **exactly (512, 768)** — 512 patches × 768 hidden dim. avex fixes
+   the mel-spectrogram window to ~10 s, so clip duration doesn't change
+   the patch count; longer clips get truncated inside avex.
+3. Concatenate across clips: per layer we stack (512, 768) matrices from
+   37 recordings → `(18 944, 768)`. We keep a parallel `rec_idx` array of
+   shape `(18 944,)` marking which recording each row came from — that's
+   how the right-hand PCA scatter panel colors frames by recording.
+4. Save all 13 layers to `activations/bullfinch_layers_raw.npz` as float16
+   (~380 MB in memory, gzipped on disk) so re-running is a load, not a
+   fresh extraction.
+
+### PCA → 50 dimensions
+
+`pca50(X)` casts to float32 and runs `sklearn.decomposition.PCA(n_components=50, random_state=42)`.
+
+**What PCA does.** Center the data (subtract per-column mean), then find
+the 50 orthogonal directions in 768-dim space that capture the most
+variance. Project each row onto those 50 directions. The result is a
+`(18 944, 50)` matrix.
+
+**Why 50 dims.** k-means and silhouette are both O(n·d) or worse per
+distance calculation, and Euclidean distance in 768 dims becomes almost
+uninformative because random directions carry noise. Reducing to 50 dims
+retains **71–95%** of variance (per layer, reported as `pca50_cum_var`)
+while dropping the tail of directions that are mostly noise.
+
+**Watch the top-PC ratio.** If PC1 alone captures ~10% of variance, no
+single direction dominates and the geometry is "diffuse." If PC1 captures
+~45% (as at `emb` and `T11`), one axis carries most of the signal — that
+usually means a strong binary structure along one dimension, which is why
+k=2 wins silhouette at those layers.
+
+### k-means sweep + silhouette
+
+For each k ∈ {2, ..., 10}:
+
+- `KMeans(n_clusters=k, random_state=42, n_init=10)` runs Lloyd's
+  algorithm 10 times from different random inits and keeps the run with
+  the lowest inertia (within-cluster squared distance). Output: a
+  cluster label per frame.
+- `silhouette_score(Xp, labels)` on a seeded 5 000-frame subsample.
+  Silhouette is O(n²) so we subsample; the 5 000-frame subset is
+  reproducible via `np.random.default_rng(42)`.
+
+**Silhouette in one line.** For each point i in cluster C:
+
+    s(i) = (b(i) - a(i)) / max(a(i), b(i))
+
+where `a(i)` = mean distance to other points in C and `b(i)` = mean
+distance to points in the *nearest other* cluster. Range −1..+1; **+1**
+is a point deep in its own cluster, **0** is on the boundary, **−1** is
+misclassified. Score is the mean of s(i) across the subsample.
+
+**Convention.** Silhouette > 0.5 = well-separated. 0.25–0.5 = weak but
+non-trivial. < 0.25 = no real cluster structure. Our max is +0.29 so we
+present relative comparisons across layers, not absolute claims.
+
+**Choosing k.** Best k = argmax silhouette across the sweep. Reported as
+`best_k_kmeans` / `silhouette`. When silhouette is essentially flat
+across k (as at `T5`), best-k picks up noise — that's a signal that the
+data doesn't want to be clustered at that layer.
+
+### HDBSCAN (secondary check)
+
+`sklearn.cluster.HDBSCAN(min_cluster_size=50, min_samples=10)`.
+
+**Idea.** Instead of choosing k, HDBSCAN estimates local density and
+extracts clusters where density exceeds a persistent threshold. Points in
+low-density regions get label −1 (noise). No parameter for "how many
+clusters" — the algorithm reads it off the density landscape.
+
+**Why we run it alongside k-means.** k-means always returns k clusters,
+even from a Gaussian blob. HDBSCAN's output is diagnostic:
+
+- **One giant blob + tiny noise fraction** (`T5`: 98% in one cluster,
+  0.7% noise) means "no meaningful density islands" — k-means is
+  imposing artificial structure.
+- **Many small clusters with high noise** (`T0`: 64 clusters, 4.5%
+  noise; `T7`: 20 clusters, 74% noise) means the geometry has fine
+  local structure that k-means smooths into a few big blobs — the two
+  algorithms disagree because the true topology isn't ball-shaped.
+
+### Per-layer plots
+
+Each `results/bullfinch_within_layer{L:02d}.png` has three panels:
+
+1. **Silhouette vs k** with a red dashed line at best-k — shape tells
+   you whether the k-choice was decisive or arbitrary.
+2. **PC1 / PC2 scatter, colored by k-means (best k) assignment** —
+   visual sanity check that clusters correspond to a spatial layout
+   in the top-2 PCs.
+3. **PC1 / PC2 scatter, colored by recording index** — critical
+   confound check. If the k-means clusters look identical to the
+   recording-colored panel, we're clustering "which recording" not
+   any within-species structure.
