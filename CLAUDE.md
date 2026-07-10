@@ -101,9 +101,10 @@ Each script reads from shards and writes to
 - **`data/loader.py`** — centralized model loading and activation extraction. `build_dataset` (local files) and `build_naturelm_dataset` (HuggingFace streaming). Both return `{layer_index: (X, y)}`.
 - **`probes/train.py`** — `train_all_layers` runs LORO cross-validation across all 13 layers.
 - **`probes/evaluate.py`** — `run_evaluation` saves accuracy curve PNG + LDA projection PNG to `results/`.
-- **`experiments/`** — entry points wiring `data/loader`, `probes/train`, `probes/evaluate`. Runnable: `animals_vs_music.py`, `species.py`, `naturelm_probe_all_pairs.py`.
+- **`experiments/`** — entry points wiring `data/loader`, `probes/train`, `probes/evaluate`. Runnable: `animals_vs_music.py`, `music_vs_speech.py`, `species.py`, `species_vs_species.py`, `naturelm_probe_all_pairs.py`.
 - **`scripts/batch_extract_naturelm.py`** — resume-safe batch extractor for 18 species × N recordings.
 - **`scripts/plot_phylogenetic_gradient.py`** — plots peak accuracy vs MYA distance across species pairs.
+- **`analysis/spearman_gradient.py`** — the primary-claim statistics: Spearman rho + permutation p + bootstrap CI on the (MYA, accuracy) table (input `analysis/species_pair_results.csv`). Produces the n=10, rho=+0.841 result.
 
 ### Layer indexing convention
 
@@ -120,6 +121,33 @@ python -W ignore scripts/batch_extract_naturelm.py --rows 1000 --device cuda
 # Run all 10 species-pair probe experiments:
 python -W ignore experiments/naturelm_probe_all_pairs.py
 ```
+
+## Within-species / call-type analysis (Sid)
+
+A third strand, separate from the geometry and probe pipelines: does
+mid-network structure encode call types *within* a single species, or is
+apparent clustering just a recording-identity artifact? All CPU-only, seed 42,
+using `esp_aves2_eat_all` on the local `audio/bullfinch/` clips.
+
+1. **`bullfinch_within_layer_cluster.py`** — extracts raw (no-pool) frame
+   activations for all Bullfinch clips, caches all 13 layers to
+   `activations/bullfinch_layers_raw.npz`, and clusters one target layer
+   (PCA-50 → k-means k=2..10 by silhouette + HDBSCAN). Run this first; the
+   `.npz` cache is what every downstream script reads.
+2. **`bullfinch_within_all_layers.py`** / **`bullfinch_umap_all_layers.py`** —
+   sweep the same clustering / a UMAP-2 embedding across all 13 layers from
+   the cache.
+3. **`analysis/recording_id_recolor.py`** — the artifact check: recolors one
+   UMAP embedding by k-means cluster vs recording ID. If clusters are
+   >0.8 dominated by a single recording, the "structure" is a recording-ID
+   artifact, not call type.
+4. **`analysis/midlayer_calltype_sweep.py`** — searches T5..T9 for genuine
+   call-type structure using z-scored PCA (required so silhouette isn't
+   inflated by cross-layer activation scale), reporting ARI/AMI against
+   recording labels. Verdict per layer: ARTIFACT / COARSE? / CANDIDATE.
+
+Later scripts reuse helpers by importing from the earlier ones
+(`sweep_kmeans`, `pca50`, recording-artifact metrics) — do not re-implement.
 
 ## Frame-level subsampling
 
@@ -148,13 +176,23 @@ include token 0; that's the existing convention everywhere.
 
 ## Data
 
-- `artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl` —
-  the frozen 600-sample manifest (100 × 7 source datasets), tracked.
+- Two frozen manifests, both tracked, each with a paired `_taxonomy.jsonl`
+  (per-item Class/Order/species) and `_summary.json`:
+  - `artifacts/manifests/naturelm_by_source_100each_20260418T171459Z.jsonl` —
+    the 600-sample by-source manifest (100 × 7 source datasets); drives the
+    `step2_*` geometry and bio-vs-non-bio work.
+  - `artifacts/manifests/naturelm_by_order_p100_m200_n200_20260427T222756Z.jsonl`
+    — the taxonomically-balanced manifest; drives the `step3*`/`step5*`/`step6*`
+    taxonomic-direction and Veitch-hierarchy scripts. Note that
+    `artifacts/comparisons/` has a subtree per manifest.
 - `artifacts/roadmap_part1/<manifest>/<model>/shards/` — per-model
   activation shards (~5.8G/model, gitignored). 5 models present:
   the 4 trained + `random_init_eat_seed42`.
 - `artifacts/comparisons/<manifest>/nway_eat_all4/{step2_*,random_init_*}/`
   — committed CSVs, plots, and per-seed stats.
+- `activations/bullfinch_layers_raw.npz` — cached 13-layer frame activations
+  for the within-species analysis (gitignored; regenerate with
+  `bullfinch_within_layer_cluster.py`).
 - `audio/` — local xeno-canto recordings for probe experiments (gitignored).
 - `results/probe-output/` — probe accuracy PNGs and LDA plots per species pair.
 
@@ -184,3 +222,10 @@ include token 0; that's the existing convention everywhere.
 - Suppress sklearn convergence warnings with `python -W ignore <script>.py`.
 - When extending the pipeline, write the metric definition once in
   `step2_tier1_frame_level.py` and import elsewhere — do not duplicate primitives.
+- No automated test suite. Validate a change by running the affected script
+  end to end, confirming the expected CSVs/PNGs land under
+  `artifacts/comparisons/` (or `results/`), and cross-checking the numbers
+  against the claims in `RESULTS.md`. `RESULTS.md` is the source of truth and
+  is organized as CLAIM / RETRACTED / OPEN sections — read it before trusting
+  any finding, since several early claims (e.g. the L4 TwoNN dip, §7) are
+  retracted. `AGENTS.md` carries the same contributor guidance in short form.
